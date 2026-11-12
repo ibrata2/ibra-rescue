@@ -50,7 +50,7 @@ jobs:
             لعبة إنقاذ بالهليكوبتر والحبل — 10 مهمات بمدن العالم، عربي وإنكليزي.
 
             ### التحميل
-            - **IBRA-RESCUE-${{ steps.ver.outputs.v }}-x64-nsis.exe** ← المثبّت (ينصّب اللعبة ويسوي اختصار على سطح المكتب)
+            - **IBRA-RESCUE-${{ steps.ver.outputs.v }}-Setup.exe** ← المثبّت (ينصّب اللعبة ويسوي اختصار على سطح المكتب)
             - **IBRA-RESCUE-${{ steps.ver.outputs.v }}-portable.exe** ← نسخة محمولة تشتغل بدون تنصيب
 
             برمجة وتطوير إبراهيم الخزرجي · Telegram: t.me/ibraprogram · TikTok: @ibraprogram

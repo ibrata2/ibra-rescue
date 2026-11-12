@@ -33,8 +33,7 @@
       "target": [
         "nsis",
         "portable"
-      ],
-      "artifactName": "IBRA-RESCUE-${version}-${arch}-${target}.${ext}"
+      ]
     },
     "nsis": {
       "oneClick": false,
@@ -48,7 +47,8 @@
         "ar_SA",
         "en_US"
       ],
-      "multiLanguageInstaller": true
+      "multiLanguageInstaller": true,
+      "artifactName": "IBRA-RESCUE-${version}-Setup.${ext}"
     },
     "portable": {
       "artifactName": "IBRA-RESCUE-${version}-portable.exe"
