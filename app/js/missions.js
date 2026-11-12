@@ -185,7 +185,8 @@ function genMission(ch, slot) {
   if (st === 'mountain') weathers = ['tornado', 'tornado', 'wind', 'storm'];
   let weather = d < 0.08 ? 'clear' : pickR(weathers);
   if (flood && !mustWater && weather === 'clear') weather = 'flood';
-  const people = goal + (type === 'careful' ? 1 : 2) + (d < 0.4 ? 1 : 0);
+  if (type === 'animals') goal = Math.max(3, Math.round(goal * 0.6));
+  const people = type === 'animals' ? goal * 2 + 2 : goal + (type === 'careful' ? 1 : 2) + (d < 0.4 ? 1 : 0);
   const time = Math.round(Math.max(150, Math.min(380, 130 + goal * 19 - d * 30)) / 5) * 5;
   const worldW = Math.min(2600, 1150 + people * 75 + ri(0, 150));
   const pal = weather === 'sand' ? 'dusk' : pickR(['night', 'night', 'day', 'dusk']);
@@ -215,7 +216,7 @@ function genMission(ch, slot) {
     rescue: [`الناس عالقين فوگ سطوح ${city.ar}. أنقذ ${goal} ووصّلهم لـ${zAr}.`, `People are stuck on the rooftops of ${city.en}. Rescue ${goal} and bring them to ${zEn}.`],
     cargo: m.cargo && [`${city.ar} محتاجة ${CARGO_NAMES[m.cargo].ar}! انقل ${goal} صناديق بالحبل لـ${zAr}.${m.cargo === 'melon' ? ' البطيخ إذا طاح من عالي يتفلّش!' : ' الصناديق ما تحچي… بس لا توگعها.'}`, `${city.en} needs ${CARGO_NAMES[m.cargo].en}! Carry ${goal} crates on the rope to ${zEn}.${m.cargo === 'melon' ? ' Watermelons smash if dropped from high!' : " Crates don't talk… but don't drop them."}`],
     vip: m.vipName && [`${m.vipName.ar} عالق بـ${city.ar}! أنقذ ${goal} أشخاص، و${m.vipName.ar} لازم يكون وياهم (أبو التاج 👑).`, `${m.vipName.en} is stuck in ${city.en}! Rescue ${goal} people — ${m.vipName.en} (the one with the crown 👑) must be one of them.`],
-    animals: [`خرفان وبزازين عالقة فوگ سطوح ${city.ar}! أنقذ ${goal} حيوانات. لا تسألني شلون صعدت.`, `Sheep and cats are stuck on the roofs of ${city.en}! Rescue ${goal} animals. Don't ask how they got up there.`],
+    animals: [`خرفان وبزازين عالقة فوگ سطوح ${city.ar} وياها أصحابها! الحيوانات ما تمسك الحبل… خلّي واحد من المعلّقين يشيلها بإيده. أنقذ ${goal} حيوانات.`, `Sheep and cats are stuck on the roofs of ${city.en} with their owners! Animals can't hold the rope — let someone hanging carry them. Rescue ${goal} animals.`],
     careful: [`جدّات وأجداد بـ${city.ar}. أنقذ ${goal} بهدوء… إذا واحد طاح من الحبل تفشل المهمة!`, `Grandmas and grandpas in ${city.en}. Rescue ${goal} gently… if anyone falls off the rope, you fail!`],
     fire: [`حريق بـ${city.ar}! الناس فوگ السطوح والنار قريبة. أنقذ ${goal} ولا تطير فوگ النار.`, `Fire in ${city.en}! People are on the roofs and the flames are close. Rescue ${goal} and don't fly over the fire.`],
   }[type];

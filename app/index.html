@@ -47,7 +47,7 @@ button{font-family:var(--font);cursor:pointer}
 .globeWrap .mhead{font-family:"Courier New",monospace;letter-spacing:.2em;color:var(--dim);font-size:13px;margin-bottom:6px}
 .side{flex:1 1 360px;max-width:520px;display:flex;flex-direction:column;gap:12px;min-width:280px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;backdrop-filter:blur(8px)}
-#mlist{display:flex;flex-direction:column;gap:6px;max-height:34vh;overflow:auto;padding:2px}
+#mlist{display:flex;flex-direction:column;gap:6px;max-height:27vh;overflow:auto;padding:2px}
 #mlist::-webkit-scrollbar{width:6px}#mlist::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
 .mcard{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.03);border:1px solid transparent;color:var(--cream);padding:8px 12px;border-radius:9px;text-align:start}
 .mcard:hover{background:rgba(255,255,255,.07)}
@@ -127,6 +127,25 @@ button{font-family:var(--font);cursor:pointer}
 .upd.fail{color:var(--dim)}
 @keyframes pulse{50%{box-shadow:0 0 0 6px rgba(201,168,76,.18)}}
 
+/* اختيار الطيارة */
+.hpTitle{margin-top:12px;font-size:13px;color:var(--dim)}
+#heliPick{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px}
+.hcard{position:relative;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:5px 2px 4px;color:var(--cream);display:flex;flex-direction:column;align-items:center;gap:2px}
+.hcard canvas{width:100%;max-width:72px;image-rendering:pixelated}
+.hcard .hn{font-size:11px;white-space:nowrap}
+.hcard.sel{border-color:var(--gold);background:rgba(201,168,76,.14)}
+.hcard.locked{opacity:.38}
+.hcard .hrec{position:absolute;top:-7px;inset-inline-start:4px;background:var(--gold);color:#1a1408;font-size:9px;font-weight:bold;padding:0 4px;border-radius:4px}
+#heliInfo{font-size:12px;color:var(--gold2);margin-top:6px;min-height:16px;direction:inherit}
+@media (max-width:520px){ #heliPick{grid-template-columns:repeat(3,1fr)} }
+
+/* أزرار الحبل */
+#reel{position:fixed;right:14px;bottom:80px;z-index:6;display:none;flex-direction:column;gap:10px}
+#hud.on ~ #reel{display:flex}
+#reel button{width:58px;height:58px;border-radius:14px;border:1px solid var(--gold);background:rgba(10,9,8,.7);color:var(--gold2);font-size:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none}
+#reel button small{font-size:10px;color:var(--dim)}
+@media (pointer:fine){ #reel button{width:44px;height:44px;font-size:16px;opacity:.75} }
+
 /* عصا اللمس */
 #stick{position:fixed;width:120px;height:120px;border-radius:50%;border:2px solid rgba(235,225,200,.35);background:rgba(0,0,0,.2);z-index:6;display:none;pointer-events:none}
 #stick.show{display:block}
@@ -174,10 +193,12 @@ button{font-family:var(--font);cursor:pointer}
       <div class="meta">
         <div><span data-t="goal"></span><b id="mGoal"></b></div>
         <div><span data-t="time"></span><b id="mTime"></b></div>
-        <div><span data-t="heli"></span><b id="mHeli"></b></div>
         <div><span data-t="weather"></span><b id="mWeather"></b></div>
         <div class="full"><span data-t="type"></span><b id="mType"></b></div>
       </div>
+      <div class="hpTitle" data-t="chooseHeli"></div>
+      <div id="heliPick"></div>
+      <div id="heliInfo"></div>
       <div id="mLock"></div>
     </div>
     <div class="row">
@@ -203,6 +224,7 @@ button{font-family:var(--font);cursor:pointer}
 <div id="radio"></div>
 <div id="howto"></div>
 <div id="stick"><div id="knob"></div></div>
+<div id="reel"><button id="reelUp" aria-label="reel up">⬆<small>Q</small></button><button id="reelDown" aria-label="reel down">⬇<small>E</small></button></div>
 
 <!-- الإيقاف -->
 <div class="overlay" id="pause"><div class="card">

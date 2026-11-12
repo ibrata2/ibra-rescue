@@ -116,12 +116,12 @@ function px(list, x, y, flip = 1) { for (const p of list) ctx.fillRect(Math.roun
 /* ---------------- الطيارات: الأنواع والخصائص ---------------- */
 // acc: سرعة الاستجابة · cap: كم واحد يتعلق بالحبل · segs×seg: طول الحبل · mass: ثقل الطيارة (تتأثر أقل بالحمولة)
 const HELI_TYPES = {
-  small:   { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 14, seg: 6, cap: 5, mass: 1, acc: 1 },
-  medic:   { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 13, seg: 6, cap: 4, mass: 1, acc: 1.12, calm: true },
-  police:  { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 20]], segs: 12, seg: 6, cap: 3, mass: 0.9, acc: 1.32, siren: true },
-  news:    { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 15, seg: 6, cap: 4, mass: 1, acc: 1.05, camera: true },
-  chinook: { w: 54, h: 19, cx: 27, cy: 10, box: [44, 13], anchor: [0, 8], rotors: [[45, 1, 22], [8, 0, 22]], segs: 18, seg: 6, cap: 8, mass: 1.5, acc: 0.88 },
-  giant:   { w: 70, h: 23, cx: 35, cy: 12, box: [58, 16], anchor: [0, 10], rotors: [[38, 0, 34]], segs: 22, seg: 6, cap: 10, mass: 2.2, acc: 0.72 },
+  small:   { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 10, seg: 6, cap: 6, mass: 1, acc: 1 },
+  medic:   { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 9, seg: 6, cap: 5, mass: 1, acc: 1.12, calm: true },
+  police:  { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 20]], segs: 8, seg: 6, cap: 4, mass: 0.9, acc: 1.32, siren: true },
+  news:    { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 11, seg: 6, cap: 5, mass: 1, acc: 1.05, camera: true },
+  chinook: { w: 54, h: 19, cx: 27, cy: 10, box: [44, 13], anchor: [0, 8], rotors: [[45, 1, 22], [8, 0, 22]], segs: 13, seg: 6, cap: 9, mass: 1.5, acc: 0.88 },
+  giant:   { w: 70, h: 23, cx: 35, cy: 12, box: [58, 16], anchor: [0, 10], rotors: [[38, 0, 34]], segs: 16, seg: 6, cap: 12, mass: 2.2, acc: 0.72 },
 };
 const HELI_ORDER = ['small', 'medic', 'police', 'news', 'chinook', 'giant'];
 const SPR = {};
@@ -196,11 +196,12 @@ let G = null;           // اللعبة الحالية
 const input = { x: 0, y: 0, keys: {} };
 
 class Game {
-  constructor(mi) {
+  constructor(mi, heliKey) {
     this.mi = mi; this.m = MISSIONS[mi];
     this.L = buildLevel(this.m);
-    const ht = HELI_TYPES[this.m.heli];
-    this.ht = ht;
+    this.heliKey = heliKey && HELI_TYPES[heliKey] ? heliKey : this.m.heli;
+    const ht = HELI_TYPES[this.heliKey];
+    this.ht = ht; this.chain = []; this.winch = 0.7;
     this.heli = { x: this.L.start.x, y: this.L.start.y, vx: 0, vy: 0, tilt: 0, face: 1, rot: 0, sink: 0 };
     this.initRope();
     this.people = []; this.parts = []; this.bubbles = []; this.drops = [];
@@ -230,7 +231,7 @@ class Game {
     for (let i = 0; i < n; i++) {
       if (t === 'cargo') out.push('crate');
       else if (t === 'careful') out.push('grandma');
-      else if (t === 'animals') out.push(i % 3 === 2 ? 'cat' : 'sheep');
+      else if (t === 'animals') out.push(i % 2 === 0 ? 'person' : (i % 4 === 3 ? 'cat' : 'sheep'));
       else out.push('person');
     }
     if (t === 'vip' && n) out[Math.floor(n * 0.7)] = 'vip';
@@ -250,17 +251,46 @@ class Game {
   radioK(cat) { this.radio(pick(RADIO[cat][lang()]).replace('{vip}', this.vipName())); }
   weightInv(p) { return { crate: 0.22, grandma: 0.3, cat: 0.6, sheep: 0.3 }[p.kind] || 0.28; }
   initRope() {
-    const ht = this.ht, n = ht.segs + 1;
-    this.rope = { n, seg: ht.seg, x: new Float32Array(n), y: new Float32Array(n), px: new Float32Array(n), py: new Float32Array(n), inv: new Float32Array(n), occ: new Array(n).fill(null), hit: new Float32Array(n) };
+    const ht = this.ht, base = ht.segs + 1, N = base + ht.cap + 4;
+    const F = () => new Float32Array(N);
+    this.rope = { n: base, base, x: F(), y: F(), px: F(), py: F(), inv: F(), hit: F(), ent: new Array(N).fill(null) };
+    for (const p of this.chain || []) { p.k = -1; }
+    this.chain = [];
     const a = this.anchor();
-    for (let i = 0; i < n; i++) { this.rope.x[i] = this.rope.px[i] = a.x; this.rope.y[i] = this.rope.py[i] = a.y + i * ht.seg; this.rope.inv[i] = 1; }
+    for (let i = 0; i < N; i++) { this.rope.x[i] = this.rope.px[i] = a.x; this.rope.y[i] = this.rope.py[i] = a.y + Math.min(i, base - 1) * ht.seg * this.winch; this.rope.inv[i] = 1; }
   }
+  bodyLen(e) { return e.kind === 'crate' ? 8 : e.kind === 'grandma' ? 10 : 11; }
+  linkLen(i) { // طول الوصلة بين النقطة i-1 و i
+    const r = this.rope;
+    if (i < r.base) return this.ht.seg * this.winch;
+    if (i === r.base) return 1.5;               // أول واحد يمسك نهاية الحبل
+    return this.bodyLen(r.ent[i - 1]);         // الباقين يمسكون رجول اللي فوگهم
+  }
+  chainEnd() { const r = this.rope, i = r.n - 1, e = r.ent[i]; return e ? { x: r.x[i], y: r.y[i] + this.bodyLen(e), e } : { x: r.x[i], y: r.y[i], e: null }; }
+  isHuman(p) { return p.kind === 'person' || p.kind === 'vip' || p.kind === 'grandma'; }
+  isAnimal(p) { return p.kind === 'sheep' || p.kind === 'cat'; }
+  attach(p) {
+    const r = this.rope, E = this.chainEnd(), i = r.n;
+    r.x[i] = E.x; r.y[i] = E.y; r.px[i] = E.x - (p.vx || 0) / 240; r.py[i] = E.y - (p.vy || 0) / 240;
+    r.inv[i] = this.weightInv(p); r.ent[i] = p; r.hit[i] = 0; r.n++;
+    this.chain.push(p); p.k = i; p.st = 'hang'; p.grip = 1; p.cool = 1.2;
+  }
+  dropFrom(j) { // يطيح الشخص j وكل اللي تحته (لأنهم ماسكين رجوله)
+    const r = this.rope, fallen = this.chain.splice(j);
+    for (const q of fallen) {
+      const i = q.k; q.vx = (r.x[i] - r.px[i]) * 120; q.vy = (r.y[i] - r.py[i]) * 120; r.ent[i] = null; r.inv[i] = 1; q.k = -1; q.st = 'fall';
+      if (q.carry) { const a = q.carry; q.carry = null; a.carrier = null; a.st = 'fall'; a.vx = q.vx + 20; a.vy = q.vy - 20; }
+    }
+    r.n = r.base + this.chain.length;
+    return fallen;
+  }
+  releaseBottom() { const r = this.rope, p = this.chain.pop(); r.ent[p.k] = null; r.inv[p.k] = 1; p.k = -1; r.n--; return p; }
   anchor() {
     const h = this.heli, ht = this.ht; const ax = ht.anchor[0] * h.face, ay = ht.anchor[1];
     const c = Math.cos(h.tilt), s = Math.sin(h.tilt);
     return { x: h.x + ax * c - ay * s, y: h.y + ax * s + ay * c };
   }
-  load() { return this.rope.occ.reduce((a, o) => a + (o ? 1 : 0), 0); }
+  load() { return this.chain.length + this.chain.filter(p => p.carry).length * 0.6; }
   waterY() { return this.L.water ? this.L.water.y : null; }
   windAt(t) { const w = this.L.wind; return w.base + w.gust * Math.sin(t * 0.7) * Math.sin(t * 0.23 + 1) + w.gust * 0.3 * Math.sin(t * 2.3); }
 
@@ -305,7 +335,7 @@ class Game {
       let ay = gEff - 70 + (iy < 0 ? -135 * -iy * massF * ht.acc : (iy > 0 ? 95 * iy * ht.acc : 0));
       // سحب الحبل الأفقي
       const dxr = rope.x[1] - rope.x[0], dyr = rope.y[1] - rope.y[0], dl = Math.hypot(dxr, dyr) || 1;
-      ax += (dxr / dl) * load * 26;
+      ax += (dxr / dl) * Math.min(load, 4) * 14; // سحب السلسلة (محدود حتى ما تعلق الطيارة)
       // الإعصار يسحب الطيارة ويدوّخها
       if (tor) {
         const d = tor.x - h.x;
@@ -326,6 +356,8 @@ class Game {
       h.vy += 260 * dt; h.x += h.vx * dt; h.y += h.vy * dt; h.tilt += h.rot * dt;
     }
 
+    // ---------------- رفع وتنزيل الحبل (Q / E) ----------------
+    if (alive && input.reel) this.winch = clamp(this.winch + input.reel * dt * 0.9, 0.25, 1);
     // ---------------- الحبل (Verlet) ----------------
     const a = this.anchor();
     rope.x[0] = a.x; rope.y[0] = a.y; rope.px[0] = a.x; rope.py[0] = a.y;
@@ -343,16 +375,20 @@ class Game {
     if (this.state === 'crash' && this.flags.cut) { /* الحبل حر */ }
     for (let it = 0; it < 14; it++) {
       for (let i = 0; i < rope.n - 1; i++) {
-        const dx = rope.x[i + 1] - rope.x[i], dy = rope.y[i + 1] - rope.y[i], d = Math.hypot(dx, dy);
-        if (d <= rope.seg || d === 0) continue;
+        const dx = rope.x[i + 1] - rope.x[i], dy = rope.y[i + 1] - rope.y[i], d = Math.hypot(dx, dy), L = this.linkLen(i + 1);
+        if (d <= L || d === 0) continue;
         const wi = (i === 0 && !this.flags.cut) ? 0 : rope.inv[i], wj = rope.inv[i + 1], ws = wi + wj; if (!ws) continue;
-        const diff = (d - rope.seg) / d;
+        const diff = (d - L) / d;
         rope.x[i] += dx * diff * wi / ws; rope.y[i] += dy * diff * wi / ws;
         rope.x[i + 1] -= dx * diff * wj / ws; rope.y[i + 1] -= dy * diff * wj / ws;
       }
       if (it % 3 === 2) for (let i = 1; i < rope.n; i++) this.collidePoint(i);
     }
 
+    // ---------------- حبال الغسيل ----------------
+    if (this.L.laundry) for (const ln of this.L.laundry) if (!ln.broken) {
+      for (let i = 1; i < rope.n; i++) if (rope.x[i] > ln.x1 && rope.x[i] < ln.x2 && Math.abs(rope.y[i] - ln.y) < 2.5) { this.breakLaundry(ln); break; }
+    }
     // ---------------- الناس ----------------
     for (const p of this.people) this.updatePerson(p, dt, wind);
 
@@ -384,7 +420,8 @@ class Game {
 
     // ---------------- الجزيئات ----------------
     for (const q of this.parts) {
-      q.vx += (q.wind ? wind * 0.6 : 0) * dt; q.vy += (q.g || 0) * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.life -= dt;
+      q.vx += (q.wind ? wind * 0.6 : 0) * dt; q.vy += (q.g || 0) * dt;
+      if (q.cloth) { q.vx += Math.sin(this.t * 3 + q.y) * 40 * dt; q.vy = Math.min(q.vy, 25); } q.x += q.vx * dt; q.y += q.vy * dt; q.life -= dt;
       if (q.spin) q.a += q.spin * dt;
       if (q.solid && wY !== null && q.y > wY) { q.vy *= -0.2; q.vx *= 0.5; q.y = wY; q.g = 30; }
       if (q.solid && L.groundY && q.y > L.groundY) { q.vy *= -0.3; q.vx *= 0.6; q.y = L.groundY; }
@@ -453,39 +490,77 @@ class Game {
   updatePerson(p, dt, wind) {
     p.f += dt; p.cool -= dt;
     const r = this.rope, h = this.heli, wY = this.waterY();
+    const full = this.chain.length >= this.ht.cap;
+    if (p.st === 'carried') { const c = p.carrier; if (c) { p.x = c.x + 4 * (c.face || 1); p.y = c.y + 5; } return; }
     if (p.st === 'wait' || p.st === 'swim') {
       // الماي يغطي السطح؟
       if (p.st === 'wait' && wY !== null && wY < p.y - 1) { p.st = 'swim'; AU.splash(); this.splash(p.x, wY, 6); this.sayK(p, 'swim'); }
       if (p.st === 'swim') { p.y = wY; p.x += Math.sin(this.t * 0.8 + p.id) * 4 * dt + wind * 0.05 * dt; }
-      else {
-        // يتمشى شوية على السطح
+      const E = this.chainEnd(), dx = E.x - p.x;
+      const near = Math.abs(h.x - p.x) < 140 && p.kind !== 'crate';
+      if (p.st === 'wait') {
         p.walkT -= dt;
-        const near = Math.abs(h.x - p.x) < 140 && p.kind !== 'crate';
         if (p.kind === 'crate') p.wdir = 0;
-        if (!near && p.walkT <= 0) { p.walkT = 1 + Math.random() * 3; p.wdir = Math.random() < 0.4 ? 0 : (Math.random() < 0.5 ? -1 : 1); }
-        if (!near && p.wdir) { p.x += p.wdir * 6 * dt; p.face = p.wdir; if (p.x < p.spot.x0 || p.x > p.spot.x1) { p.wdir *= -1; p.x = clamp(p.x, p.spot.x0, p.spot.x1); } }
-        if (near) p.face = h.x > p.x ? 1 : -1;
-      }
-      // مسك الحبل
-      const lo = Math.max(1, r.n - 7);
-      for (let i = r.n - 1; i >= lo; i--) {
-        const d = p.st === 'swim' ? Math.hypot(r.x[i] - p.x, (r.y[i] - (p.y - 2)) * 0.7) : Math.hypot(r.x[i] - p.x, r.y[i] - (p.y - 6));
-        if (d < (p.st === 'swim' ? 11 : 8.5)) {
-          const slot = this.freeSlot();
-          if (slot < 0) { if (p.cool <= 0) { p.cool = 3; this.sayK(p, 'full'); } break; }
-          p.st = 'hang'; p.k = slot; r.occ[slot] = p; r.inv[slot] = this.weightInv(p); p.grip = 1; p.cool = 1.5;
-          AU.grab(); this.sayK(p, 'grab', { force: true });
-          if (this.load() >= this.ht.cap - 1) { const bottom = r.occ[r.n - 1]; if (bottom && bottom !== p) setTimeout(() => this.sayK(bottom, 'heavy', { force: true }), 700); }
-          break;
+        // يركض باتجاه الحبل إذا قريب
+        const chasing = this.isHuman(p) && !full && this.state === 'play' && Math.abs(dx) < 70 && E.y > p.y - 70 && E.y < p.y + 6;
+        if (chasing) {
+          const sp = p.kind === 'grandma' ? 9 : 30;
+          if (Math.abs(dx) > 3) { p.x += Math.sign(dx) * sp * dt; p.face = Math.sign(dx); p.running = true; }
+          p.x = clamp(p.x, p.spot.x0 - 3, p.spot.x1 + 3);
+        } else {
+          p.running = false;
+          if (!near && p.walkT <= 0) { p.walkT = 1 + Math.random() * 3; p.wdir = Math.random() < 0.4 ? 0 : (Math.random() < 0.5 ? -1 : 1); }
+          if (!near && p.wdir) { p.x += p.wdir * 6 * dt; p.face = p.wdir; if (p.x < p.spot.x0 || p.x > p.spot.x1) { p.wdir *= -1; p.x = clamp(p.x, p.spot.x0, p.spot.x1); } }
+          if (near && p.kind !== 'crate') p.face = h.x > p.x ? 1 : -1;
         }
       }
+      if (this.state !== 'play') return;
+      // ---- المسك ----
+      if (this.isAnimal(p)) {
+        // الحيوان ما يمسك… واحد من المعلّقين يشيله بإيد وحدة
+        const last = this.chain[this.chain.length - 1];
+        if (last && this.isHuman(last) && !last.carry && Math.hypot(E.x - p.x, E.y - (p.y - 3)) < 12) {
+          last.carry = p; p.carrier = last; p.st = 'carried'; r.inv[last.k] *= 0.75; AU.grab();
+          this.sayK(last, 'carry', { force: true }); last.cool = 2;
+        } else if (Math.hypot(dx, E.y - (p.y - 3)) < 12 && p.cool <= 0) { p.cool = 2.5; this.sayK(p, 'wait', { force: true }); }
+        return;
+      }
+      if (full) { if (Math.abs(dx) < 16 && Math.abs(E.y - (p.y - 8)) < 16 && p.cool <= 0) { p.cool = 3; this.sayK(p, 'full'); } return; }
+      if (p.kind === 'crate' || p.st === 'swim') {
+        const reach = p.kind === 'crate' ? 10 : 10, hy = p.kind === 'crate' ? p.y - 7 : p.y - 3;
+        if (Math.hypot(dx, E.y - hy) < reach) { p.vx = p.vy = 0; this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); }
+        return;
+      }
+      // إنسان على السطح: يقفز على الحبل
+      if (p.cool <= 0 && Math.abs(dx) < 26 && E.y > p.y - 46 && E.y < p.y - 2) {
+        const hy = p.y - 10, T = clamp(Math.hypot(dx, E.y - hy) / 150, 0.2, 0.42);
+        p.st = 'jump'; p.jt = 0; p.vx = dx / T; p.vy = (E.y - hy) / T - 0.5 * 300 * T; p.cool = 1;
+        AU.tone(380, 0.12, 'square', 0.04, 260);
+        this.sayK(p, 'jump');
+      }
+    }
+    else if (p.st === 'jump') {
+      p.jt += dt; const oy = p.y;
+      p.vy += 300 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      const E = this.chainEnd();
+      if (this.chain.length < this.ht.cap && Math.hypot(E.x - p.x, E.y - (p.y - 10)) < 8.5) { this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); return; }
+      if (p.vy > 0) {
+        for (const sd of this.L.solids) if (p.x > sd.x && p.x < sd.x + sd.w && oy <= sd.y + 0.5 && p.y >= sd.y) {
+          p.y = sd.y; p.vx = p.vy = 0; p.st = 'wait'; p.cool = 1.3;
+          p.spot = { x0: Math.max(sd.x + 3, Math.min(p.spot.x0, p.x - 8)), x1: Math.min(sd.x + sd.w - 3, Math.max(p.spot.x1, p.x + 8)), y: sd.y };
+          this.sayK(p, 'missed'); return;
+        }
+        if (wY !== null && p.y > wY) { p.y = wY; p.st = 'swim'; AU.splash(); this.splash(p.x, wY, 8); this.sayK(p, 'landWater', { force: true }); return; }
+      }
+      if (p.jt > 1.2) { p.st = 'fall'; }
     }
     else if (p.st === 'hang') {
       const k = p.k; p.x = r.x[k]; p.y = r.y[k];
       const vx = (r.x[k] - r.px[k]) * 120, vy = (r.y[k] - r.py[k]) * 120;
       p.vx = vx; p.vy = vy;
+      if (Math.abs(vx) > 8) p.face = vx > 0 ? -1 : 1;
       const rel = Math.hypot(vx - h.vx, vy - h.vy);
-      const fragile = p.kind === 'grandma' ? 1.6 : p.kind === 'cat' ? 0.55 : p.kind === 'crate' ? 0 : 1;
+      const fragile = (p.kind === 'grandma' ? 1.6 : p.kind === 'crate' ? 0 : 1) * (p.carry ? 1.35 : 1);
       const calm = this.ht.calm ? 0.8 : 1;
       if (rel > 125) p.grip -= (rel - 125) * 0.009 * dt * fragile * calm; else p.grip = Math.min(1, p.grip + 0.1 * dt);
       p.hitCool = (p.hitCool || 0) - dt;
@@ -495,36 +570,45 @@ class Game {
       r.hit[k] = 0;
       // النار تحرگ اللي يعبر فوگها
       if (this.inFire(p.x, p.y + 5)) { p.grip -= 0.7 * dt; if (p.cool <= 0) { p.cool = 1; this.sayK(p, 'hot', { force: true }); } if (Math.random() < 0.3) this.parts.push({ x: p.x, y: p.y + 4, vx: 0, vy: -20, g: -10, life: 0.6, c: 'rgba(80,75,70,0.6)', s: 2, smoke: true }); }
-      if (p.grip < 0.5 && p.cool <= 0) { p.cool = 1.6; this.sayK(p, 'scared'); }
+      if (p.grip < 0.5 && p.cool <= 0) { p.cool = 1.6; this.sayK(p, p.grip < 0.3 ? 'fingers' : 'scared'); }
+      // اللي شايل حيوان ممكن يفلته
+      if (p.carry && p.grip < 0.35 && Math.random() < 0.6 * dt) {
+        const an = p.carry; p.carry = null; an.carrier = null; an.st = 'fall'; an.vx = vx; an.vy = vy; r.inv[k] = this.weightInv(p);
+        this.sayK(p, 'carryDrop', { force: true }); this.sayK(an, 'fall', { force: true });
+      }
       if (this.state === 'crash') p.grip = -1;
       if (p.grip <= 0) {
-        this.detach(p); p.st = 'fall'; this.falls++;
+        const j = this.chain.indexOf(p); const fallen = this.dropFrom(j);
+        this.falls += fallen.length;
         if (p.kind !== 'crate') AU.scream();
         this.sayK(p, 'fall', { force: true });
+        if (fallen[1]) this.sayK(fallen[1], 'dragged', { force: true });
         if (this.state === 'play') {
           if (this.m.careful) { this.radioK('careFail'); this.end(false, 'careful'); }
           else this.radio(pick(RADIO.fell[lang()]));
         }
         return;
       }
-      // التسليم
-      const z = this.zoneAt(p.x, p.y + 10);
-      if (z && Math.abs(vx) < 130) {
-        this.detach(p); p.st = 'saved'; p.y = z.y; p.zone = z; p.zoneOff = p.x - z.x; p.timer = 0;
-        this.onSaved(p);
+      // التسليم: اللي بأسفل السلسلة ينزل أول
+      if (p === this.chain[this.chain.length - 1]) {
+        const z = this.zoneAt(p.x, p.y + this.bodyLen(p));
+        if (z && Math.abs(vx) < 130) {
+          this.releaseBottom(); p.st = 'saved'; p.y = z.y; p.zone = z; p.zoneOff = p.x - z.x; p.timer = 0;
+          this.onSaved(p);
+          if (p.carry) { const an = p.carry; p.carry = null; an.carrier = null; an.st = 'saved'; an.zone = z; an.zoneOff = clamp(p.zoneOff + 4, 2, z.w - 2); an.x = z.x + an.zoneOff; an.y = z.y; an.timer = 0; this.onSaved(an); }
+        }
       }
     }
     else if (p.st === 'fall') {
       p.vy += 300 * dt; p.vx += wind * 0.4 * dt; p.vx *= Math.pow(0.6, dt);
       const ny = p.y + p.vy * dt, nx = p.x + p.vx * dt;
-      // هبوط على منطقة إنقاذ
       for (const z of this.zones()) if (nx > z.x && nx < z.x + z.w && p.y <= z.y && ny >= z.y) { p.x = nx; p.y = z.y; p.st = 'saved'; p.zone = z; p.zoneOff = p.x - z.x; p.timer = 0; this.onSaved(p, true); return; }
-      for (const s of this.L.solids) {
-        if (nx > s.x && nx < s.x + s.w && p.y <= s.y + 1 && ny >= s.y) {
-          p.x = nx; p.y = s.y; AU.thud(); this.puff(p.x, p.y);
+      for (const sd of this.L.solids) {
+        if (nx > sd.x && nx < sd.x + sd.w && p.y <= sd.y + 1 && ny >= sd.y) {
+          p.x = nx; p.y = sd.y; AU.thud(); this.puff(p.x, p.y);
           if (p.kind === 'crate' && this.m.cargo === 'melon' && p.vy > 120) { this.breakMelon(p); return; }
           p.st = 'daze'; p.timer = p.kind === 'crate' ? 0.3 : 2.2;
-          p.spot = { x0: Math.max(s.x + 3, p.x - 10), x1: Math.min(s.x + s.w - 3, p.x + 10), y: s.y };
+          p.spot = { x0: Math.max(sd.x + 3, p.x - 10), x1: Math.min(sd.x + sd.w - 3, p.x + 10), y: sd.y };
           this.sayK(p, 'landHard', { force: true }); return;
         }
       }
@@ -544,12 +628,16 @@ class Game {
       if (p.timer > 2.5 && !z.boat) { p.x += p.dir * 8 * dt; p.face = p.dir; if (p.x < z.x + 3 || p.x > z.x + z.w - 3) p.dir *= -1; }
     }
   }
-  freeSlot() {
-    const r = this.rope; let used = 0;
-    for (let i = r.n - 1; i > 0; i -= 2) { if (!r.occ[i]) { if (used < this.ht.cap) return i; } else used++; if (used >= this.ht.cap) return -1; }
-    return -1;
+  afterGrab(p) {
+    if (this.chain.length >= this.ht.cap - 1 && this.chain.length > 2) { const top = this.chain[0]; if (top && top !== p) setTimeout(() => this.state === 'play' && top.st === 'hang' && this.sayK(top, 'heavy', { force: true }), 700); }
   }
-  detach(p) { const r = this.rope; if (p.k >= 0) { r.occ[p.k] = null; r.inv[p.k] = 1; } p.k = -1; }
+  breakLaundry(ln) {
+    ln.broken = true; AU.burst(0.25, 2500, 0.15);
+    for (const c of ln.clothes) this.parts.push({ x: c.x, y: ln.y + 2, vx: (Math.random() - 0.5) * 60 + this.heli.vx * 0.4, vy: -20 - Math.random() * 40, g: 60, life: 4 + Math.random() * 2, c: c.c, s: 3, wind: true, cloth: true, w: c.w, h: c.h, solid: true });
+    const owner = this.people.filter(q => q.st === 'wait' && this.isHuman(q) && Math.abs(q.x - (ln.x1 + ln.x2) / 2) < 140)[0];
+    if (owner) this.say(owner, line('laundry'), { force: true });
+    else if (this.chain[0]) this.say(this.chain[0], line('laundryHang'), { force: true });
+  }
   zones() {
     const out = [];
     for (const pd of this.L.pads) out.push({ x: pd.x, y: pd.y, w: pd.w, pad: true });
@@ -559,7 +647,8 @@ class Game {
   }
   zoneAt(x, y) { for (const z of this.zones()) if (x > z.x + 1 && x < z.x + z.w - 1 && y > z.y - 6 && y < z.y + 14) return z; return null; }
   onSaved(p, fell) {
-    this.saved++; AU.saved();
+    if (this.type !== 'animals' || this.isAnimal(p)) this.saved++;
+    AU.saved();
     this.sayK(p, fell ? 'landZone' : 'saved', { force: true });
     if (p.kind === 'crate') this.radioK('crate');
     if (p.kind === 'vip') { this.vipSaved = true; this.radioK('vipSaved'); }
@@ -588,7 +677,7 @@ class Game {
     for (let i = 0; i < 25; i++) this.parts.push({ x: h.x, y: h.y, vx: (Math.random() - 0.5) * 30, vy: -10 - Math.random() * 30, g: -15, life: 2 + Math.random() * 2, c: 'rgba(90,85,78,0.6)', s: 4, smoke: true, wind: true });
     this.flags.cut = true;
     // كل المعلّقين يطيحون (بس بخير — هاي لعبة مضحكة 😄)
-    for (const p of this.people) if (p.st === 'hang') { this.detach(p); p.st = 'fall'; p.vy = -60 - Math.random() * 60; p.vx = (Math.random() - 0.5) * 120; }
+    for (const p of this.dropFrom(0)) { p.vy = -60 - Math.random() * 60; p.vx = (Math.random() - 0.5) * 120; }
     this.crashLine = line('crash');
     this.say({ x: h.x, y: h.y - 10, id: 999 }, this.crashLine, { force: true, big: true, life: 4, pitch: 180 });
     setTimeout(() => { if (G === this) this.end(false, 'crashed'); }, 2600);
@@ -644,13 +733,14 @@ class Game {
     // المهابط
     for (const pd of L.pads) this.drawPad(pd, P);
     this.drawFires(P);
+    this.drawLaundry(P);
     // الإعصار
     if (L.tornado) this.drawTornado(L.tornado, P);
     // الناس (غير المعلّقين)
-    for (const p of this.people) if (p.st !== 'hang' && p.st !== 'swim') this.drawPerson(p, P);
+    for (const p of this.people) if (p.st !== 'hang' && p.st !== 'swim' && p.st !== 'carried') this.drawPerson(p, P);
     // الحبل
     this.drawRope(P);
-    for (const p of this.people) if (p.st === 'hang') this.drawPerson(p, P);
+    for (const p of this.people) if (p.st === 'hang' || p.st === 'carried') this.drawPerson(p, P);
     // الطيارة
     if (!(this.state === 'crash' && this.endT > 0.05)) this.drawHeli();
     else this.drawWreck();
@@ -663,7 +753,9 @@ class Game {
     // جزيئات
     for (const q of this.parts) {
       ctx.globalAlpha = q.smoke ? Math.min(1, q.life) * 0.7 : Math.min(1, q.life * 2);
-      ctx.fillStyle = q.c; ctx.fillRect(Math.round(q.x), Math.round(q.y), q.s, q.s);
+      ctx.fillStyle = q.c;
+      if (q.cloth) { const w = Math.max(1, Math.round(q.w * Math.abs(Math.cos(this.t * 5 + q.x)))); ctx.fillRect(Math.round(q.x), Math.round(q.y), w, q.h); }
+      else ctx.fillRect(Math.round(q.x), Math.round(q.y), q.s, q.s);
     }
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -743,13 +835,23 @@ class Game {
     ctx.globalAlpha = 1;
   }
   drawRope(P) {
-    const r = this.rope; ctx.fillStyle = P.isDay ? '#2a2723' : '#e3d8bd';
-    for (let i = 0; i < r.n - 1; i++) {
+    const r = this.rope, end = r.base - 1; ctx.fillStyle = P.isDay ? '#2a2723' : '#e3d8bd';
+    for (let i = 0; i < end; i++) {
       const x0 = r.x[i], y0 = r.y[i], x1 = r.x[i + 1], y1 = r.y[i + 1]; const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0)));
       for (let k = 0; k < n; k++) ctx.fillRect(Math.round(x0 + (x1 - x0) * k / n), Math.round(y0 + (y1 - y0) * k / n), 1, 1);
+      if (i % 2 === 1) ctx.fillRect(Math.round(x1) - 1, Math.round(y1), 3, 1); // درجات السلّم
     }
-    // سلّم صغير بالنهاية
-    const e = r.n - 1; ctx.fillRect(Math.round(r.x[e]) - 2, Math.round(r.y[e]), 5, 1);
+    ctx.fillRect(Math.round(r.x[end]) - 2, Math.round(r.y[end]), 5, 1);
+  }
+  drawLaundry(P) {
+    for (const ln of this.L.laundry || []) {
+      if (ln.x2 < this.camX - 10 || ln.x1 > this.camX + VW + 10) continue;
+      ctx.fillStyle = P.edge; ctx.fillRect(Math.round(ln.x1), ln.y, 1, ln.base - ln.y); ctx.fillRect(Math.round(ln.x2), ln.y, 1, ln.base - ln.y);
+      if (ln.broken) { ctx.fillRect(Math.round(ln.x1), ln.y, 3, 1); ctx.fillRect(Math.round(ln.x2) - 2, ln.y + 1, 3, 1); continue; }
+      ctx.fillStyle = P.isDay ? '#3d3934' : '#8a8274';
+      for (let x = ln.x1; x <= ln.x2; x++) ctx.fillRect(Math.round(x), Math.round(ln.y + Math.sin((x - ln.x1) / (ln.x2 - ln.x1) * Math.PI) * 1.5), 1, 1);
+      for (const c of ln.clothes) { const sway = Math.round(Math.sin(this.t * 2 + c.x) * 0.6); ctx.fillStyle = c.c; ctx.fillRect(Math.round(c.x) + sway, ln.y + 1, c.w, c.h); }
+    }
   }
   drawPerson(p, P) {
     if (p.st === 'broken') return;
@@ -790,7 +892,7 @@ class Game {
   drawSheep(p, P) {
     const x = Math.round(p.x), y = Math.round(p.y), fr = Math.floor(p.f * 6) % 2, W = '#efe9dc', K = '#121110';
     const f = p.face || 1;
-    if (p.st === 'hang') { // معلّق من ظهره والرجول تتحرك
+    if (p.st === 'hang' || p.st === 'carried') { // معلّق من ظهره والرجول تتحرك
       ctx.fillStyle = W; ctx.fillRect(x - 3, y + 1, 7, 4); ctx.fillRect(x - 2, y, 5, 1);
       ctx.fillStyle = K; ctx.fillRect(x + 4 * f - (f < 0 ? 1 : 0), y + 2, 2, 2);
       for (const lx of [-2, 0, 2]) ctx.fillRect(x + lx + (fr ? 1 : 0), y + 5, 1, 2 + (lx === 0 ? fr : 0));
@@ -804,7 +906,7 @@ class Game {
   drawCat(p, P) {
     const x = Math.round(p.x), y = Math.round(p.y), fr = Math.floor(p.f * 6) % 2, C = P.isDay ? '#1a1917' : '#d9cdb0';
     ctx.fillStyle = C; const f = p.face || 1;
-    if (p.st === 'hang') { // متعلقة بمخالبها
+    if (p.st === 'hang' || p.st === 'carried') { // متعلقة بمخالبها
       ctx.fillRect(x, y, 1, 1); ctx.fillRect(x - 1, y + 1, 3, 2); ctx.fillRect(x - 1, y + 1, 1, 1); ctx.fillRect(x - 1, y + 3, 3, 4); ctx.fillRect(x - 1, y + 7, 1, 1); ctx.fillRect(x + 1, y + 7, 1, 1);
       ctx.fillRect(x + 2, y + 5 + fr, 1, 3); return;
     }
@@ -814,6 +916,8 @@ class Game {
     if (p.st !== 'swim') { ctx.fillRect(x - 2, by + 2, 1, 2); ctx.fillRect(x + 2, by + 2, 1, 2); }
   }
   drawHuman(p, P) {
+    if (p.st === 'jump') { ctx.fillStyle = P.person; const x = p.x, y = Math.round(p.y); px(POSE.head, x, y); px(POSE.waveA, x, y, p.face); return; }
+    if (p.st === 'hang' && p.carry) { ctx.fillStyle = P.person; const f = p.face || 1; ctx.fillRect(Math.round(p.x + 1 * f), Math.round(p.y) + 5, 1, 1); ctx.fillRect(Math.round(p.x + 2 * f), Math.round(p.y) + 5, 1, 1); }
     ctx.fillStyle = P.person;
     const fr = Math.floor(p.f * 6) % 2, x = p.x, y = Math.round(p.y);
     if (p.st === 'wait') {
@@ -989,7 +1093,7 @@ function updateHUD(pop) {
   $('#hudCity').textContent = m.city[lang()] + ' — ' + m.name[lang()];
   $('#hudSavedBox small').textContent = G.type === 'cargo' ? T('delivered') : T('saved');
   $('#hudSaved').textContent = G.saved + ' / ' + G.goal + (G.vip ? (G.vipSaved ? ' 👑✔' : ' 👑') : '');
-  $('#hudRope').textContent = G.load() + ' / ' + G.ht.cap;
+  $('#hudRope').textContent = G.chain.length + ' / ' + G.ht.cap;
   const tl = $('#hudTime'); tl.textContent = fmtTime(G.timeLeft); tl.classList.toggle('low', G.timeLeft < 30);
   if (pop) { const e = $('#hudSavedBox'); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop'); }
 }
@@ -1043,9 +1147,10 @@ function drawMenuBg(dt) {
    ============================================================ */
 function recomputeKeys() {
   const k = input.keys;
-  if (touch.active) return;
+  if (touch.active) { input.reel = (input.touchReel || 0); return; }
   input.x = (k.ArrowRight || k.KeyD ? 1 : 0) - (k.ArrowLeft || k.KeyA ? 1 : 0);
   input.y = (k.ArrowDown || k.KeyS ? 1 : 0) - (k.ArrowUp || k.KeyW || k.Space ? 1 : 0);
+  input.reel = (k.KeyE || k.PageDown ? 1 : 0) - (k.KeyQ || k.PageUp ? 1 : 0) + (input.touchReel || 0);
 }
 addEventListener('keydown', e => {
   AU.init();
@@ -1074,6 +1179,12 @@ cv.addEventListener('pointermove', e => {
   knob.style.transform = `translate(${dx}px,${dy}px)`;
   input.x = Math.abs(dx) > 8 ? dx / max : 0; input.y = Math.abs(dy) > 8 ? dy / max : 0;
 });
+for (const [id, v] of [['#reelUp', -1], ['#reelDown', 1]]) {
+  const b = document.querySelector(id); if (!b) continue;
+  b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); input.touchReel = v; recomputeKeys(); input.reel = v; });
+  const up = () => { input.touchReel = 0; recomputeKeys(); };
+  b.addEventListener('pointerup', up); b.addEventListener('pointerleave', up); b.addEventListener('pointercancel', up);
+}
 const endTouch = e => { if (e.pointerId !== touch.id) return; touch.active = false; input.x = input.y = 0; stick.classList.remove('show'); };
 cv.addEventListener('pointerup', endTouch); cv.addEventListener('pointercancel', endTouch);
 
@@ -1084,5 +1195,7 @@ function pollGamepad() {
   if (Math.abs(ax) > 0.2 || Math.abs(ay) > 0.2) { input.x = Math.abs(ax) > 0.2 ? ax : 0; input.y = Math.abs(ay) > 0.2 ? ay : 0; input.gp = true; }
   else if (input.gp) { input.gp = false; recomputeKeys(); }
   if (gp.buttons[0] && gp.buttons[0].pressed) input.y = -1;
+  const lb = gp.buttons[4] && gp.buttons[4].pressed, rb = gp.buttons[5] && gp.buttons[5].pressed;
+  if (lb || rb) { input.reel = (rb ? 1 : 0) - (lb ? 1 : 0); input.gpReel = true; } else if (input.gpReel) { input.gpReel = false; recomputeKeys(); }
   const st = gp.buttons[9] && gp.buttons[9].pressed; if (st && !pollGamepad.st && G) togglePause(); pollGamepad.st = st;
 }

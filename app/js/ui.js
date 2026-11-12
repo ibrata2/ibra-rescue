@@ -55,13 +55,41 @@ function selectMission(i, quiet) {
   $('#mDesc').textContent = m.desc[lang()];
   $('#mGoal').textContent = T('goalTxt').replace('{n}', m.goal);
   $('#mTime').textContent = fmtTime(m.time);
-  $('#mHeli').textContent = T(m.heli) + ' · ' + HELI_TYPES[m.heli].cap;
   $('#mWeather').textContent = T('w_' + m.weather) + (m.water && m.water.rate && m.weather !== 'flood' ? ' + ' + T('w_flood') : '');
   $('#mType').textContent = TYPE_ICON[m.type || 'rescue'] + ' ' + T('t_' + (m.type || 'rescue'));
+  { const u = unlockedHelis(); selHeli = save.heli && u.has(save.heli) ? save.heli : m.heli; buildHeliPicker(); }
   const ok = unlocked(i);
   $('#btnGo').disabled = !ok; $('#mLock').textContent = ok ? '' : T('locked');
   globe.target = m.lon; globe.targetLat = m.lat;
   if (!quiet) { const c = document.querySelector(`.mcard[data-i="${i}"]`); c && c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+}
+
+/* ---------------- اختيار الطيارة ---------------- */
+let selHeli = 'small';
+function unlockedHelis() {
+  const u = new Set(['small']);
+  MISSIONS.forEach(m => { if (save.stars[m.id]) u.add(m.heli); });
+  u.add(MISSIONS[selMission].heli); // المقترحة للمهمة دايماً متاحة
+  return u;
+}
+function bars(v, max) { const n = Math.round(v / max * 5); return '▮'.repeat(n) + '▯'.repeat(5 - n); }
+function buildHeliPicker() {
+  const box = $('#heliPick'); if (!box) return; box.innerHTML = '';
+  const u = unlockedHelis(), rec = MISSIONS[selMission].heli;
+  for (const k of HELI_ORDER) {
+    const ht = HELI_TYPES[k], ok = u.has(k);
+    const b = document.createElement('button'); b.className = 'hcard' + (k === selHeli ? ' sel' : '') + (ok ? '' : ' locked');
+    const c = document.createElement('canvas'); c.width = 72; c.height = 30; const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+    const sc = Math.min(2, 70 / ht.w); g.drawImage(SPR[k], (72 - ht.w * sc) / 2, (30 - ht.h * sc) / 2, ht.w * sc, ht.h * sc);
+    b.appendChild(c);
+    const nm = document.createElement('div'); nm.className = 'hn'; nm.textContent = (ok ? '' : '🔒 ') + T('h_' + k); b.appendChild(nm);
+    if (k === rec) { const t = document.createElement('span'); t.className = 'hrec'; t.textContent = T('recommended'); b.appendChild(t); }
+    b.title = ok ? '' : T('heliLocked');
+    b.onclick = () => { AU.init(); AU.click(); if (!ok) { $('#heliInfo').textContent = T('heliLocked'); return; } selHeli = k; save.heli = k; persist(); buildHeliPicker(); };
+    box.appendChild(b);
+  }
+  const ht = HELI_TYPES[selHeli];
+  $('#heliInfo').textContent = `${T('h_' + selHeli)} — ${T('cap')}: ${ht.cap}  ·  ${T('speed')} ${bars(ht.acc, 1.35)}  ·  ${T('ropeLen')} ${bars(ht.segs, 16)}`;
 }
 
 /* ---------------- فحص التحديثات ---------------- */
@@ -159,17 +187,19 @@ function drawGlobe(dt) {
 (function globeLoop() { let last = performance.now(); function f(n) { const dt = Math.min(0.05, (n - last) / 1000); last = n; drawGlobe(dt); requestAnimationFrame(f); } requestAnimationFrame(f); })();
 
 /* ---------------- بدء / إيقاف / نتيجة ---------------- */
-function startMission(i) {
+function startMission(i, heliKey) {
   if (!unlocked(i)) return;
   AU.init(); AU.click();
   selMission = i; paused = false; acc = 0;
-  G = new Game(i); window.G = G;
+  if (!heliKey) { const u = unlockedHelis(); heliKey = save.heli && u.has(save.heli) ? save.heli : MISSIONS[i].heli; }
+  selHeli = heliKey;
+  G = new Game(i, heliKey); window.G = G;
   show(null); $('#pause').classList.remove('on'); $('#result').classList.remove('on');
   $('#howto').textContent = (matchMedia('(pointer:coarse)').matches ? T('touchHint') : T('controls'));
   $('#howto').classList.add('show'); setTimeout(() => $('#howto').classList.remove('show'), 6000);
   updateHUD();
 }
-function restartMission() { if (G) startMission(G.mi); }
+function restartMission() { if (G) startMission(G.mi, G.heliKey); }
 function togglePause() {
   if (!G || G.state !== 'play') return;
   paused = !paused; $('#pause').classList.toggle('on', paused);
@@ -196,7 +226,7 @@ $('#btnBack').onclick = () => { AU.click(); show('title'); };
 $('#btnAbout').onclick = () => { AU.init(); AU.click(); $('#about').classList.add('on'); };
 $('#btnAboutClose').onclick = () => { AU.click(); $('#about').classList.remove('on'); };
 $('#about').onclick = e => { if (e.target.id === 'about') $('#about').classList.remove('on'); };
-$('#btnGo').onclick = () => startMission(selMission);
+$('#btnGo').onclick = () => startMission(selMission, selHeli);
 $('#btnPause').onclick = () => togglePause();
 $('#btnResume').onclick = () => togglePause();
 $('#btnRestart').onclick = () => restartMission();

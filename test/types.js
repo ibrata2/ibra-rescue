@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
       for (let k = 0; k < i; k++) save.stars[MISSIONS[k].id] = 1; startMission(i);
       const g = G; g.heli.x = Math.min(g.L.W - 300, 520); g.heli.y = 40; g.initRope(); g.camX = g.heli.x - VW / 2;
       // علّق 3 من الموجودين
-      for (let k = 0; k < Math.min(3, g.ht.cap); k++) { const q = g.people[k]; const s = g.freeSlot(); q.st = 'hang'; q.k = s; g.rope.occ[s] = q; g.rope.inv[s] = g.weightInv(q); }
+      for (const q of g.people) { if (g.chain.length >= Math.min(4, g.ht.cap)) break; if (g.isAnimal(q)) { const last = g.chain[g.chain.length - 1]; if (last && g.isHuman(last) && !last.carry) { last.carry = q; q.carrier = last; q.st = 'carried'; } continue; } g.attach(q); }
       for (let k = 0; k < 360; k++) { input.x = k < 120 ? 0.6 : 0; g.step(1 / 120); }
       input.x = 0; const m = g.m;
       return `${i + 1} ${m.id} ${m.type || 'rescue'} heli=${m.heli} ppl=${g.people.length} goal=${g.goal} fires=${(g.L.fires || []).length} kinds=${[...new Set(g.people.map(q => q.kind))]} state=${g.state}`;

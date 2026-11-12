@@ -520,6 +520,18 @@ function buildLevel(m) {
   }
   L.peopleSpots = chosen;
 
+  // ---------- حبال الغسيل على السطوح (الحبل يقطعها 😄) ----------
+  L.laundry = [];
+  if (['baghdad', 'cairo', 'mumbai', 'tokyo', 'marsh'].includes(style)) {
+    const cols = ['#e9e3d4', '#c8323c', '#8c95a3', '#d9b968', '#6f7d68', '#b7a68a', '#f4f1ea', '#3a3f4a'];
+    for (const sp of L.spots) {
+      if (rng() > 0.5 || sp.x1 - sp.x0 < 14 || sp.y < 60) continue;
+      const x1 = sp.x0 - 2, x2 = sp.x1 + 2, ln = { x1, x2, y: sp.y - 10, base: sp.y, clothes: [], broken: false };
+      for (let x = x1 + 2; x < x2 - 3; x += 4 + rng() * 3) { const dish = rng() < 0.25; ln.clothes.push({ x, c: cols[(rng() * cols.length) | 0], w: dish ? 4 : 3, h: dish ? 6 : 3 + ((rng() * 3) | 0) }); }
+      L.laundry.push(ln);
+    }
+  }
+
   // ---------- النار (مهمات الحريق) ----------
   L.fires = [];
   if (m.fire) {

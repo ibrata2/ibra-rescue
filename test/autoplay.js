@@ -8,23 +8,23 @@ const { chromium } = require('playwright');
   await p.evaluate(mi => { for (let k = 0; k < mi; k++) save.stars[MISSIONS[k].id] = 1; startMission(mi); }, mi);
   const res = await p.evaluate(async () => {
     const g = G; const log = [];
-    const ropeLen = g.ht.segs * g.ht.seg;
+    const drop = () => g.chainEnd().y - g.heli.y;
     const cruise = () => { const tops = g.L.solids.filter(s => !s.ground).map(s => s.y); return Math.max(18, Math.min(...tops) - 22); };
     const CR = cruise();
     let phase = 'go', target = null, tLast = 0, tStart = 0; const black = new Set();
     function ctrl() {
       const h = g.heli;
       const zones = g.zones(); const z = zones.reduce((a, b) => Math.abs(b.x - h.x) < Math.abs(a.x - h.x) ? b : a);
-      const waiting = g.people.filter(q => (q.st === 'wait' || q.st === 'swim') && !black.has(q));
+      const waiting = g.people.filter(q => (q.st === 'wait' || q.st === 'swim') && !black.has(q) && (!g.isAnimal(q) || (g.chain.length && g.isHuman(g.chain[g.chain.length - 1]) && !g.chain[g.chain.length - 1].carry)));
       const load = g.load();
       if (load >= g.ht.cap || (load > 0 && waiting.length === 0) || (load > 0 && g.saved + load >= g.goal)) phase = 'home'; else if (phase === 'home' && load === 0) phase = 'go';
       let tx, ty;
-      if (phase === 'home') { tx = z.x + z.w / 2; const dx = Math.abs(tx - h.x); ty = dx < 12 ? z.y - ropeLen * 0.55 : CR; }
+      if (phase === 'home') { tx = z.x + z.w / 2; const dx = Math.abs(tx - h.x); ty = dx < 12 ? z.y - drop() + 2 : CR; }
       else {
         if (target && g.t - tStart > 9) { black.add(target); target = null; }
         if (!target || !(target.st === 'wait' || target.st === 'swim') || black.has(target)) { target = waiting.sort((a, b) => Math.abs(a.x - h.x) - Math.abs(b.x - h.x))[0]; tStart = g.t; if (black.size > 4) black.clear(); }
         if (!target) { tx = h.x; ty = CR; }
-        else { tx = target.x; const dx = Math.abs(tx - h.x); ty = dx < 10 ? target.y - ropeLen * 0.85 : CR; }
+        else { tx = target.x; const dx = Math.abs(tx - h.x); ty = dx < 12 ? target.y - (target.kind === 'crate' || target.st === 'swim' ? 5 : 20) - drop() : CR; }
       }
       // لا تنزل تحت مستوى آمن فوگ البنايات القريبة
       const near = g.L.solids.filter(s => !s.ground && h.x + 30 > s.x && h.x - 30 < s.x + s.w).map(s => s.y);
