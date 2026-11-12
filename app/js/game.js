@@ -36,7 +36,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const AU = {
   ctx: null, master: null, rotorG: null, rotorF: null, rainG: null, ok: false,
   init() {
-    if (this.ctx) return;
+    if (this.ctx) { if (this.ctx.state === "suspended") this.ctx.resume(); return; }
     try {
       const A = window.AudioContext || window.webkitAudioContext; this.ctx = new A();
       const c = this.ctx;
@@ -1170,7 +1170,7 @@ cv.addEventListener('pointerdown', e => {
   if (!G || e.pointerType === 'mouse') return;
   touch.active = true; touch.id = e.pointerId; touch.ox = e.clientX; touch.oy = e.clientY;
   stick.style.left = (e.clientX - 60) + 'px'; stick.style.top = (e.clientY - 60) + 'px'; stick.classList.add('show'); knob.style.transform = 'translate(0,0)';
-  cv.setPointerCapture(e.pointerId);
+  try { cv.setPointerCapture(e.pointerId); } catch (err) { }
 });
 cv.addEventListener('pointermove', e => {
   if (!touch.active || e.pointerId !== touch.id) return;

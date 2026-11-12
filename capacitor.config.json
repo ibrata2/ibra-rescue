@@ -1,0 +1,9 @@
+{
+  "appId": "com.ibraprogram.ibrarescue",
+  "appName": "IBRA RESCUE",
+  "webDir": "app",
+  "backgroundColor": "#0b0a09",
+  "android": { "backgroundColor": "#0b0a09", "allowMixedContent": false },
+  "ios": { "backgroundColor": "#0b0a09", "contentInset": "never", "scrollEnabled": false },
+  "plugins": { "StatusBar": { "overlaysWebView": true, "style": "DARK" } }
+}

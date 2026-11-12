@@ -92,6 +92,28 @@ function buildHeliPicker() {
   $('#heliInfo').textContent = `${T('h_' + selHeli)} — ${T('cap')}: ${ht.cap}  ·  ${T('speed')} ${bars(ht.acc, 1.35)}  ·  ${T('ropeLen')} ${bars(ht.segs, 16)}`;
 }
 
+/* ---------------- المنصة (ويندوز / أندرويد / آيفون / متصفح) ---------------- */
+const CAP = window.Capacitor || null;
+const PLATFORM = CAP && CAP.getPlatform ? CAP.getPlatform() : (window.ibra ? 'windows' : 'web');
+function openExt(url) {
+  if (window.ibra && window.ibra.open) return window.ibra.open(url);
+  if (CAP && CAP.isNativePlatform && CAP.isNativePlatform()) { location.href = url; return; } // يفتح بالمتصفح الخارجي
+  window.open(url, '_blank');
+}
+// موبايل: إخفاء شريط الحالة + زر الرجوع بالأندرويد
+if (CAP && CAP.Plugins) {
+  try { CAP.Plugins.StatusBar && CAP.Plugins.StatusBar.hide(); } catch (e) { }
+  try {
+    CAP.Plugins.App && CAP.Plugins.App.addListener('backButton', () => {
+      if ($('#about').classList.contains('on')) { $('#about').classList.remove('on'); return; }
+      if (G) { if (G.state === 'play') { if (paused) toMenu(); else togglePause(); } else toMenu(); return; }
+      if ($('#map').classList.contains('on')) { show('title'); return; }
+      CAP.Plugins.App.exitApp();
+    });
+    CAP.Plugins.App && CAP.Plugins.App.addListener('pause', () => { if (G && G.state === 'play' && !paused) togglePause(); });
+  } catch (e) { }
+}
+
 /* ---------------- فحص التحديثات ---------------- */
 const REPO_API = 'https://api.github.com/repos/ibrata2/ibra-rescue/releases/latest';
 const UPD = { state: 'checking', latest: null, url: null };
@@ -105,7 +127,7 @@ function renderUpdate() {
     else if (UPD.state === 'latest') { el.classList.add('ok'); el.textContent = `v${v} · ${T('upLatest')}`; }
     else if (UPD.state === 'new') {
       el.classList.add('new'); el.textContent = `${T('upNew')}: v${UPD.latest} — ${T('upDownload')}`;
-      el.onclick = () => { if (window.ibra && window.ibra.open) window.ibra.open(UPD.url); else window.open(UPD.url, '_blank'); };
+      el.onclick = () => openExt(UPD.url);
     } else { el.classList.add('fail'); el.textContent = `v${v} · ${T('upFail')}`; }
   }
 }
@@ -119,8 +141,9 @@ async function checkUpdate() {
     const j = await r.json(); const tag = (j.tag_name || '').replace(/^v/, '');
     if (!tag) throw new Error('no tag');
     UPD.latest = tag;
-    const setup = (j.assets || []).find(a => /setup\.exe$/i.test(a.name));
-    UPD.url = setup ? setup.browser_download_url : j.html_url;
+    const want = PLATFORM === 'android' ? /android\.apk$/i : PLATFORM === 'ios' ? /\.ipa$/i : /setup\.exe$/i;
+    const asset = (j.assets || []).find(a => want.test(a.name));
+    UPD.url = asset ? asset.browser_download_url : j.html_url;
     UPD.state = verCmp(tag, appVersion()) > 0 ? 'new' : 'latest';
   } catch (e) { UPD.state = 'fail'; }
   renderUpdate();
@@ -234,7 +257,7 @@ $('#btnMenu').onclick = () => toMenu();
 $('#btnRetry').onclick = () => restartMission();
 $('#btnNext').onclick = () => startMission(G.mi + 1);
 $('#btnMenu2').onclick = () => toMenu();
-for (const a of document.querySelectorAll('a[data-ext]')) a.onclick = e => { e.preventDefault(); if (window.ibra && window.ibra.open) window.ibra.open(a.href); else window.open(a.href, '_blank'); };
+for (const a of document.querySelectorAll('a[data-ext]')) a.onclick = e => { e.preventDefault(); openExt(a.href); };
 addEventListener('keydown', e => {
   if (G) return;
   if ($('#map').classList.contains('on')) {

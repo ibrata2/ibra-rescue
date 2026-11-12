@@ -77,6 +77,17 @@
 
 المدينة الجديدة (شكل جديد) تنضاف بدالة الرسم بـ `app/js/levels.js`.
 
+## 📱 المنصات
+| المنصة | الملف بالإصدارات |
+|---|---|
+| 💻 ويندوز | `Setup.exe` (مثبّت) و `portable.exe` |
+| 🤖 أندرويد | `android.apk` — نزّله وافتحه (فعّل «تثبيت من مصادر غير معروفة») |
+| 🍎 آيفون | `ios-unsigned.ipa` — **بدون توقيع**، وقّعه بـ Sideloadly / AltStore / ESign |
+
+- اللعبة على الموبايل بالعرض، وتتحكم بالسحب على الشاشة + أزرار ⬆⬇ للحبل. زر الرجوع بالأندرويد يوقف اللعبة.
+- **توقيع الأندرويد:** يستخدم المفتاح `mobile/android-release.keystore` (حتى التحديثات تنصّب فوگ القديمة). إذا تريد مفتاح خاص بيك: ضيف أسرار GitHub باسم `ANDROID_KEYSTORE_B64` و `ANDROID_KS_PASS` و `ANDROID_KS_ALIAS`.
+- البناء يصير بـ [Capacitor](https://capacitorjs.com) على GitHub Actions (أندرويد على Linux، آيفون على macOS).
+
 ## 🛠️ التشغيل والبناء
 ```bash
 npm install

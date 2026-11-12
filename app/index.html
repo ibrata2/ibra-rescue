@@ -2,7 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>IBRA RESCUE — حبل النجاة</title>
 <link rel="icon" href="icon.svg">
 <style>
@@ -145,6 +147,37 @@ button{font-family:var(--font);cursor:pointer}
 #reel button{width:58px;height:58px;border-radius:14px;border:1px solid var(--gold);background:rgba(10,9,8,.7);color:var(--gold2);font-size:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none}
 #reel button small{font-size:10px;color:var(--dim)}
 @media (pointer:fine){ #reel button{width:44px;height:44px;font-size:16px;opacity:.75} }
+
+/* حواف الشاشة (نوتش الآيفون) */
+#hud{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-top:max(10px,env(safe-area-inset-top))}
+#map,#title{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+#reel{right:max(14px,env(safe-area-inset-right))}
+/* موبايل بالعرض */
+@media (max-height:520px){
+  #map{padding-top:8px;padding-bottom:8px;gap:10px;align-items:flex-start}
+  .globeWrap{flex:0 0 34%;min-width:180px}
+  #globe{width:min(100%,80vh)}
+  .side{flex:1 1 300px;gap:8px}
+  .panel{padding:10px}
+  #mDesc{font-size:12.5px;min-height:0;line-height:1.6}
+  .meta{margin-top:6px;font-size:12px}
+  #mlist{max-height:30vh}
+  .how{display:none}
+  .hbox{padding:4px 8px;font-size:13px}
+  #hudCity{font-size:11px}
+  .card{padding:16px;gap:8px}
+  #title h1{font-size:clamp(28px,6vw,44px)}
+  #title h2{font-size:18px;margin-top:-4px}
+  #title{overflow-y:auto;justify-content:flex-start;padding-top:10px;gap:8px}
+  #title .logo{width:64px;animation:none}
+  #title .btns{display:grid;grid-template-columns:1fr 1fr;width:min(520px,92vw)}
+  #title .btns .btn.main{grid-column:1/-1}
+  #title .credit{display:block;font-size:11px}
+  #map{overflow-y:auto}
+  .side .row{position:sticky;bottom:0;z-index:2;padding:6px 0;background:linear-gradient(transparent,var(--bg) 35%)}
+  #heliPick{grid-template-columns:repeat(6,1fr)}
+  .hcard .hn{font-size:10px}
+}
 
 /* عصا اللمس */
 #stick{position:fixed;width:120px;height:120px;border-radius:50%;border:2px solid rgba(235,225,200,.35);background:rgba(0,0,0,.2);z-index:6;display:none;pointer-events:none}

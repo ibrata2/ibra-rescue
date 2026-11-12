@@ -1,60 +1,145 @@
-name: Build & Release (Windows)
+name: Build & Release (Windows · Android · iPhone)
 
-# كل دفع على main يبني المثبّت وينشره بالإصدارات حسب رقم النسخة بـ package.json
-# للتحديث: غيّر "version" بـ package.json وادفع → إصدار جديد تلقائياً
+# كل دفع على main يبني: مثبّت ويندوز + APK أندرويد + IPA آيفون (بدون توقيع)
+# وينشرهم بالإصدارات حسب رقم النسخة بـ package.json
 on:
   push:
     branches: [main]
-    tags: ['v*']
   workflow_dispatch:
 
 permissions:
   contents: write
 
+env:
+  CAP_VER: '6'
+
 jobs:
-  build:
+  # ---------------- ويندوز ----------------
+  windows:
     runs-on: windows-latest
+    outputs:
+      v: ${{ steps.ver.outputs.v }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
+        with: { node-version: 20 }
       - name: Read version
         id: ver
         shell: bash
         run: echo "v=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
-
       - name: Write version into the game
         shell: bash
         run: printf "// يتحدّث تلقائياً من package.json وقت البناء\nwindow.APP_VERSION = '%s';\n" "${{ steps.ver.outputs.v }}" > app/js/version.js
-
       - run: npm install
-
       - run: npm run dist
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-
       - uses: actions/upload-artifact@v4
         with:
-          name: IBRA-RESCUE-${{ steps.ver.outputs.v }}-windows
+          name: windows
           path: dist/*.exe
 
-      - name: Publish release v${{ steps.ver.outputs.v }}
+  # ---------------- أندرويد ----------------
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Read version
+        id: ver
+        run: echo "v=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Write version into the game
+        run: printf "// يتحدّث تلقائياً من package.json وقت البناء\nwindow.APP_VERSION = '%s';\n" "${{ steps.ver.outputs.v }}" > app/js/version.js
+      - name: Install Capacitor
+        env: { ELECTRON_SKIP_BINARY_DOWNLOAD: 1 }
+        run: npm install --no-save --no-package-lock @capacitor/cli@$CAP_VER @capacitor/core@$CAP_VER @capacitor/android@$CAP_VER @capacitor/app@$CAP_VER @capacitor/status-bar@$CAP_VER @capacitor/assets@3
+      - run: npx cap add android
+      - run: npx capacitor-assets generate --android --iconBackgroundColor '#0b0a09' --splashBackgroundColor '#0b0a09'
+      - run: bash mobile/patch-android.sh "${{ steps.ver.outputs.v }}"
+      - run: npx cap sync android
+      - name: Signing key
+        run: |
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_B64 }}" ]; then echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > $RUNNER_TEMP/ks.keystore; else cp mobile/android-release.keystore $RUNNER_TEMP/ks.keystore; fi
+      - name: Build APK
+        working-directory: android
+        env:
+          KS_FILE: ${{ runner.temp }}/ks.keystore
+          KS_PASS: ${{ secrets.ANDROID_KS_PASS || 'ibrarescue2026' }}
+          KS_ALIAS: ${{ secrets.ANDROID_KS_ALIAS || 'ibrarescue' }}
+        run: chmod +x gradlew && ./gradlew assembleRelease --no-daemon
+      - run: mkdir -p out && cp android/app/build/outputs/apk/release/app-release.apk "out/IBRA-RESCUE-${{ steps.ver.outputs.v }}-android.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: out/*.apk
+
+  # ---------------- آيفون (بدون توقيع) ----------------
+  ios:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Read version
+        id: ver
+        run: echo "v=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Write version into the game
+        run: printf "// يتحدّث تلقائياً من package.json وقت البناء\nwindow.APP_VERSION = '%s';\n" "${{ steps.ver.outputs.v }}" > app/js/version.js
+      - name: Install Capacitor
+        env: { ELECTRON_SKIP_BINARY_DOWNLOAD: 1 }
+        run: npm install --no-save --no-package-lock @capacitor/cli@$CAP_VER @capacitor/core@$CAP_VER @capacitor/ios@$CAP_VER @capacitor/app@$CAP_VER @capacitor/status-bar@$CAP_VER @capacitor/assets@3
+      - run: npx cap add ios
+      - run: npx capacitor-assets generate --ios --iconBackgroundColor '#0b0a09' --splashBackgroundColor '#0b0a09'
+      - run: bash mobile/patch-ios.sh "${{ steps.ver.outputs.v }}"
+      - run: npx cap sync ios
+      - name: Build (no signing)
+        run: |
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build-ios \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build | tail -25
+      - name: Package IPA
+        run: |
+          mkdir -p out/Payload
+          cp -R build-ios/Build/Products/Release-iphoneos/App.app out/Payload/
+          cd out && zip -qr "IBRA-RESCUE-${{ steps.ver.outputs.v }}-ios-unsigned.ipa" Payload && rm -rf Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: out/*.ipa
+
+  # ---------------- النشر ----------------
+  release:
+    needs: [windows, android, ios]
+    if: always() && needs.windows.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist, merge-multiple: true }
+      - run: ls -la dist
+      - name: Publish release v${{ needs.windows.outputs.v }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.ver.outputs.v }}
+          tag_name: v${{ needs.windows.outputs.v }}
           target_commitish: ${{ github.sha }}
-          name: IBRA RESCUE v${{ steps.ver.outputs.v }} — حبل النجاة
+          name: IBRA RESCUE v${{ needs.windows.outputs.v }} — حبل النجاة
           make_latest: true
-          files: dist/*.exe
+          files: |
+            dist/*.exe
+            dist/*.apk
+            dist/*.ipa
           body: |
             ## IBRA RESCUE — حبل النجاة 🚁
-            لعبة إنقاذ بالهليكوبتر والحبل — 10 مهمات بمدن العالم، عربي وإنكليزي.
+            لعبة إنقاذ بالهليكوبتر والحبل — 200 مهمة بـ20 مدينة، 6 طيارات، عربي وإنكليزي.
 
             ### التحميل
-            - **IBRA-RESCUE-${{ steps.ver.outputs.v }}-Setup.exe** ← المثبّت (ينصّب اللعبة ويسوي اختصار على سطح المكتب)
-            - **IBRA-RESCUE-${{ steps.ver.outputs.v }}-portable.exe** ← نسخة محمولة تشتغل بدون تنصيب
+            | المنصة | الملف |
+            |---|---|
+            | 💻 ويندوز (مثبّت) | **IBRA-RESCUE-${{ needs.windows.outputs.v }}-Setup.exe** |
+            | 💻 ويندوز (محمولة) | **IBRA-RESCUE-${{ needs.windows.outputs.v }}-portable.exe** |
+            | 🤖 أندرويد | **IBRA-RESCUE-${{ needs.windows.outputs.v }}-android.apk** |
+            | 🍎 آيفون (بدون توقيع) | **IBRA-RESCUE-${{ needs.windows.outputs.v }}-ios-unsigned.ipa** — وقّعه بـ Sideloadly / AltStore / ESign |
 
             برمجة وتطوير إبراهيم الخزرجي · Telegram: t.me/ibraprogram · TikTok: @ibraprogram
