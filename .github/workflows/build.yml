@@ -116,15 +116,19 @@ jobs:
     if: always() && needs.windows.result == 'success'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: ver
+        run: echo "v=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v4
         with: { path: dist, merge-multiple: true }
       - run: ls -la dist
-      - name: Publish release v${{ needs.windows.outputs.v }}
+      - name: Publish release v${{ steps.ver.outputs.v }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ needs.windows.outputs.v }}
+          tag_name: v${{ steps.ver.outputs.v }}
           target_commitish: ${{ github.sha }}
-          name: IBRA RESCUE v${{ needs.windows.outputs.v }} — حبل النجاة
+          name: IBRA RESCUE v${{ steps.ver.outputs.v }} — حبل النجاة
           make_latest: true
           files: |
             dist/*.exe
@@ -137,9 +141,9 @@ jobs:
             ### التحميل
             | المنصة | الملف |
             |---|---|
-            | 💻 ويندوز (مثبّت) | **IBRA-RESCUE-${{ needs.windows.outputs.v }}-Setup.exe** |
-            | 💻 ويندوز (محمولة) | **IBRA-RESCUE-${{ needs.windows.outputs.v }}-portable.exe** |
-            | 🤖 أندرويد | **IBRA-RESCUE-${{ needs.windows.outputs.v }}-android.apk** |
-            | 🍎 آيفون (بدون توقيع) | **IBRA-RESCUE-${{ needs.windows.outputs.v }}-ios-unsigned.ipa** — وقّعه بـ Sideloadly / AltStore / ESign |
+            | 💻 ويندوز (مثبّت) | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-Setup.exe** |
+            | 💻 ويندوز (محمولة) | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-portable.exe** |
+            | 🤖 أندرويد | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-android.apk** |
+            | 🍎 آيفون (بدون توقيع) | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-ios-unsigned.ipa** — وقّعه بـ Sideloadly / AltStore / ESign |
 
             برمجة وتطوير إبراهيم الخزرجي · Telegram: t.me/ibraprogram · TikTok: @ibraprogram
