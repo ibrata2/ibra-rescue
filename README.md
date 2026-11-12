@@ -70,10 +70,7 @@ node test/autoplay.js 0   # طيار آلي يجرّب المهمة الأولى
 ```
 أو افتح `app/index.html` بالمتصفح مباشرة.
 
-**النشر التلقائي:** سوّي tag مثل `v1.0.0` وادفعه → GitHub Actions يبني المثبّت وينشره بـ Releases.
-```bash
-git tag v1.0.0 && git push origin v1.0.0
-```
+**النشر التلقائي:** كل دفع على `main` يبني المثبّت وينشره بـ Releases حسب رقم `version` بـ `package.json`. للتحديث: غيّر الرقم (مثلاً 1.1.0) وادفع.
 
 ---
 <p align="center">تصميم وتطوير <b>إبراهيم الخزرجي</b> · <a href="https://t.me/ibraprogram">Telegram: t.me/ibraprogram</a> · <a href="https://www.tiktok.com/@ibraprogram">TikTok: @ibraprogram</a></p>
