@@ -143,6 +143,9 @@ function firstUnplayed() { for (let i = 0; i < MISSIONS.length; i++) if (!save.s
 $('#btnLang').onclick = () => { AU.click(); save.lang = lang() === 'ar' ? 'en' : 'ar'; persist(); applyLang(); };
 $('#btnSound').onclick = () => { AU.init(); save.sound = !save.sound; persist(); AU.setSound(save.sound); AU.click(); applyLang(); };
 $('#btnBack').onclick = () => { AU.click(); show('title'); };
+$('#btnAbout').onclick = () => { AU.init(); AU.click(); $('#about').classList.add('on'); };
+$('#btnAboutClose').onclick = () => { AU.click(); $('#about').classList.remove('on'); };
+$('#about').onclick = e => { if (e.target.id === 'about') $('#about').classList.remove('on'); };
 $('#btnGo').onclick = () => startMission(selMission);
 $('#btnPause').onclick = () => togglePause();
 $('#btnResume').onclick = () => togglePause();
@@ -162,5 +165,6 @@ addEventListener('keydown', e => {
   } else if ($('#title').classList.contains('on') && e.code === 'Enter') $('#btnPlay').click();
 });
 
+if (window.ibra && window.ibra.version) $('#appVer').textContent = window.ibra.version;
 applyLang();
 show('title');

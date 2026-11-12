@@ -73,4 +73,4 @@ node test/autoplay.js 0   # طيار آلي يجرّب المهمة الأولى
 **النشر التلقائي:** كل دفع على `main` يبني المثبّت وينشره بـ Releases حسب رقم `version` بـ `package.json`. للتحديث: غيّر الرقم (مثلاً 1.1.0) وادفع.
 
 ---
-<p align="center">تصميم وتطوير <b>إبراهيم الخزرجي</b> · <a href="https://t.me/ibraprogram">Telegram: t.me/ibraprogram</a> · <a href="https://www.tiktok.com/@ibraprogram">TikTok: @ibraprogram</a></p>
+<p align="center">برمجة وتطوير <b>إبراهيم الخزرجي</b> · <a href="https://t.me/ibraprogram">Telegram: t.me/ibraprogram</a> · <a href="https://www.tiktok.com/@ibraprogram">TikTok: @ibraprogram</a></p>

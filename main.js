@@ -9,7 +9,7 @@ function createWindow() {
     backgroundColor: '#0b0a09', title: 'IBRA RESCUE — حبل النجاة',
     icon: path.join(__dirname, 'app', 'icon.png'),
     autoHideMenuBar: true, show: false,
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false }
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false, additionalArguments: ['--app-version=' + app.getVersion()] }
   });
   Menu.setApplicationMenu(null);
   win.loadFile(path.join(__dirname, 'app', 'index.html'));

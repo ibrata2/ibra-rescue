@@ -1,7 +1,7 @@
 {
   "name": "ibra-rescue",
   "productName": "IBRA RESCUE",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "IBRA RESCUE — حبل النجاة: لعبة إنقاذ بالهليكوبتر والحبل، مهمات بمدن العالم، عربي وإنكليزي",
   "author": "Ibrahim Al-Khazraji (IBRAPROGRAM)",
   "license": "UNLICENSED",
@@ -18,12 +18,22 @@
   "build": {
     "appId": "com.ibraprogram.ibrarescue",
     "productName": "IBRA RESCUE",
-    "copyright": "© إبراهيم الخزرجي — IBRAPROGRAM",
-    "directories": { "output": "dist", "buildResources": "build" },
-    "files": ["main.js", "preload.js", "app/**/*"],
+    "copyright": "برمجة وتطوير إبراهيم الخزرجي — t.me/ibraprogram",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*"
+    ],
     "win": {
       "icon": "build/icon.ico",
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "artifactName": "IBRA-RESCUE-${version}-${arch}-${target}.${ext}"
     },
     "nsis": {
@@ -34,10 +44,15 @@
       "shortcutName": "IBRA RESCUE — حبل النجاة",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
-      "installerLanguages": ["ar_SA", "en_US"],
+      "installerLanguages": [
+        "ar_SA",
+        "en_US"
+      ],
       "multiLanguageInstaller": true
     },
-    "portable": { "artifactName": "IBRA-RESCUE-${version}-portable.exe" },
+    "portable": {
+      "artifactName": "IBRA-RESCUE-${version}-portable.exe"
+    },
     "publish": null
   }
 }

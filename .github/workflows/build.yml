@@ -53,4 +53,4 @@ jobs:
             - **IBRA-RESCUE-${{ steps.ver.outputs.v }}-x64-nsis.exe** ← المثبّت (ينصّب اللعبة ويسوي اختصار على سطح المكتب)
             - **IBRA-RESCUE-${{ steps.ver.outputs.v }}-portable.exe** ← نسخة محمولة تشتغل بدون تنصيب
 
-            تصميم وتطوير إبراهيم الخزرجي · Telegram: t.me/ibraprogram · TikTok: @ibraprogram
+            برمجة وتطوير إبراهيم الخزرجي · Telegram: t.me/ibraprogram · TikTok: @ibraprogram

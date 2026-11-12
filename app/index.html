@@ -102,6 +102,15 @@ button{font-family:var(--font);cursor:pointer}
 #rStats span{color:var(--dim)}
 #rAll{color:var(--gold2);font-weight:bold}
 
+.about{gap:8px}
+.aLogo{width:96px;height:96px;margin:0 auto}
+.aSub{color:var(--cream);font-weight:bold;margin-top:-6px}
+.aVer{color:var(--dim);font-size:13px}.aVer b{color:var(--gold2);font-family:"Courier New",monospace}
+.aDesc{font-size:14px;line-height:1.8;color:var(--cream)}
+.aCredit{font-size:17px;font-weight:bold;color:var(--gold2);border-top:1px dashed var(--line);padding-top:10px;margin-top:4px}
+.aFollow{font-size:12.5px;color:var(--dim)}
+.btn.link{text-decoration:none;font-size:15px;direction:ltr}
+
 /* عصا اللمس */
 #stick{position:fixed;width:120px;height:120px;border-radius:50%;border:2px solid rgba(235,225,200,.35);background:rgba(0,0,0,.2);z-index:6;display:none;pointer-events:none}
 #stick.show{display:block}
@@ -123,6 +132,7 @@ button{font-family:var(--font);cursor:pointer}
     <button class="btn main" id="btnPlay" data-t="play"></button>
     <button class="btn" id="btnLang" data-t="langBtn"></button>
     <button class="btn" id="btnSound"></button>
+    <button class="btn" id="btnAbout" data-t="about"></button>
   </div>
   <div class="credit">
     <div data-t="credit"></div>
@@ -179,6 +189,20 @@ button{font-family:var(--font);cursor:pointer}
   <button class="btn main" id="btnResume" data-t="resume"></button>
   <button class="btn" id="btnRestart" data-t="restart"></button>
   <button class="btn" id="btnMenu" data-t="menu"></button>
+</div></div>
+
+<!-- حول -->
+<div class="overlay" id="about"><div class="card about">
+  <img src="icon.svg" alt="" class="aLogo">
+  <h3>IBRA RESCUE</h3>
+  <div class="aSub" data-t="subtitle"></div>
+  <div class="aVer"><span data-t="version"></span> <b id="appVer">1.0.1</b></div>
+  <p class="aDesc" data-t="aboutDesc"></p>
+  <div class="aCredit" data-t="credit"></div>
+  <div class="aFollow" data-t="follow"></div>
+  <a class="btn link" href="https://t.me/ibraprogram" data-ext>✈️ Telegram · t.me/ibraprogram</a>
+  <a class="btn link" href="https://www.tiktok.com/@ibraprogram" data-ext>🎵 TikTok · @ibraprogram</a>
+  <button class="btn main" id="btnAboutClose" data-t="close"></button>
 </div></div>
 
 <!-- النتيجة -->
