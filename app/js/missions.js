@@ -10,7 +10,13 @@
    id       : اسم فريد بالإنكليزي (يُستخدم لحفظ النجوم)
    style    : شكل المدينة → baghdad | tokyo | marsh | rotterdam | dubai | cairo | mountain | mumbai
    pal      : الألوان → night (ليل) | day (نهار) | dusk (غروب)
-   heli     : small (5 أشخاص) | chinook (8 أشخاص، حبل أطول)
+   heli     : small (5) | medic إسعاف (4، أهدأ) | police شرطة (3، أسرع) | news أخبار (4)
+              | chinook شينوك (8، حبل أطول) | giant العملاق (10، أطول حبل، أثقل)
+   type     : rescue إنقاذ | cargo صناديق | vip شخص مهم | animals حيوانات | careful جدّات (ممنوع يطيح أحد) | fire حريق
+   cargo    : (لمهمات الصناديق) medicine | flour | melon (البطيخ يتفلّش إذا طاح)
+   vipName  : (لمهمات الشخص المهم) { ar: 'العريس', en: 'the groom' }
+   fire     : (لمهمات الحريق) عدد الحرائق
+   careful  : true ← إذا طاح أحد تفشل المهمة
    goal     : كم شخص لازم يوصل حتى تنجح
    people   : كم شخص موجود بالمرحلة (خليه أكثر من goal)
    time     : الوقت بالثواني
@@ -103,3 +109,120 @@ const MISSIONS = [
     weather: 'storm', zones: 'boat', water: { y: 266, to: 206, rate: 0.24 }, wind: { base: -4, gust: 16 }
   },
 ];
+
+/* ============================================================
+   🏭 مولّد المهمات: الفصل 1 = المهمات العشر فوگ (مصنوعة باليد)
+   الفصول 2 → 20 تتولّد تلقائياً (190 مهمة) بنفس النتيجة كل مرة.
+   حتى تضيف مدينة جديدة: ضيفها لـ CHAPTER_CITIES.
+   حتى تغيّر الصعوبة: عدّل genMission.
+   ============================================================ */
+const CHAPTER_CITIES = [
+  { style: 'baghdad',   ar: 'الموصل',          en: 'Mosul',            lat: 36.3, lon: 43.1 },
+  { style: 'tokyo',     ar: 'كيوتو',           en: 'Kyoto',            lat: 35.0, lon: 135.8 },
+  { style: 'marsh',     ar: 'البصرة',          en: 'Basra',            lat: 30.5, lon: 47.8 },
+  { style: 'dubai',     ar: 'أبوظبي',          en: 'Abu Dhabi',        lat: 24.5, lon: 54.4 },
+  { style: 'rotterdam', ar: 'أمستردام',        en: 'Amsterdam',        lat: 52.4, lon: 4.9 },
+  { style: 'cairo',     ar: 'الإسكندرية',      en: 'Alexandria',       lat: 31.2, lon: 29.9 },
+  { style: 'mountain',  ar: 'جبال كردستان',     en: 'Kurdistan Mountains', lat: 36.6, lon: 44.5 },
+  { style: 'mumbai',    ar: 'كولكاتا',          en: 'Kolkata',          lat: 22.6, lon: 88.4 },
+  { style: 'baghdad',   ar: 'كربلاء',           en: 'Karbala',          lat: 32.6, lon: 44.0 },
+  { style: 'tokyo',     ar: 'أوساكا',           en: 'Osaka',            lat: 34.7, lon: 135.5 },
+  { style: 'dubai',     ar: 'نيويورك',          en: 'New York',         lat: 40.7, lon: -74.0 },
+  { style: 'rotterdam', ar: 'هامبورغ',          en: 'Hamburg',          lat: 53.5, lon: 10.0 },
+  { style: 'cairo',     ar: 'الأقصر',           en: 'Luxor',            lat: 25.7, lon: 32.6 },
+  { style: 'mumbai',    ar: 'بانكوك',           en: 'Bangkok',          lat: 13.7, lon: 100.5 },
+  { style: 'mountain',  ar: 'الهيمالايا',        en: 'Himalayas',        lat: 28.0, lon: 84.0 },
+  { style: 'marsh',     ar: 'الجبايش',          en: 'Chibayish',        lat: 31.0, lon: 47.0 },
+  { style: 'dubai',     ar: 'شنغهاي',           en: 'Shanghai',         lat: 31.2, lon: 121.5 },
+  { style: 'mumbai',    ar: 'ريو دي جانيرو',     en: 'Rio de Janeiro',   lat: -22.9, lon: -43.2 },
+  { style: 'baghdad',   ar: 'بغداد — الكرادة',   en: 'Baghdad — Karrada', lat: 33.31, lon: 44.42 },
+];
+
+const TYPE_NAMES = {
+  rescue:  { ar: ['سطوح محاصرة', 'نداء استغاثة', 'الحي القديم', 'آخر الليل', 'الكل فوگ السطح', 'زحمة إنقاذ', 'شارع الماي', 'صيحات من بعيد'], en: ['Trapped Rooftops', 'Distress Call', 'Old Quarter', 'Late Night', 'Everyone on the Roof', 'Rescue Rush', 'Water Street', 'Distant Cries'] },
+  cargo:   { ar: ['نقل الدوا', 'صناديق الطحين', 'بطيخ عاجل!', 'مؤن للمستشفى', 'توصيل سريع'], en: ['Medicine Run', 'Flour Crates', 'Urgent Watermelons!', 'Hospital Supplies', 'Express Delivery'] },
+  vip:     { ar: ['إنقاذ العريس', 'العمدة عالق', 'نجم السوشيال', 'المطرب المشهور', 'بطل كمال الأجسام'], en: ['Save the Groom', 'Mayor Stuck', 'Influencer Down', 'Famous Singer', 'The Bodybuilder'] },
+  animals: { ar: ['خرفان على السطح', 'بزازين الحارة', 'مزرعة طايرة', 'قطيع ضايع'], en: ['Sheep on the Roof', 'Alley Cats', 'Flying Farm', 'Lost Flock'] },
+  careful: { ar: ['الجدّات أولاً', 'بيت المسنّين', 'بشويش ابني'], en: ['Grandmas First', 'Retirement Home', 'Easy, Dear'] },
+  fire:    { ar: ['حريق بالعمارة', 'دخان أسود', 'النار تقترب'], en: ['Building Fire', 'Black Smoke', 'Fire Closing In'] },
+};
+const VIP_NAMES = [
+  { ar: 'العريس', en: 'the groom' }, { ar: 'العمدة', en: 'the mayor' }, { ar: 'نجم السوشيال', en: 'the influencer' },
+  { ar: 'المطرب المشهور', en: 'the famous singer' }, { ar: 'بطل كمال الأجسام', en: 'the bodybuilder' }
+];
+const CARGO_NAMES = { medicine: { ar: 'دوا', en: 'medicine' }, flour: { ar: 'طحين', en: 'flour' }, melon: { ar: 'بطيخ', en: 'watermelons' } };
+
+function genMission(ch, slot) {
+  const city = CHAPTER_CITIES[(ch - 2) % CHAPTER_CITIES.length];
+  const rng = mulberry(hashStr('ch' + ch + 's' + slot) + 99);
+  const ri = (a, b) => a + Math.floor(rng() * (b - a + 1));
+  const pickR = arr => arr[Math.floor(rng() * arr.length)];
+  const d = ((ch - 2) * 10 + slot) / 189;           // 0 → 1 صعوبة
+  const boss = slot === 9;
+  // نوع المهمة حسب الترتيب داخل الفصل
+  const pattern = ['rescue', 'cargo', 'rescue', 'animals', 'vip', 'rescue', 'fire', 'careful', 'cargo', 'rescue'];
+  let type = pattern[(slot + ch) % 10];
+  if (boss) type = pickR(['rescue', 'vip', 'fire']);
+  const st = city.style;
+  if (type === 'fire' && st === 'marsh') type = 'rescue';
+  // ماي؟
+  const mustWater = st === 'marsh' || st === 'rotterdam';
+  const noWater = st === 'mountain' || st === 'dubai';
+  const flood = mustWater || (!noWater && type !== 'fire' && rng() < 0.45);
+  const zones = flood ? 'boat' : 'pad';
+  // الطيارة
+  let heli = pickR(['small', 'small', 'medic', 'police', 'news']);
+  if (type === 'careful' || type === 'vip') heli = rng() < 0.6 ? 'medic' : 'small';
+  if (type === 'cargo') heli = rng() < 0.5 ? 'police' : 'news';
+  let goal = 4 + Math.round(d * 7) + ri(0, 2);
+  if (type === 'careful') goal = Math.max(3, goal - 2);
+  if (boss) goal += 3;
+  if (goal >= 9 && rng() < 0.65) heli = ch >= 10 && rng() < 0.5 ? 'giant' : 'chinook';
+  if (boss && ch >= 12) heli = 'giant';
+  // الطقس
+  let weathers = ['clear', 'rain', 'wind', 'storm'];
+  if (st === 'dubai' || st === 'cairo') weathers.push('sand', 'sand');
+  if (st === 'mountain') weathers = ['tornado', 'tornado', 'wind', 'storm'];
+  let weather = d < 0.08 ? 'clear' : pickR(weathers);
+  if (flood && !mustWater && weather === 'clear') weather = 'flood';
+  const people = goal + (type === 'careful' ? 1 : 2) + (d < 0.4 ? 1 : 0);
+  const time = Math.round(Math.max(150, Math.min(380, 130 + goal * 19 - d * 30)) / 5) * 5;
+  const worldW = Math.min(2600, 1150 + people * 75 + ri(0, 150));
+  const pal = weather === 'sand' ? 'dusk' : pickR(['night', 'night', 'day', 'dusk']);
+  const m = {
+    id: 'c' + String(ch).padStart(2, '0') + 'm' + slot, chapter: ch, type, style: st, pal, heli, goal, people, time, worldW,
+    lat: city.lat, lon: city.lon, city: { ar: city.ar, en: city.en }, weather, zones,
+  };
+  if (flood) {
+    const y0 = st === 'rotterdam' ? 264 : st === 'marsh' ? 258 : 262 + ri(0, 8);
+    const rises = st !== 'rotterdam' && st !== 'marsh';
+    m.water = { y: y0, to: rises ? Math.max(206, y0 - 26 - Math.round(d * 30)) : y0, rate: rises ? +(0.1 + d * 0.22).toFixed(2) : 0 };
+  }
+  const gust = Math.round((weather === 'wind' || weather === 'sand' || weather === 'storm' ? 14 : 4) + d * 22);
+  m.wind = { base: ri(-1, 1) * Math.round(4 + d * 8), gust };
+  if (type === 'fire') m.fire = 2 + Math.round(d * 4) + (boss ? 2 : 0);
+  if (type === 'careful') m.careful = true;
+  if (type === 'cargo') { m.cargo = pickR(['medicine', 'flour', 'melon']); }
+  if (type === 'vip') { m.vipName = pickR(VIP_NAMES); }
+  // الاسم والوصف
+  let nm = TYPE_NAMES[type];
+  let ni = Math.floor(rng() * nm.ar.length);
+  if (type === 'vip') ni = VIP_NAMES.indexOf(m.vipName);
+  if (type === 'cargo') ni = { medicine: 0, flour: 1, melon: 2 }[m.cargo];
+  m.name = { ar: (boss ? '⭐ ' : '') + nm.ar[ni], en: (boss ? '⭐ ' : '') + nm.en[ni] };
+  const zAr = zones === 'boat' ? 'القوارب' : 'المهبط', zEn = zones === 'boat' ? 'the boats' : 'the helipad';
+  const D = {
+    rescue: [`الناس عالقين فوگ سطوح ${city.ar}. أنقذ ${goal} ووصّلهم لـ${zAr}.`, `People are stuck on the rooftops of ${city.en}. Rescue ${goal} and bring them to ${zEn}.`],
+    cargo: m.cargo && [`${city.ar} محتاجة ${CARGO_NAMES[m.cargo].ar}! انقل ${goal} صناديق بالحبل لـ${zAr}.${m.cargo === 'melon' ? ' البطيخ إذا طاح من عالي يتفلّش!' : ' الصناديق ما تحچي… بس لا توگعها.'}`, `${city.en} needs ${CARGO_NAMES[m.cargo].en}! Carry ${goal} crates on the rope to ${zEn}.${m.cargo === 'melon' ? ' Watermelons smash if dropped from high!' : " Crates don't talk… but don't drop them."}`],
+    vip: m.vipName && [`${m.vipName.ar} عالق بـ${city.ar}! أنقذ ${goal} أشخاص، و${m.vipName.ar} لازم يكون وياهم (أبو التاج 👑).`, `${m.vipName.en} is stuck in ${city.en}! Rescue ${goal} people — ${m.vipName.en} (the one with the crown 👑) must be one of them.`],
+    animals: [`خرفان وبزازين عالقة فوگ سطوح ${city.ar}! أنقذ ${goal} حيوانات. لا تسألني شلون صعدت.`, `Sheep and cats are stuck on the roofs of ${city.en}! Rescue ${goal} animals. Don't ask how they got up there.`],
+    careful: [`جدّات وأجداد بـ${city.ar}. أنقذ ${goal} بهدوء… إذا واحد طاح من الحبل تفشل المهمة!`, `Grandmas and grandpas in ${city.en}. Rescue ${goal} gently… if anyone falls off the rope, you fail!`],
+    fire: [`حريق بـ${city.ar}! الناس فوگ السطوح والنار قريبة. أنقذ ${goal} ولا تطير فوگ النار.`, `Fire in ${city.en}! People are on the roofs and the flames are close. Rescue ${goal} and don't fly over the fire.`],
+  }[type];
+  m.desc = { ar: D[0], en: D[1] };
+  return m;
+}
+
+MISSIONS.forEach(m => { m.chapter = 1; });
+for (let ch = 2; ch <= 20; ch++) for (let s = 0; s < 10; s++) MISSIONS.push(genMission(ch, s));
+const CHAPTERS = 20;

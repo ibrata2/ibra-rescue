@@ -16,36 +16,86 @@ function applyLang() {
   for (const el of document.querySelectorAll('[data-t]')) el.textContent = T(el.dataset.t);
   $('#btnSound').textContent = T('sound') + ': ' + (save.sound ? T('on') : T('off'));
   buildMissionList(); selectMission(selMission, true);
+  $('#chPrev').textContent = ar ? '›' : '‹'; $('#chNext').textContent = ar ? '‹' : '›';
+  renderUpdate();
   if (G) updateHUD();
 }
 
 /* ---------------- قائمة المهمات ---------------- */
 function unlocked(i) { return i === 0 || (save.stars[MISSIONS[i - 1].id] || 0) > 0; }
 function starStr(n) { return '★'.repeat(n) + '☆'.repeat(3 - n); }
+const TYPE_ICON = { rescue: '🛟', cargo: '📦', vip: '👑', animals: '🐑', careful: '👵', fire: '🔥' };
+let curChapter = 1;
+function chapterRange(ch) { const out = []; MISSIONS.forEach((m, i) => { if (m.chapter === ch) out.push(i); }); return out; }
+function totalStars() { return MISSIONS.reduce((a, m) => a + (save.stars[m.id] || 0), 0); }
 function buildMissionList() {
   const box = $('#mlist'); box.innerHTML = '';
-  MISSIONS.forEach((m, i) => {
+  const idx = chapterRange(curChapter); const first = MISSIONS[idx[0]];
+  const chStars = idx.reduce((a, i) => a + (save.stars[MISSIONS[i].id] || 0), 0);
+  $('#chName').textContent = `${T('chapter')} ${curChapter} / ${CHAPTERS} · ${first.chapter === 1 ? (lang() === 'ar' ? 'البداية' : 'Beginnings') : first.city[lang()]}`;
+  $('#chStars').textContent = `★ ${chStars}/${idx.length * 3}  ·  ${T('totalStars')} ${totalStars()}/${MISSIONS.length * 3}`;
+  $('#chPrev').disabled = curChapter <= 1; $('#chNext').disabled = curChapter >= CHAPTERS;
+  for (const i of idx) {
+    const m = MISSIONS[i];
     const b = document.createElement('button'); b.className = 'mcard' + (unlocked(i) ? '' : ' locked') + (i === selMission ? ' sel' : '');
     const st = save.stars[m.id] || 0;
-    b.innerHTML = `<span class="mn">${String(i + 1).padStart(2, '0')}</span><span class="mt"><b>${m.city[lang()]}</b><small>${m.name[lang()]}</small></span><span class="ms">${unlocked(i) ? starStr(st) : '🔒'}</span>`;
+    b.innerHTML = `<span class="mn">${String(i + 1).padStart(3, '0')}</span><span class="mi">${TYPE_ICON[m.type || 'rescue']}</span><span class="mt"><b>${m.city[lang()]}</b><small>${m.name[lang()]}</small></span><span class="ms">${unlocked(i) ? starStr(st) : '🔒'}</span>`;
+    b.dataset.i = i;
     b.onclick = () => { AU.init(); AU.click(); selectMission(i); };
     b.ondblclick = () => { if (unlocked(i)) startMission(i); };
     box.appendChild(b);
-  });
+  }
 }
+function setChapter(ch) { curChapter = clamp(ch, 1, CHAPTERS); buildMissionList(); const idx = chapterRange(curChapter); const pickI = idx.find(i => unlocked(i) && !save.stars[MISSIONS[i].id]); selectMission(pickI != null ? pickI : idx[0], true); }
 function selectMission(i, quiet) {
   selMission = i; const m = MISSIONS[i];
-  for (const [k, c] of [...document.querySelectorAll('.mcard')].entries()) c.classList.toggle('sel', k === i);
+  if (m.chapter !== curChapter) { curChapter = m.chapter; buildMissionList(); }
+  for (const c of document.querySelectorAll('.mcard')) c.classList.toggle('sel', +c.dataset.i === i);
   $('#mTitle').textContent = m.city[lang()] + ' — ' + m.name[lang()];
   $('#mDesc').textContent = m.desc[lang()];
   $('#mGoal').textContent = T('goalTxt').replace('{n}', m.goal);
   $('#mTime').textContent = fmtTime(m.time);
   $('#mHeli').textContent = T(m.heli) + ' · ' + HELI_TYPES[m.heli].cap;
-  $('#mWeather').textContent = T('w_' + m.weather);
+  $('#mWeather').textContent = T('w_' + m.weather) + (m.water && m.water.rate && m.weather !== 'flood' ? ' + ' + T('w_flood') : '');
+  $('#mType').textContent = TYPE_ICON[m.type || 'rescue'] + ' ' + T('t_' + (m.type || 'rescue'));
   const ok = unlocked(i);
   $('#btnGo').disabled = !ok; $('#mLock').textContent = ok ? '' : T('locked');
   globe.target = m.lon; globe.targetLat = m.lat;
-  if (!quiet) { const c = document.querySelectorAll('.mcard')[i]; c && c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  if (!quiet) { const c = document.querySelector(`.mcard[data-i="${i}"]`); c && c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+}
+
+/* ---------------- فحص التحديثات ---------------- */
+const REPO_API = 'https://api.github.com/repos/ibrata2/ibra-rescue/releases/latest';
+const UPD = { state: 'checking', latest: null, url: null };
+function appVersion() { return (window.ibra && window.ibra.version) || window.APP_VERSION || '0.0.0'; }
+function verCmp(a, b) { const pa = a.replace(/^v/, '').split('.').map(Number), pb = b.replace(/^v/, '').split('.').map(Number); for (let i = 0; i < 3; i++) { const d = (pa[i] || 0) - (pb[i] || 0); if (d) return d > 0 ? 1 : -1; } return 0; }
+function renderUpdate() {
+  const v = appVersion();
+  for (const el of document.querySelectorAll('.upd')) {
+    el.classList.remove('new', 'ok', 'fail'); el.onclick = null;
+    if (UPD.state === 'checking') el.textContent = `v${v} · ${T('upChecking')}`;
+    else if (UPD.state === 'latest') { el.classList.add('ok'); el.textContent = `v${v} · ${T('upLatest')}`; }
+    else if (UPD.state === 'new') {
+      el.classList.add('new'); el.textContent = `${T('upNew')}: v${UPD.latest} — ${T('upDownload')}`;
+      el.onclick = () => { if (window.ibra && window.ibra.open) window.ibra.open(UPD.url); else window.open(UPD.url, '_blank'); };
+    } else { el.classList.add('fail'); el.textContent = `v${v} · ${T('upFail')}`; }
+  }
+}
+async function checkUpdate() {
+  UPD.state = 'checking'; renderUpdate();
+  try {
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 8000);
+    const r = await fetch(REPO_API, { headers: { Accept: 'application/vnd.github+json' }, signal: ctl.signal, cache: 'no-store' });
+    clearTimeout(to);
+    if (!r.ok) throw new Error('http ' + r.status);
+    const j = await r.json(); const tag = (j.tag_name || '').replace(/^v/, '');
+    if (!tag) throw new Error('no tag');
+    UPD.latest = tag;
+    const setup = (j.assets || []).find(a => /setup\.exe$/i.test(a.name));
+    UPD.url = setup ? setup.browser_download_url : j.html_url;
+    UPD.state = verCmp(tag, appVersion()) > 0 ? 'new' : 'latest';
+  } catch (e) { UPD.state = 'fail'; }
+  renderUpdate();
 }
 
 /* ---------------- الكرة الأرضية المنقّطة ---------------- */
@@ -128,17 +178,17 @@ function toMenu() { G = null; window.G = null; paused = false; $('#pause').class
 function showResult(g) {
   const win = g.state === 'win';
   const box = $('#result'); box.classList.add('on'); box.classList.toggle('win', win);
-  $('#rTitle').textContent = win ? T('complete') : (g.why === 'timeup' ? T('timeup') : T('crashed'));
+  $('#rTitle').textContent = win ? T('complete') : ({ timeup: T('timeup'), careful: T('carefulFail'), notEnough: T('notEnough'), crashed: T('crashed') }[g.why] || T('failed'));
   $('#rStars').textContent = win ? starStr(g.stars) : '';
   $('#rLine').textContent = win ? '' : (g.why === 'crashed' ? '“' + g.crashLine + '”' : '');
-  $('#rStats').innerHTML = `<div><span>${T('saved')}</span><b>${g.saved} / ${g.goal}</b></div><div><span>${T('falls')}</span><b>${g.falls}</b></div><div><span>${T('timeLeft')}</span><b>${fmtTime(g.timeLeft)}</b></div>`;
+  $('#rStats').innerHTML = `<div><span>${g.type === 'cargo' ? T('delivered') : T('saved')}</span><b>${g.saved} / ${g.goal}</b></div><div><span>${T('falls')}</span><b>${g.falls}</b></div><div><span>${T('timeLeft')}</span><b>${fmtTime(g.timeLeft)}</b></div>`;
   const hasNext = win && g.mi + 1 < MISSIONS.length;
   $('#btnNext').style.display = hasNext ? '' : 'none';
   $('#rAll').textContent = win && g.mi + 1 >= MISSIONS.length ? T('allDone') : '';
 }
 
 /* ---------------- ربط الأزرار ---------------- */
-$('#btnPlay').onclick = () => { AU.init(); AU.click(); buildMissionList(); selectMission(firstUnplayed(), true); show('map'); };
+$('#btnPlay').onclick = () => { AU.init(); AU.click(); const i = firstUnplayed(); curChapter = MISSIONS[i].chapter; buildMissionList(); selectMission(i, true); show('map'); setTimeout(() => selectMission(i), 50); };
 function firstUnplayed() { for (let i = 0; i < MISSIONS.length; i++) if (!save.stars[MISSIONS[i].id]) return unlocked(i) ? i : Math.max(0, i - 1); return 0; }
 $('#btnLang').onclick = () => { AU.click(); save.lang = lang() === 'ar' ? 'en' : 'ar'; persist(); applyLang(); };
 $('#btnSound').onclick = () => { AU.init(); save.sound = !save.sound; persist(); AU.setSound(save.sound); AU.click(); applyLang(); };
@@ -161,10 +211,15 @@ addEventListener('keydown', e => {
     if (e.code === 'ArrowDown') { selectMission(Math.min(MISSIONS.length - 1, selMission + 1)); e.preventDefault(); }
     if (e.code === 'ArrowUp') { selectMission(Math.max(0, selMission - 1)); e.preventDefault(); }
     if (e.code === 'Enter') startMission(selMission);
+    if (e.code === 'PageDown' || e.code === 'BracketRight') setChapter(curChapter + 1);
+    if (e.code === 'PageUp' || e.code === 'BracketLeft') setChapter(curChapter - 1);
     if (e.code === 'Escape') show('title');
   } else if ($('#title').classList.contains('on') && e.code === 'Enter') $('#btnPlay').click();
 });
 
-if (window.ibra && window.ibra.version) $('#appVer').textContent = window.ibra.version;
+$('#appVer').textContent = appVersion();
+$('#chPrev').onclick = () => { AU.click(); setChapter(curChapter - 1); };
+$('#chNext').onclick = () => { AU.click(); setChapter(curChapter + 1); };
 applyLang();
 show('title');
+checkUpdate();

@@ -51,6 +51,15 @@ const STR = {
     w_clear: 'صافي', w_rain: 'مطر', w_storm: 'عاصفة رعدية', w_sand: 'عاصفة ترابية', w_tornado: 'إعصار', w_wind: 'رياح', w_flood: 'فيضان يرتفع',
     allDone: 'خلّصت كل المهمات! أنت أحسن طيار بالعراق 🏆',
     loading: 'جاري التحميل…',
+    medic: 'إسعاف', police: 'شرطة (سريعة)', news: 'الأخبار', giant: 'العملاق (حبل طويل جداً)',
+    delivered: 'تم التسليم',
+    t_rescue: 'إنقاذ', t_cargo: 'نقل صناديق', t_vip: 'شخص مهم', t_animals: 'حيوانات', t_careful: 'بهدوء! (ممنوع يطيح أحد)', t_fire: 'حريق',
+    type: 'نوع المهمة',
+    chapter: 'الفصل', totalStars: 'النجوم',
+    carefulFail: 'واحد طاح! المهمة تحتاج هدوء',
+    vipFail: 'نسيت الشخص المهم!',
+    notEnough: 'ما بقى عدد كافي',
+    upChecking: 'جاري التحقق من التحديثات…', upLatest: '✔ النسخة حديثة', upNew: '⬆ توجد نسخة جديدة', upDownload: 'اضغط للتحميل', upFail: 'تعذّر التحقق من التحديثات (بدون إنترنت؟)',
   },
   en: {
     subtitle: 'Rope of Hope',
@@ -98,11 +107,43 @@ const STR = {
     w_clear: 'Clear', w_rain: 'Rain', w_storm: 'Thunderstorm', w_sand: 'Sandstorm', w_tornado: 'Tornado', w_wind: 'Windy', w_flood: 'Rising flood',
     allDone: 'All missions done! Best pilot in the world 🏆',
     loading: 'Loading…',
+    medic: 'Ambulance', police: 'Police (fast)', news: 'News', giant: 'The Giant (very long rope)',
+    delivered: 'Delivered',
+    t_rescue: 'Rescue', t_cargo: 'Cargo', t_vip: 'VIP', t_animals: 'Animals', t_careful: 'Careful! (no one may fall)', t_fire: 'Fire',
+    type: 'Mission type',
+    chapter: 'Chapter', totalStars: 'Stars',
+    carefulFail: 'Someone fell! This mission needed care',
+    vipFail: 'You forgot the VIP!',
+    notEnough: 'Not enough left',
+    upChecking: 'Checking for updates…', upLatest: '✔ You have the latest version', upNew: '⬆ A new version is available', upDownload: 'click to download', upFail: 'Could not check for updates (offline?)',
   }
 };
 
 /* ---------- التعليقات المضحكة ---------- */
 const LINES = {
+
+  /* ----- الشخص المهم (VIP) ----- */
+  vip_wait: {
+    ar: ['آني {vip}! أنقذوني أول!', 'تعرفون منو آني؟!', 'وين الحرس؟! وين الطيارة؟!', 'صوّروني وآني أنقذ!'],
+    en: ["I'm {vip}! Save me first!", 'Do you know who I am?!', 'Where are my bodyguards?!', 'Film me being rescued!']
+  },
+  vip_grab: { ar: ['أخيراً! سجّلوا هالمشهد', 'بشويش على البدلة!'], en: ['Finally! Record this moment', 'Careful with the suit!'] },
+  vip_hang: { ar: ['هذا مو مستوى درجة أولى!', 'راح أشتكي على الحبل', 'شعري خرب!'], en: ['This is not first class!', "I'm filing a complaint", 'My hair is ruined!'] },
+  vip_saved: { ar: ['راح أذكرك بخطابي الجاي!', 'تستاهل وسام!', 'وين الكاميرات؟'], en: ["I'll mention you in my next speech!", 'You deserve a medal!', 'Where are the cameras?'] },
+  vip_fall: { ar: ['محاميييي!!', 'هذا مو بالعقد!!'], en: ['MY LAWYER!!', 'This was NOT in the contract!!'] },
+
+  /* ----- الجدّات والأجداد ----- */
+  grandma_wait: { ar: ['يمّه تعال ابني!', 'نظارتي وين؟ شايفة طيارة؟', 'ابني لا تستعجل، ركبتي توجعني', 'جبتلك دولمة!'], en: ['Come here, dear!', 'Where are my glasses? Is that a helicopter?', 'Slowly dear, my knees!', 'I made you dolma!'] },
+  grandma_grab: { ar: ['يا ستّار!', 'بسم الله… مسكته', 'لزمني زين ابني'], en: ['Oh my goodness!', 'Got it, dear…', 'Hold me tight, dear'] },
+  grandma_hang: { ar: ['بهاي العمر أطير؟!', 'لو يشوفني جدّك هسه…', 'ابني شغّل أم كلثوم'], en: ['Flying at my age?!', 'If grandpa could see me now…', 'Put on some old songs, dear'] },
+  grandma_scared: { ar: ['يمّه بشويييش!!', 'عمري 90 سنة ابني!!', 'ضغطي صعد!!'], en: ['SLOWLY, DEAR!!', "I'm 90 years old!!", 'My blood pressure!!'] },
+  grandma_saved: { ar: ['الله يرضى عليك ابني', 'تعال اتغدى عدنا!', 'هسه أحچي لكل الجيران'], en: ['Bless you, dear', 'Come over for lunch!', "I'm telling all the neighbours"] },
+  grandma_fall: { ar: ['يااا ستّاااار!!'], en: ['OH MY GOODNEEESS!!'] },
+
+  /* ----- الحيوانات ----- */
+  sheep: { ar: ['مااااع!', 'ماع؟', 'ماااااااع!!', 'مع.'], en: ['Baaaa!', 'Baa?', 'BAAAAAA!!', 'Meh.'] },
+  cat: { ar: ['مياو!', 'مياااو؟!', 'هسسسس!', 'مياو… (نظرة احتقار)'], en: ['Meow!', 'Meooow?!', 'HSSSS!', 'Meow… (judging you)'] },
+  hot: { ar: ['حااار!!', 'احترگت!!', 'نااار!!'], en: ['HOT HOT HOT!!', "I'm burning!!", 'FIRE!!'] },
   wait: {
     ar: ['هنا! هنا!', 'عمي آني هنا!', 'يا طيارة! يا طيارة!', 'لا تنساني الله يخليك', 'تعال تعال!', 'آني أول واحد!', 'شوف وجهي، آني مهم!', 'وين صرت؟ صارلي ساعة!', 'جبت كيك، لا تخليني!', 'أبو الطيارة! هنااا!', 'آني خفيف والله!', 'شحن موبايلي خلص، تعال!'],
     en: ['Over here!', 'HEY! HELICOPTER!', "Don't forget me!", 'I brought snacks!', 'Pick me, I\'m important!', 'Hello?? TAXI!', 'I\'m very light, I promise!', 'My phone is at 1%!', 'Down here!!', 'I\'ve been waiting an hour!']
@@ -167,6 +208,15 @@ const LINES = {
 
 /* ---------- خطوط الراديو (البرج/الطيار) ---------- */
 const RADIO = {
+
+  vipNeed: { ar: ['البرج: لازم تجيب {vip}! بدونه ما ننجح', 'البرج: نسيت {vip}؟!'], en: ['Tower: you must bring {vip}!', 'Tower: did you forget {vip}?!'] },
+  vipSaved: { ar: ['البرج: {vip} وصل! هسه يسوي مؤتمر صحفي'], en: ['Tower: {vip} is safe! now he wants a press conference'] },
+  careFail: { ar: ['البرج: الجدّة طاحت!! هي بخير… بس زعلانة هواية'], en: ['Tower: grandma fell!! she\'s fine… but VERY angry'] },
+  melon: { ar: ['البرج: البطيخ تفلّش! ', 'الطيار: راحت البطيخة…'], en: ['Tower: the watermelon exploded!', 'Pilot: RIP watermelon…'] },
+  crate: { ar: ['البرج: الصندوق وصل سالم', 'البرج: تم التسليم، كمّل'], en: ['Tower: crate delivered', 'Tower: delivered, keep going'] },
+  fire: { ar: ['البرج: ابتعد عن النار!', 'الطيار: الحرارة عالية هنا!'], en: ['Tower: stay away from the fire!', "Pilot: it's hot up here!"] },
+  police: { ar: ['الطيار: شغّلت السرينة… بس ماكو أحد يسمع', 'الطيار: وضع المطاردة!'], en: ['Pilot: siren on… nobody cares', 'Pilot: pursuit mode!'] },
+  news: { ar: ['المذيع: نحن على الهواء مباشرة!', 'المذيع: لقطة حصرية!'], en: ['Reporter: we are LIVE!', 'Reporter: exclusive shot!'] },
   start: {
     ar: ['البرج: اليوم بلا حوادث رجاءً', 'البرج: لا تطير فوگ بيت أمي', 'البرج: الطيارة جديدة، دير بالك', 'الطيار: يلا بسم الله'],
     en: ['Tower: no crashes today, please', 'Tower: the heli is brand new, careful', 'Pilot: here we go…', 'Tower: try to bring it back in one piece']

@@ -520,6 +520,18 @@ function buildLevel(m) {
   }
   L.peopleSpots = chosen;
 
+  // ---------- النار (مهمات الحريق) ----------
+  L.fires = [];
+  if (m.fire) {
+    const padXs = L.pads.map(p => p.x);
+    let cands = L.solids.filter(sd => ['block', 'house', 'tower', 'cont', 'mudhif'].includes(sd.kind) && sd.x > 230 && sd.w >= 20 && sd.y > 40
+      && !chosen.some(c => c.y === sd.y && c.x0 >= sd.x - 2 && c.x1 <= sd.x + sd.w + 2) && !padXs.some(px => px >= sd.x - 4 && px <= sd.x + sd.w));
+    for (let i = cands.length - 1; i > 0; i--) { const j = (rng() * (i + 1)) | 0; [cands[i], cands[j]] = [cands[j], cands[i]]; }
+    for (const sd of cands.slice(0, m.fire)) { const w = Math.min(sd.w - 6, 28); L.fires.push({ x: sd.x + (sd.w - w) / 2, y: sd.y, w, h: 34 }); }
+    // سواد الحريق على البناية
+    for (const fr of L.fires) dither(g, fr.x - 2, fr.y, fr.w + 4, 30, 'rgba(10,8,6,0.7)', 2);
+  }
+
   L.layers = { far, mid, fg, farW, midW };
   return L;
 }

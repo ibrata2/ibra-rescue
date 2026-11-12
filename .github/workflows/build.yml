@@ -26,6 +26,10 @@ jobs:
         shell: bash
         run: echo "v=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
+      - name: Write version into the game
+        shell: bash
+        run: printf "// يتحدّث تلقائياً من package.json وقت البناء\nwindow.APP_VERSION = '%s';\n" "${{ steps.ver.outputs.v }}" > app/js/version.js
+
       - run: npm install
 
       - run: npm run dist
