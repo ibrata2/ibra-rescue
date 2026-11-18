@@ -55,11 +55,13 @@ jobs:
         run: printf "// يتحدّث تلقائياً من package.json وقت البناء\nwindow.APP_VERSION = '%s';\n" "${{ steps.ver.outputs.v }}" > app/js/version.js
       - name: Install Capacitor
         env: { ELECTRON_SKIP_BINARY_DOWNLOAD: 1 }
-        run: npm install --no-save --no-package-lock @capacitor/cli@$CAP_VER @capacitor/core@$CAP_VER @capacitor/android@$CAP_VER @capacitor/app@$CAP_VER @capacitor/status-bar@$CAP_VER @capacitor/assets@3
+        run: npm install --save --no-package-lock @capacitor/cli@$CAP_VER @capacitor/core@$CAP_VER @capacitor/android@$CAP_VER @capacitor/app@$CAP_VER @capacitor/status-bar@$CAP_VER @capacitor/assets@3
       - run: npx cap add android
       - run: npx capacitor-assets generate --android --iconBackgroundColor '#0b0a09' --splashBackgroundColor '#0b0a09'
       - run: bash mobile/patch-android.sh "${{ steps.ver.outputs.v }}"
       - run: npx cap sync android
+      - name: Check plugins are included
+        run: cat android/app/src/main/assets/capacitor.plugins.json && grep -q '@capacitor/status-bar' android/app/src/main/assets/capacitor.plugins.json && grep -q '@capacitor/app' android/app/src/main/assets/capacitor.plugins.json
       - name: Signing key
         run: |
           if [ -n "${{ secrets.ANDROID_KEYSTORE_B64 }}" ]; then echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > $RUNNER_TEMP/ks.keystore; else cp mobile/android-release.keystore $RUNNER_TEMP/ks.keystore; fi
@@ -90,11 +92,13 @@ jobs:
         run: printf "// يتحدّث تلقائياً من package.json وقت البناء\nwindow.APP_VERSION = '%s';\n" "${{ steps.ver.outputs.v }}" > app/js/version.js
       - name: Install Capacitor
         env: { ELECTRON_SKIP_BINARY_DOWNLOAD: 1 }
-        run: npm install --no-save --no-package-lock @capacitor/cli@$CAP_VER @capacitor/core@$CAP_VER @capacitor/ios@$CAP_VER @capacitor/app@$CAP_VER @capacitor/status-bar@$CAP_VER @capacitor/assets@3
+        run: npm install --save --no-package-lock @capacitor/cli@$CAP_VER @capacitor/core@$CAP_VER @capacitor/ios@$CAP_VER @capacitor/app@$CAP_VER @capacitor/status-bar@$CAP_VER @capacitor/assets@3
       - run: npx cap add ios
       - run: npx capacitor-assets generate --ios --iconBackgroundColor '#0b0a09' --splashBackgroundColor '#0b0a09'
       - run: bash mobile/patch-ios.sh "${{ steps.ver.outputs.v }}"
       - run: npx cap sync ios
+      - name: Check plugins are included
+        run: cat ios/App/App/capacitor.config.json && grep -q StatusBarPlugin ios/App/App/capacitor.config.json && grep -q AppPlugin ios/App/App/capacitor.config.json
       - name: Build (no signing)
         run: |
           xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Release \
@@ -146,4 +150,4 @@ jobs:
             | 🤖 أندرويد | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-android.apk** |
             | 🍎 آيفون (بدون توقيع) | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-ios-unsigned.ipa** — وقّعه بـ Sideloadly / AltStore / ESign |
 
-            برمجة وتطوير إبراهيم الخزرجي · Telegram: t.me/ibraprogram · TikTok: @ibraprogram
+            برمجة وتطوير إبراهيم الخزرجي · الموقع: ibraprogram.netlify.app · Telegram: t.me/ibraprogram · TikTok: @ibraprogram
