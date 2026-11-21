@@ -69,9 +69,14 @@ const AU = {
   setSound(on) { if (this.master) this.master.gain.value = on ? 0.7 : 0; },
   rotor(level, pitch) {
     if (!this.ok) return; const t = this.ctx.currentTime;
-    if (SND.loop('heli', level * 1.4, 0.85 + pitch * 0.22)) { this.rotorG.gain.setTargetAtTime(0, t, 0.08); return; }
+    // كل طيارة صوتها: heli_<نوع>.mp3، وإذا ما موجود heli.mp3 بنبرة تناسب حجمها
+    const key = (typeof G !== 'undefined' && G && G.heliKey) || 'small', own = 'heli_' + key;
+    const name = SND.has(own) ? own : 'heli', tone = name === own ? 1 : (HELI_TONE[key] || 1);
+    for (const k of HELI_ORDER) if ('heli_' + k !== name) SND.loop('heli_' + k, 0);
+    if (name !== 'heli') SND.loop('heli', 0);
+    if (SND.loop(name, level * 1.4, (0.85 + pitch * 0.22) * tone)) { this.rotorG.gain.setTargetAtTime(0, t, 0.08); return; }
     this.rotorG.gain.setTargetAtTime(level * 0.55, t, 0.08);
-    this.rotorF.frequency.setTargetAtTime(220 + pitch * 120, t, 0.1);
+    this.rotorF.frequency.setTargetAtTime((220 + pitch * 120) * (HELI_TONE[key] || 1), t, 0.1);
     this.lfo.frequency.setTargetAtTime(14 + pitch * 4, t, 0.1);
   },
   rain(level) { if (!this.ok) return; if (SND.loop('rain', level)) { this.rainG.gain.setTargetAtTime(0, this.ctx.currentTime, 0.3); return; } this.rainG.gain.setTargetAtTime(level * 0.12, this.ctx.currentTime, 0.3); },
@@ -129,6 +134,8 @@ const HELI_TYPES = {
   chinook: { w: 54, h: 19, cx: 27, cy: 10, box: [44, 13], anchor: [0, 8], rotors: [[45, 1, 22], [8, 0, 22]], segs: 13, seg: 6, cap: 9, mass: 1.5, acc: 0.88 },
   giant:   { w: 70, h: 23, cx: 35, cy: 12, box: [58, 16], anchor: [0, 10], rotors: [[38, 0, 34]], segs: 16, seg: 6, cap: 12, mass: 2.2, acc: 0.72 },
 };
+// نبرة صوت كل طيارة (إذا ما إلها ملف خاص): الصغيرة أحد، الكبيرة أثقل
+const HELI_TONE = { small: 1.1, medic: 1.04, police: 1.18, news: 1.0, chinook: 0.74, giant: 0.62 };
 const HELI_ORDER = ['small', 'medic', 'police', 'news', 'chinook', 'giant'];
 const SPR = {};
 function buildHeliSprites() {

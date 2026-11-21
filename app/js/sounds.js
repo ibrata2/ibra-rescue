@@ -9,7 +9,14 @@
    ============================================================ */
 const SOUND_LIST = {
   // أصوات مستمرة (تتكرر) — loop
-  heli:       { loop: true,  vol: 0.55, desc: 'صوت الهليكوبتر (دوّار) يتكرر' },
+  heli:       { loop: true,  vol: 0.55, desc: 'صوت الهليكوبتر العام (لأي طيارة ما إلها صوت خاص)' },
+  // صوت خاص لكل طيارة (اختياري) — إذا مو موجود تستخدم heli.mp3 بنبرة مختلفة
+  heli_small:   { loop: true, vol: 0.55, desc: 'الطيارة الصغيرة' },
+  heli_medic:   { loop: true, vol: 0.55, desc: 'طيارة الإسعاف' },
+  heli_police:  { loop: true, vol: 0.55, desc: 'طيارة الشرطة' },
+  heli_news:    { loop: true, vol: 0.55, desc: 'طيارة الأخبار' },
+  heli_chinook: { loop: true, vol: 0.6,  desc: 'الشينوك (دوّارين — صوت ثقيل)' },
+  heli_giant:   { loop: true, vol: 0.65, desc: 'العملاقة (أثقل صوت)' },
   rain:       { loop: true,  vol: 0.45, desc: 'مطر مستمر' },
   wind:       { loop: true,  vol: 0.4,  desc: 'رياح / عاصفة ترابية' },
   tornado:    { loop: true,  vol: 0.6,  desc: 'هدير الإعصار' },
