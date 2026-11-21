@@ -19,6 +19,10 @@ const save = { stars: {}, lang: 'ar', sound: true };
 try { Object.assign(save, JSON.parse(localStorage.getItem(SAVE_KEY)) || {}); } catch (e) { }
 function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { } }
 const lang = () => save.lang;
+// حجم الكتابة: الموبايل افتراضياً كبير
+const TS_STEPS = ['s', 'm', 'l', 'xl'], TS_SCALE = { s: 0.85, m: 1, l: 1.3, xl: 1.6 };
+const isTouch = () => matchMedia('(pointer:coarse)').matches;
+function textScale() { return TS_SCALE[save.ts || (isTouch() ? 'l' : 'm')] || 1; }
 const T = k => (STR[lang()] && STR[lang()][k]) || STR.en[k] || k;
 const pick = arr => arr[(Math.random() * arr.length) | 0];
 // يجمع التعليقات العامة + التعليقات الخاصة بالمهمة الحالية (إذا موجودة)
@@ -59,16 +63,18 @@ const AU = {
       this.rainG = c.createGain(); this.rainG.gain.value = 0;
       rn.connect(rf); rf.connect(this.rainG); this.rainG.connect(this.master); rn.start();
       this.ok = true;
+      SND.init(c);
     } catch (e) { this.ok = false; }
   },
   setSound(on) { if (this.master) this.master.gain.value = on ? 0.7 : 0; },
   rotor(level, pitch) {
     if (!this.ok) return; const t = this.ctx.currentTime;
+    if (SND.loop('heli', level * 1.4, 0.85 + pitch * 0.22)) { this.rotorG.gain.setTargetAtTime(0, t, 0.08); return; }
     this.rotorG.gain.setTargetAtTime(level * 0.55, t, 0.08);
     this.rotorF.frequency.setTargetAtTime(220 + pitch * 120, t, 0.1);
     this.lfo.frequency.setTargetAtTime(14 + pitch * 4, t, 0.1);
   },
-  rain(level) { if (this.ok) this.rainG.gain.setTargetAtTime(level * 0.12, this.ctx.currentTime, 0.3); },
+  rain(level) { if (!this.ok) return; if (SND.loop('rain', level)) { this.rainG.gain.setTargetAtTime(0, this.ctx.currentTime, 0.3); return; } this.rainG.gain.setTargetAtTime(level * 0.12, this.ctx.currentTime, 0.3); },
   tone(f, dur, type = 'square', vol = 0.08, slide = 0, delay = 0) {
     if (!this.ok) return; const c = this.ctx, t = c.currentTime + delay;
     const o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.setValueAtTime(f, t);
@@ -84,16 +90,16 @@ const AU = {
     s.connect(f); f.connect(g); g.connect(this.master); s.start(t, Math.random()); s.stop(t + dur + 0.05);
   },
   blip(pitchBase) { this.tone(pitchBase * (0.8 + Math.random() * 0.5), 0.05, 'square', 0.035); },
-  grab() { this.tone(520, 0.08, 'square', 0.06, 300); },
+  grab() { if (SND.play('grab')) return; this.tone(520, 0.08, 'square', 0.06, 300); },
   saved() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.12, 'square', 0.05, 0, i * 0.07)); },
-  splash() { this.burst(0.45, 1800, 0.35); },
-  thud() { this.burst(0.18, 500, 0.4); this.tone(90, 0.15, 'sine', 0.2, -40); },
-  boom() { this.burst(1.6, 1200, 0.9); this.tone(70, 0.9, 'sine', 0.5, -50); },
-  thunder(delay) { this.burst(2.2, 400, 0.6, 'lowpass', delay); },
-  scream() { this.tone(900, 0.8, 'sawtooth', 0.04, -600); },
-  win() { [523, 659, 784, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.16, 'square', 0.06, 0, i * 0.11)); },
-  fail() { [392, 330, 262, 196].forEach((f, i) => this.tone(f, 0.25, 'triangle', 0.08, 0, i * 0.18)); },
-  click() { this.tone(880, 0.04, 'square', 0.04); }
+  splash() { if (SND.play('splash')) return; this.burst(0.45, 1800, 0.35); },
+  thud() { if (SND.play('thud')) return; this.burst(0.18, 500, 0.4); this.tone(90, 0.15, 'sine', 0.2, -40); },
+  boom() { if (SND.play('explosion')) return; this.burst(1.6, 1200, 0.9); this.tone(70, 0.9, 'sine', 0.5, -50); },
+  thunder(delay) { if (SND.has('thunder')) { setTimeout(() => SND.play('thunder'), delay * 1000); return; } this.burst(2.2, 400, 0.6, 'lowpass', delay); },
+  scream() { if (SND.play('scream', 1, 0.9 + Math.random() * 0.25)) return; this.tone(900, 0.8, 'sawtooth', 0.04, -600); },
+  win() { if (SND.play('win')) return; [523, 659, 784, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.16, 'square', 0.06, 0, i * 0.11)); },
+  fail() { if (SND.play('fail')) return; [392, 330, 262, 196].forEach((f, i) => this.tone(f, 0.25, 'triangle', 0.08, 0, i * 0.18)); },
+  click() { if (SND.play('click')) return; this.tone(880, 0.04, 'square', 0.04); }
 };
 
 /* ============================================================
@@ -201,7 +207,7 @@ class Game {
     this.L = buildLevel(this.m);
     this.heliKey = heliKey && HELI_TYPES[heliKey] ? heliKey : this.m.heli;
     const ht = HELI_TYPES[this.heliKey];
-    this.ht = ht; this.chain = []; this.winch = 0.7;
+    this.ht = ht; this.chain = []; this.cabin = []; this.winch = 0.7;
     this.heli = { x: this.L.start.x, y: this.L.start.y, vx: 0, vy: 0, tilt: 0, face: 1, rot: 0, sink: 0 };
     this.initRope();
     this.people = []; this.parts = []; this.bubbles = []; this.drops = [];
@@ -247,7 +253,15 @@ class Game {
     if (LINES[key]) return pick(LINES[key][lang()]).replace('{vip}', this.vipName());
     return line(cat);
   }
-  sayK(p, cat, opts) { const t = this.kline(p, cat); if (t) this.say(p, t, opts); }
+  sayK(p, cat, opts) { const t = this.kline(p, cat); if (t) { this.say(p, t, opts); this.voice(p, cat); } }
+  voice(p, cat) { // صوت حقيقي ويّا الكلام (إذا الملفات موجودة)
+    if (!this.onScreen(p.x)) return;
+    if (p.kind === 'sheep' || p.kind === 'cat') { SND.play(p.kind); return; }
+    if (p.kind === 'crate') return;
+    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: 'cheer', jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'scream', landZone: 'cheer' };
+    let n = map[cat]; if (p.kind === 'grandma' && (cat === 'scared' || cat === 'wait' || cat === 'fingers')) n = 'grandma';
+    if (n) SND.play(n, 1, 0.92 + (p.id % 5) * 0.04);
+  }
   radioK(cat) { this.radio(pick(RADIO[cat][lang()]).replace('{vip}', this.vipName())); }
   weightInv(p) { return { crate: 0.22, grandma: 0.3, cat: 0.6, sheep: 0.3 }[p.kind] || 0.28; }
   initRope() {
@@ -320,10 +334,11 @@ class Game {
       if (!this.flags.flood && this.t > 8) { this.flags.flood = 1; this.radio(pick(RADIO.flood[lang()])); }
     }
     // الإعصار
-    const tor = L.tornado;
-    if (tor) { tor.x += tor.vx * dt; if (tor.x < tor.min || tor.x > tor.max) tor.vx *= -1; }
+    const tors = L.tornados || [];
+    for (const tw of tors) { tw.x += tw.vx * dt; if (tw.x < tw.min) tw.vx = Math.abs(tw.vx); if (tw.x > tw.max) tw.vx = -Math.abs(tw.vx); }
 
-    if (alive) {
+    if (alive && h.landed) this.updateLanded(dt);
+    else if (alive) {
       // تحكم
       const ix = clamp(input.x, -1, 1), iy = clamp(input.y, -1, 1);
       if (ix) h.face = ix > 0 ? 1 : -1;
@@ -337,7 +352,7 @@ class Game {
       const dxr = rope.x[1] - rope.x[0], dyr = rope.y[1] - rope.y[0], dl = Math.hypot(dxr, dyr) || 1;
       ax += (dxr / dl) * Math.min(load, 4) * 14; // سحب السلسلة (محدود حتى ما تعلق الطيارة)
       // الإعصار يسحب الطيارة ويدوّخها
-      if (tor) {
+      for (const tor of tors) {
         const d = tor.x - h.x;
         if (Math.abs(d) < 90) {
           const k = 1 - Math.abs(d) / 90; ax += Math.sign(d) * 160 * k + Math.sin(this.t * 9) * 120 * k; ay -= 60 * k;
@@ -367,7 +382,7 @@ class Game {
       const vx = (rope.x[i] - rope.px[i]) * 0.992, vy = (rope.y[i] - rope.py[i]) * 0.992;
       rope.px[i] = rope.x[i]; rope.py[i] = rope.y[i];
       let fx = wind * 0.9, fy = ropeG;
-      if (tor && Math.abs(tor.x - rope.x[i]) < 80) { const k = 1 - Math.abs(tor.x - rope.x[i]) / 80; fx += Math.sin(this.t * 7 + i) * 300 * k; fy -= 120 * k; }
+      for (const tor of tors) if (Math.abs(tor.x - rope.x[i]) < 80) { const k = 1 - Math.abs(tor.x - rope.x[i]) / 80; fx += Math.sin(this.t * 7 + i) * 300 * k; fy -= 120 * k; }
       let dampW = 1;
       if (wY !== null && rope.y[i] > wY) { fy -= 260; dampW = 0.9; }
       rope.x[i] += vx * dampW + fx * dt * dt; rope.y[i] += vy * dampW + fy * dt * dt;
@@ -392,14 +407,19 @@ class Game {
     // ---------------- الناس ----------------
     for (const p of this.people) this.updatePerson(p, dt, wind);
 
-    // ---------------- اصطدام الطيارة ----------------
-    if (alive) {
+    // ---------------- اصطدام الطيارة / الهبوط ----------------
+    if (alive && !h.landed) {
       const bw = ht.box[0] / 2, bh = ht.box[1] / 2;
       const x0 = h.x - bw, x1 = h.x + bw, y0 = h.y - bh - 3, y1 = h.y + bh + 1;
-      let hit = false;
-      for (const s of L.solids) if (x1 > s.x && x0 < s.x + s.w && y1 > s.y && y0 < s.y + s.h) { hit = true; break; }
-      if (!hit && wY !== null && y1 > wY + 2) hit = 'water';
-      if (hit) this.crash(hit === 'water');
+      const soft = h.vy > -8 && h.vy < 60 && Math.abs(h.vx) < 48 && Math.abs(h.tilt) < 0.3;
+      let hitS = null;
+      for (const s of L.solids) if (x1 > s.x && x0 < s.x + s.w && y1 > s.y && y0 < s.y + s.h) { hitS = s; break; }
+      const zb = this.zones().find(z => h.x > z.x - 2 && h.x < z.x + z.w + 2 && y1 >= z.y - 1 && y1 <= z.y + 7);
+      if (zb && soft) this.land(zb, null);
+      else if (hitS && soft && !hitS.ground && h.y < hitS.y && y1 - hitS.y < 8 && h.x > hitS.x + 3 && h.x < hitS.x + hitS.w - 3) this.land(null, hitS);
+      else if (hitS && soft && hitS.ground && y1 - hitS.y < 8) this.land(null, hitS);
+      else if (hitS) this.crash(false, hitS);
+      else if (wY !== null && y1 > wY + 2) this.crash(true);
     }
 
     // ---------------- الطقس ----------------
@@ -486,12 +506,132 @@ class Game {
     }
   }
 
+
+  /* ---------------- الهبوط والصعود للطيارة ---------------- */
+  land(zone, solid) {
+    const h = this.heli, bh = this.ht.box[1] / 2;
+    h.landed = { zone, solid, t: 0, next: 0.4 };
+    h.vx = h.vy = 0; h.tilt = 0; h.rot = 0;
+    h.y = (zone ? zone.y : solid.y) - bh - 1;
+    if (!SND.play('land')) AU.thud(); this.puff(h.x - 8, h.y + bh); this.puff(h.x + 8, h.y + bh);
+    this.radio(pick(RADIO.landed[lang()]));
+  }
+  updateLanded(dt) {
+    const h = this.heli, L = h.landed, bh = this.ht.box[1] / 2;
+    L.t += dt; L.next -= dt;
+    if (L.zone) h.y = L.zone.y - bh - 1;
+    h.vx = h.vy = 0; h.tilt *= 0.8;
+    if (input.y < -0.2 && L.t > 0.25) { h.landed = null; h.vy = -45; h.y -= 2; return; } // إقلاع
+    if (input.x) h.face = input.x > 0 ? 1 : -1;
+    if (L.next > 0) return;
+    if (L.zone) {
+      // تنزيل: المعلّقين بالحبل ثم ركّاب الطيارة
+      if (this.chain.length) {
+        const p = this.releaseBottom(); this.dropOff(p, L.zone);
+        if (p.carry) { const an = p.carry; p.carry = null; an.carrier = null; this.dropOff(an, L.zone); }
+        L.next = 0.3;
+      } else if (this.cabin.length) {
+        const p = this.cabin.shift(); this.dropOff(p, L.zone); L.next = 0.35;
+      }
+    } else if (L.solid) {
+      // صعود: الناس اللي على نفس السطح يركضون للطيارة
+      const free = this.ht.cap - this.chain.length - this.cabin.length;
+      if (free <= 0) return;
+      for (const p of this.people) {
+        if (p.st !== 'wait' || p.kind === 'crate') continue;
+        if (Math.abs(p.y - L.solid.y) > 1.5 || p.x < L.solid.x - 2 || p.x > L.solid.x + L.solid.w + 2) continue;
+        const dx = h.x - p.x;
+        if (Math.abs(dx) < 5) {
+          p.st = 'cabin'; this.cabin.push(p); p.k = -1; AU.grab();
+          this.sayK(p, 'board', { force: true }); L.next = 0.25;
+          if (this.cabin.length + this.chain.length >= this.ht.cap) this.radio(pick(RADIO.cabinFull[lang()]));
+          return;
+        }
+        p.boarding = true;
+      }
+    }
+  }
+  dropOff(p, z) {
+    const h = this.heli;
+    p.st = 'saved'; p.zone = z; p.y = z.y; p.timer = 0;
+    p.zoneOff = clamp(h.x - z.x + (Math.random() - 0.5) * 14, 3, z.w - 3); p.x = z.x + p.zoneOff;
+    this.onSaved(p);
+  }
+  /* ---------------- الإعصار يطيّر الناس ---------------- */
+  twisterGrab(p, tor) {
+    if (p.k >= 0) { const j = this.chain.indexOf(p); if (j >= 0) this.dropFrom(j); }
+    p.st = 'twister'; p.tw = { tor, a: Math.random() * 6.28, h: Math.max(0, this.torBase() - p.y), t: 0, life: 2.2 + Math.random() * 1.6 };
+    this.sayK(p, 'twister', { force: true }); AU.scream();
+  }
+  updateTwister(p, dt) {
+    const w = p.tw, base = this.torBase();
+    w.t += dt; w.a += dt * (6 + w.h * 0.03); w.h = Math.min(170, w.h + 55 * dt);
+    const r = 6 + w.h * 0.22;
+    p.x = w.tor.x + Math.cos(w.a) * r; p.y = base - w.h + Math.sin(w.a) * r * 0.15;
+    p.f += dt * 3;
+    if (w.t > w.life) { p.st = 'fall'; p.vx = -Math.sin(w.a) * 140; p.vy = -40; p.tw = null; }
+  }
+  /* ---------------- تفليش البناية لما الطيارة تضربها ---------------- */
+  destroyBuilding(s, ix, iy) {
+    const L = this.L, g = L.layers.fg.getContext('2d');
+    const thin = s.w < 16;
+    const R = thin ? 0 : 15 + Math.random() * 6;
+    let hx0, hx1, hy0, hy1;
+    if (thin) { hx0 = s.x - 6; hx1 = s.x + s.w + 6; hy0 = Math.min(s.y - 40, 0); hy1 = iy + 8; }
+    else { hx0 = Math.max(s.x, ix - R); hx1 = Math.min(s.x + s.w, ix + R); hy0 = Math.max(s.y - 4, iy - R); hy1 = iy + R; if (hy0 - s.y < 8) hy0 = s.y - 20; }
+    // ألوان الأنقاض من البناية نفسها
+    const cols = [];
+    try { const d = g.getImageData(Math.max(0, hx0 | 0), Math.max(0, hy0 | 0), Math.max(1, (hx1 - hx0) | 0), Math.max(1, (hy1 - hy0) | 0)).data; for (let i = 0; i < d.length && cols.length < 60; i += 4 * 37) if (d[i + 3] > 100) cols.push(`rgb(${d[i]},${d[i + 1]},${d[i + 2]})`); } catch (e) { }
+    if (!cols.length) cols.push(L.P.bld, L.P.edge, L.P.bldD);
+    // قص الفتحة بشكل متكسّر
+    g.save(); g.globalCompositeOperation = 'destination-out'; g.beginPath();
+    if (thin) g.rect(hx0, hy0, hx1 - hx0, hy1 - hy0 - 3);
+    else { const cx = (hx0 + hx1) / 2, cy = (hy0 + hy1) / 2, rx = (hx1 - hx0) / 2, ry = (hy1 - hy0) / 2; for (let a = 0; a < 6.3; a += 0.45) { const k = 0.75 + Math.random() * 0.45; g.lineTo(cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k); } }
+    g.closePath(); g.fill(); g.restore();
+    // حواف محروگة
+    g.save(); g.globalAlpha = 0.6; g.fillStyle = '#100e0c';
+    for (let i = 0; i < 40; i++) { const a = Math.random() * 6.28, cx = (hx0 + hx1) / 2, cy = (hy0 + hy1) / 2; g.fillRect(cx + Math.cos(a) * (hx1 - hx0) * 0.55, cy + Math.sin(a) * (hy1 - hy0) * 0.55, 2, 2); }
+    g.restore();
+    // تحديث التصادم: نقسم البناية لقطع
+    const i = L.solids.indexOf(s); if (i >= 0) L.solids.splice(i, 1);
+    const add = (x, y, w, h) => { if (w >= 2 && h >= 2) L.solids.push(Object.assign({}, s, { x, y, w, h })); };
+    if (thin) add(s.x, hy1, s.w, s.y + s.h - hy1);
+    else {
+      add(s.x, s.y, hx0 - s.x, s.h); add(hx1, s.y, s.x + s.w - hx1, s.h);
+      if (hy0 > s.y + 2) add(hx0, s.y, hx1 - hx0, hy0 - s.y);
+      add(hx0, hy1, hx1 - hx0, s.y + s.h - hy1);
+    }
+    // الأنقاض تطيح
+    const n = thin ? 70 : 90;
+    for (let k = 0; k < n; k++) {
+      const big = k % 6 === 0;
+      this.parts.push({ x: hx0 + Math.random() * (hx1 - hx0), y: hy0 + Math.random() * (hy1 - hy0), vx: (Math.random() - 0.5) * 90 + this.heli.vx * 0.4, vy: -10 - Math.random() * 55, g: 300, life: 2.5 + Math.random() * 2, c: cols[(Math.random() * cols.length) | 0], s: big ? 4 + ((Math.random() * 3) | 0) : 1 + ((Math.random() * 2) | 0), solid: true, spin: 0, a: 0 });
+    }
+    for (let k = 0; k < 30; k++) this.parts.push({ x: (hx0 + hx1) / 2 + (Math.random() - 0.5) * 30, y: (hy0 + hy1) / 2, vx: (Math.random() - 0.5) * 40, vy: -5 - Math.random() * 25, g: -8, life: 2 + Math.random() * 2.5, c: 'rgba(120,112,100,0.45)', s: 5, smoke: true, wind: true });
+    // الناس والغسيل فوگ الجزء اللي انهار يطيحون
+    for (const p of this.people) if ((p.st === 'wait' || p.st === 'daze') && p.x > hx0 - 2 && p.x < hx1 + 2 && p.y >= hy0 - 2 && p.y <= hy1 + 2) { p.st = 'fall'; p.vx = (Math.random() - 0.5) * 60; p.vy = -40; this.sayK(p, 'fall', { force: true }); }
+    for (const ln of L.laundry || []) if (!ln.broken && ln.x2 > hx0 && ln.x1 < hx1 && ln.y >= hy0 - 4 && ln.y <= hy1) this.breakLaundry(ln);
+    L.pads = L.pads.filter(pd => !(pd.x + pd.w > hx0 && pd.x < hx1 && pd.y >= hy0 - 3 && pd.y <= hy1));
+    if (!SND.play('collapse')) AU.burst(1.2, 700, 0.6, 'lowpass', 0.05);
+  }
+
   /* ---------------- منطق كل شخص ---------------- */
   updatePerson(p, dt, wind) {
     p.f += dt; p.cool -= dt;
     const r = this.rope, h = this.heli, wY = this.waterY();
-    const full = this.chain.length >= this.ht.cap;
+    const full = this.chain.length + this.cabin.length >= this.ht.cap;
     if (p.st === 'carried') { const c = p.carrier; if (c) { p.x = c.x + 4 * (c.face || 1); p.y = c.y + 5; } return; }
+    if (p.st === 'cabin') { p.x = h.x; p.y = h.y; return; }
+    if (p.st === 'twister') { this.updateTwister(p, dt); return; }
+    // الإعصار يشيل الناس من الأرض والحبل
+    for (const tor of this.L.tornados || []) {
+      const near = Math.abs(p.x - tor.x);
+      if ((p.st === 'wait' || p.st === 'swim' || p.st === 'daze') && near < 14 && this.state === 'play') { this.twisterGrab(p, tor); return; }
+      if (p.st === 'hang' && near < 26 && Math.random() < 0.9 * dt) { this.twisterGrab(p, tor); return; }
+    }
+    // يركض للطيارة إذا هابطة على نفس السطح
+    if (p.st === 'wait' && p.boarding && h.landed && h.landed.solid && Math.abs(p.y - h.landed.solid.y) < 1.5) { const dx = h.x - p.x; p.x += Math.sign(dx) * Math.min(Math.abs(dx), (p.kind === 'grandma' ? 10 : 32) * dt); p.face = Math.sign(dx) || p.face; p.running = true; return; }
+    if (p.boarding && !(h.landed && h.landed.solid)) p.boarding = false;
     if (p.st === 'wait' || p.st === 'swim') {
       // الماي يغطي السطح؟
       if (p.st === 'wait' && wY !== null && wY < p.y - 1) { p.st = 'swim'; AU.splash(); this.splash(p.x, wY, 6); this.sayK(p, 'swim'); }
@@ -543,7 +683,7 @@ class Game {
       p.jt += dt; const oy = p.y;
       p.vy += 300 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
       const E = this.chainEnd();
-      if (this.chain.length < this.ht.cap && Math.hypot(E.x - p.x, E.y - (p.y - 10)) < 8.5) { this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); return; }
+      if (this.chain.length + this.cabin.length < this.ht.cap && Math.hypot(E.x - p.x, E.y - (p.y - 10)) < 8.5) { this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); return; }
       if (p.vy > 0) {
         for (const sd of this.L.solids) if (p.x > sd.x && p.x < sd.x + sd.w && oy <= sd.y + 0.5 && p.y >= sd.y) {
           p.y = sd.y; p.vx = p.vy = 0; p.st = 'wait'; p.cool = 1.3;
@@ -632,7 +772,7 @@ class Game {
     if (this.chain.length >= this.ht.cap - 1 && this.chain.length > 2) { const top = this.chain[0]; if (top && top !== p) setTimeout(() => this.state === 'play' && top.st === 'hang' && this.sayK(top, 'heavy', { force: true }), 700); }
   }
   breakLaundry(ln) {
-    ln.broken = true; AU.burst(0.25, 2500, 0.15);
+    ln.broken = true; if (!SND.play('rip')) AU.burst(0.25, 2500, 0.15);
     for (const c of ln.clothes) this.parts.push({ x: c.x, y: ln.y + 2, vx: (Math.random() - 0.5) * 60 + this.heli.vx * 0.4, vy: -20 - Math.random() * 40, g: 60, life: 4 + Math.random() * 2, c: c.c, s: 3, wind: true, cloth: true, w: c.w, h: c.h, solid: true });
     const owner = this.people.filter(q => q.st === 'wait' && this.isHuman(q) && Math.abs(q.x - (ln.x1 + ln.x2) / 2) < 140)[0];
     if (owner) this.say(owner, line('laundry'), { force: true });
@@ -665,10 +805,11 @@ class Game {
   splash(x, y, n) { for (let i = 0; i < n; i++) this.parts.push({ x, y, vx: (Math.random() - 0.5) * 50, vy: -30 - Math.random() * 60, g: 220, life: 0.7, c: this.L.P.waterL, s: 1 }); }
   puff(x, y) { for (let i = 0; i < 8; i++) this.parts.push({ x, y, vx: (Math.random() - 0.5) * 40, vy: -Math.random() * 15, g: 10, life: 0.6, c: this.L.P.edge, s: 1 }); }
 
-  crash(water) {
+  crash(water, solid) {
     if (this.state !== 'play') return;
-    this.state = 'crash'; this.crashes++; this.shake = 6; this.flash = 0.6;
-    const h = this.heli; h.rot = (Math.random() < 0.5 ? -1 : 1) * 4; h.vx *= 0.3; h.vy = -60;
+    this.state = 'crash'; this.crashes++; this.shake = 8; this.flash = 0.6;
+    const h = this.heli;
+    if (solid && !solid.ground) this.destroyBuilding(solid, clamp(h.x, solid.x + 2, solid.x + solid.w - 2), clamp(h.y, solid.y, solid.y + solid.h)); h.rot = (Math.random() < 0.5 ? -1 : 1) * 4; h.vx *= 0.3; h.vy = -60;
     AU.boom(); if (water) AU.splash();
     for (let i = 0; i < 70; i++) {
       const a = Math.random() * Math.PI * 2, sp = 30 + Math.random() * 140;
@@ -735,7 +876,7 @@ class Game {
     this.drawFires(P);
     this.drawLaundry(P);
     // الإعصار
-    if (L.tornado) this.drawTornado(L.tornado, P);
+    for (const tw of L.tornados || []) this.drawTornado(tw, P);
     // الناس (غير المعلّقين)
     for (const p of this.people) if (p.st !== 'hang' && p.st !== 'swim' && p.st !== 'carried') this.drawPerson(p, P);
     // الحبل
@@ -854,7 +995,7 @@ class Game {
     }
   }
   drawPerson(p, P) {
-    if (p.st === 'broken') return;
+    if (p.st === 'broken' || p.st === 'cabin') return;
     const k = p.kind;
     if (k === 'crate') return this.drawCrate(p, P);
     if (k === 'sheep') return this.drawSheep(p, P);
@@ -929,7 +1070,7 @@ class Game {
       const sw = clamp(Math.round(-p.vx * 0.02), -2, 2), kick = Math.floor(p.f * (p.grip < 0.5 ? 14 : 4)) % 2;
       ctx.fillRect(Math.round(x - 1 + sw), y + 9, 1, 3); ctx.fillRect(Math.round(x + 1 + sw + (kick ? 1 : 0)), y + 9, 1, 3 - kick);
       if (p.grip < 0.45) { ctx.fillStyle = '#c8323c'; if (fr) ctx.fillRect(Math.round(x + 2), y + 2, 1, 2); ctx.fillStyle = P.person; }
-    } else if (p.st === 'fall') {
+    } else if (p.st === 'fall' || p.st === 'twister') {
       px(POSE.head, x, y); px(fr ? POSE.fallA : POSE.fallB, x, y);
     } else if (p.st === 'swim') {
       const by = y + (Math.sin(this.t * 3 + p.id) > 0 ? 0 : 1); px(fr ? POSE.swimA : POSE.swimB, x, by);
@@ -987,8 +1128,9 @@ class Game {
     if (!P.isDay) { const mx = Math.round(VW * 0.18 + cam * 0.98); for (let k = 0; k < 10; k++) ctx.fillRect(mx - 6 + Math.sin(k + this.t * 3) * 3, wy + 3 + k * 3, 12 - k, 1); }
     ctx.globalAlpha = 1;
   }
+  torBase() { return this.waterY() !== null ? this.waterY() : GROUND_Y - 10; }
   drawTornado(tor, P) {
-    const base = GROUND_Y - 10;
+    const base = this.torBase();
     ctx.fillStyle = P.isDay ? '#3d3934' : '#d9cfb8';
     for (let i = 0; i < 28; i++) {
       const y = base - i * 9, r = 5 + i * 1.6, ph = this.t * 6 + i * 0.5;
@@ -1027,7 +1169,7 @@ class Game {
     if (this.state !== 'play') return;
     let left = 0, right = 0;
     for (const p of this.people) if (p.st === 'wait' || p.st === 'swim' || p.st === 'daze') { if (p.x < cam - 4) left++; else if (p.x > cam + VW + 4) right++; }
-    const fs = Math.round(Math.max(13, 6 * S));
+    const fs = Math.round(Math.max(15 * DPR * textScale(), 6 * S));
     ctx.font = `bold ${fs}px Tahoma, "Segoe UI", Arial`; ctx.textBaseline = 'middle';
     const y = CH * 0.5, pulse = 0.6 + 0.4 * Math.sin(this.t * 5);
     ctx.globalAlpha = pulse;
@@ -1043,36 +1185,47 @@ class Game {
     }
   }
   drawBubbles(cam) {
-    const isAr = lang() === 'ar';
+    const isAr = lang() === 'ar', sc = textScale(), lw = Math.max(2, Math.round(1.5 * DPR));
+    const font = (px) => `bold ${px}px Tahoma, "Segoe UI", "Noto Sans Arabic", Arial`;
     for (const b of this.bubbles) {
       const e = b.ent; if (!e) continue;
-      const fs = Math.round(Math.max(12, (b.big ? 9 : 6.2) * S));
-      ctx.font = `bold ${fs}px Tahoma, "Segoe UI", Arial`;
-      ctx.direction = isAr ? 'rtl' : 'ltr';
-      const txt = b.text.slice(0, Math.max(1, b.shown));
-      const full = ctx.measureText(b.text).width;
-      const padX = fs * 0.55, bw = full + padX * 2, bh = fs * 1.6;
+      // الحجم: حد أدنى بالبكسل الحقيقي حتى تبين بالموبايل
+      const fs = Math.round(Math.max((b.big ? 21 : 14.5) * sc * DPR, (b.big ? 9 : 6.2) * S * sc));
+      ctx.font = font(fs); ctx.direction = isAr ? 'rtl' : 'ltr';
+      // تقسيم لسطرين إذا الكلام طويل
+      const maxW = CW * (b.big ? 0.8 : 0.42);
+      let lines = [b.text];
+      if (ctx.measureText(b.text).width > maxW) {
+        const words = b.text.split(' '); let best = null;
+        for (let i = 1; i < words.length; i++) { const l1 = words.slice(0, i).join(' '), l2 = words.slice(i).join(' '); const w = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width); if (!best || w < best.w) best = { w, l: [l1, l2] }; }
+        if (best) lines = best.l;
+      }
+      let left = Math.max(1, b.shown); const shownLines = lines.map(L => { const t = L.slice(0, Math.max(0, left)); left -= L.length + 1; return t; });
+      const tw = Math.max(...lines.map(L => ctx.measureText(L).width));
+      const padX = fs * 0.55, lh = fs * 1.3, bw = tw + padX * 2, bh = lines.length * lh + fs * 0.45;
       let ex = (e.x - cam) * S, ey = (e.y - (e.st === 'hang' ? -2 : 16)) * S;
       if (e.st === 'swim') ey = (e.y - 8) * S;
-      let bx = ex - bw / 2 + (e.st === 'hang' ? bw / 2 + 10 : 0), by = ey - bh - 8;
-      if (b.big) { bx = CW / 2 - bw / 2; by = CH * 0.4; }
-      bx = clamp(bx, 6, CW - bw - 6); by = clamp(by, 6, CH - bh - 6);
-      const alpha = Math.min(1, (b.life - b.t) * 3, b.t * 10);
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = 'rgba(10,9,8,0.92)'; ctx.fillRect(bx, by, bw, bh);
-      const lw = Math.max(1, Math.round(S * 0.6));
+      let bx = ex - bw / 2 + (e.st === 'hang' ? bw / 2 + 10 * DPR : 0), by = ey - bh - 8 * DPR;
+      if (b.big) { bx = CW / 2 - bw / 2; by = CH * 0.36; }
+      const rightPad = isTouch() && !b.big ? 84 * DPR : 6 * DPR; // مكان أزرار الحبل بالموبايل
+      bx = clamp(bx, 6 * DPR, Math.max(6 * DPR, CW - bw - rightPad)); by = clamp(by, 46 * DPR, CH - bh - 6 * DPR);
+      ctx.globalAlpha = Math.min(1, (b.life - b.t) * 3, b.t * 10);
+      // ظل + خلفية غامقة + إطار سميك
+      ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(bx + lw * 1.5, by + lw * 1.5, bw, bh);
+      ctx.fillStyle = 'rgba(10,9,8,0.96)'; ctx.fillRect(bx, by, bw, bh);
       ctx.fillStyle = b.big ? '#c8323c' : '#ebe1c8';
       ctx.fillRect(bx, by, bw, lw); ctx.fillRect(bx, by + bh - lw, bw, lw); ctx.fillRect(bx, by, lw, bh); ctx.fillRect(bx + bw - lw, by, lw, bh);
-      // الذيل
-      if (!b.big) { const tx = clamp(ex, bx + 8, bx + bw - 8); ctx.beginPath(); ctx.moveTo(tx - 5, by + bh); ctx.lineTo(tx + 5, by + bh); ctx.lineTo(clamp(ex, tx - 10, tx + 10), by + bh + 8); ctx.fill(); }
-      ctx.fillStyle = '#ebe1c8'; ctx.textBaseline = 'middle';
-      if (isAr) { ctx.textAlign = 'right'; ctx.fillText(txt, bx + bw - padX, by + bh / 2 + 1); }
-      else { ctx.textAlign = 'left'; ctx.fillText(txt, bx + padX, by + bh / 2 + 1); }
-      // نقطة الكلام ♦ مثل الفيديو
+      if (!b.big) { const tx = clamp(ex, bx + 8 * DPR, bx + bw - 8 * DPR); ctx.beginPath(); ctx.moveTo(tx - 6 * DPR, by + bh); ctx.lineTo(tx + 6 * DPR, by + bh); ctx.lineTo(clamp(ex, tx - 10 * DPR, tx + 10 * DPR), by + bh + 9 * DPR); ctx.fill(); }
+      ctx.fillStyle = '#fff6df'; ctx.textBaseline = 'middle';
+      shownLines.forEach((t, i) => {
+        const yy = by + fs * 0.22 + lh * (i + 0.5) + 1;
+        if (isAr) { ctx.textAlign = 'right'; ctx.fillText(t, bx + bw - padX, yy); } else { ctx.textAlign = 'left'; ctx.fillText(t, bx + padX, yy); }
+      });
       ctx.globalAlpha = 1;
     }
     ctx.direction = 'ltr';
   }
+
 }
 
 /* ============================================================
@@ -1080,6 +1233,7 @@ class Game {
    ============================================================ */
 let radioTimer = 0;
 function showRadio(text) {
+  SND.play('radio');
   const el = $('#radio'); el.textContent = ''; el.classList.add('show');
   let i = 0; clearInterval(showRadio.iv);
   showRadio.iv = setInterval(() => { i++; el.textContent = '📻 ' + text.slice(0, i); if (i % 3 === 0) AU.blip(180); if (i >= text.length) clearInterval(showRadio.iv); }, 32);
@@ -1093,7 +1247,7 @@ function updateHUD(pop) {
   $('#hudCity').textContent = m.city[lang()] + ' — ' + m.name[lang()];
   $('#hudSavedBox small').textContent = G.type === 'cargo' ? T('delivered') : T('saved');
   $('#hudSaved').textContent = G.saved + ' / ' + G.goal + (G.vip ? (G.vipSaved ? ' 👑✔' : ' 👑') : '');
-  $('#hudRope').textContent = G.chain.length + ' / ' + G.ht.cap;
+  $('#hudRope').textContent = (G.chain.length + G.cabin.length) + ' / ' + G.ht.cap;
   const tl = $('#hudTime'); tl.textContent = fmtTime(G.timeLeft); tl.classList.toggle('low', G.timeLeft < 30);
   if (pop) { const e = $('#hudSavedBox'); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop'); }
 }
@@ -1115,8 +1269,16 @@ function frame(now) {
     const h = G.heli; const sp = Math.min(1, Math.hypot(h.vx, h.vy) / 120);
     AU.rotor(G.state === 'play' ? 0.55 + sp * 0.3 : (G.state === 'win' ? 0.4 : 0), sp + (input.y < 0 ? 0.6 : 0));
     AU.rain(['rain', 'storm'].includes(G.m.weather) || G.m.style === 'mountain' ? 1 : 0);
-  } else if (G && paused) { G.render(); }
-  else { AU.rotor(0, 0); AU.rain(0); }
+    // أصوات الجو الحقيقية
+    const tw = (G.L.tornados || []).reduce((a, t) => Math.max(a, 1 - Math.min(1, Math.abs(t.x - G.heli.x) / 420)), 0);
+    SND.loop('tornado', tw);
+    SND.loop('fire', (G.L.fires || []).some(f => G.onScreen(f.x)) ? 0.9 : 0);
+    SND.loop('wind', ['wind', 'sand'].includes(G.m.weather) ? 0.8 : 0);
+    SND.loop('siren', G.ht.siren && G.state === 'play' ? 0.8 : 0);
+    SND.loop('water', G.L.water ? 0.6 : 0);
+    SND.loop('music_game', G.state === 'play' ? 1 : 0); SND.loop('music_menu', 0);
+  } else if (G && paused) { G.render(); AU.rotor(0, 0); AU.rain(0); for (const n of ['tornado', 'fire', 'wind', 'siren', 'water']) SND.loop(n, 0); }
+  else { AU.rotor(0, 0); AU.rain(0); for (const n of ['tornado', 'fire', 'wind', 'siren', 'water', 'music_game']) SND.loop(n, 0); SND.loop('music_menu', 1); }
   if (!G) drawMenuBg(dt);
 }
 requestAnimationFrame(frame);

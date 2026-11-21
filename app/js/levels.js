@@ -241,7 +241,7 @@ function buildLevel(m) {
   const P = PALS[m.pal];
   const W = m.worldW;
   const L = {
-    m, P, W, solids: [], spots: [], pads: [], boats: [], decor: [], tornado: null,
+    m, P, W, solids: [], spots: [], pads: [], boats: [], decor: [], tornados: [],
     water: m.water ? { y: m.water.y, to: m.water.to, rate: m.water.rate } : null,
     groundY: m.water ? null : GROUND_Y,
     wind: m.wind || { base: 0, gust: 0 },
@@ -474,7 +474,7 @@ function buildLevel(m) {
     // المخيم
     L.pads.push({ x: 90, y: GROUND_Y - 24, w: 40, label: 'H' });
     R(g, 60, GROUND_Y - 34, 18, 10, P.bld); for (let i = 0; i < 9; i++) R(g, 60 + 9 - i, GROUND_Y - 34 - (9 - i) * 0.0 + i - 9 + 9, i * 2, 1, P.edge);
-    L.tornado = { x: W * 0.55, vx: 22, min: 400, max: W - 150 };
+    L.tornados.push({ x: W * 0.55, vx: 22, min: 400, max: W - 150 });
   }
   else if (style === 'mumbai') {
     let x = 150;
@@ -530,6 +530,12 @@ function buildLevel(m) {
       for (let x = x1 + 2; x < x2 - 3; x += 4 + rng() * 3) { const dish = rng() < 0.25; ln.clothes.push({ x, c: cols[(rng() * cols.length) | 0], w: dish ? 4 : 3, h: dish ? 6 : 3 + ((rng() * 3) | 0) }); }
       L.laundry.push(ln);
     }
+  }
+
+  // ---------- الأعاصير بالمدن ----------
+  if (m.weather === 'tornado' && style !== 'mountain') {
+    const n = m.tornados || 1;
+    for (let i = 0; i < n; i++) L.tornados.push({ x: W * (n === 1 ? 0.55 : 0.4 + i * 0.35), vx: (i % 2 ? -1 : 1) * (18 + rng() * 10), min: 380, max: W - 120 });
   }
 
   // ---------- النار (مهمات الحريق) ----------

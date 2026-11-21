@@ -39,7 +39,7 @@ const STR = {
     howto: 'قرّب الحبل من الناس ويقفزون عليه، وكل واحد يلزم رجول اللي فوگه. وصّلهم للقارب أو المهبط… ولا تهز السلسلة هواية!',
     credit: 'برمجة وتطوير إبراهيم الخزرجي',
     about: 'حول',
-    aboutDesc: 'لعبة إنقاذ بالهليكوبتر والحبل — 200 مهمة بـ20 مدينة حول العالم، 6 طيارات، وتعليقات مضحكة بالعراقي والإنكليزي.',
+    aboutDesc: 'لعبة إنقاذ بالهليكوبتر والحبل — 210 مهمة بمدن العالم، 6 طيارات، أعاصير، وتعليقات مضحكة بالعراقي والإنكليزي.',
     version: 'الإصدار',
     close: 'إغلاق',
     follow: 'تابعنا للتحديثات والبرامج الجديدة',
@@ -53,6 +53,13 @@ const STR = {
     loading: 'جاري التحميل…',
     medic: 'إسعاف', police: 'شرطة (سريعة)', news: 'الأخبار', giant: 'العملاق (حبل طويل جداً)',
     delivered: 'تم التسليم',
+    story: 'نمط القصة', soon: 'قريباً', storyTitle: 'نمط القصة — قريباً', storyDrawing: 'جاري رسم القصة ✏️',
+    storyTeaser: 'سعدون… أول يوم إله طيار إنقاذ ببغداد، وما يعرف يسوق غير بايسكل. ويّا البرج أبو جاسم، والجدّة أم رزاق اللي ما تسكت، والبزونة زعطوط اللي تلحگه بكل مهمة. رحلة من بغداد للأهوار ولآخر الدنيا… بقصص مرسومة ومضحكة.',
+    storyNext: 'ينزل بالتحديث الجاي إن شاء الله', ok: 'تمام',
+    whatsNew: 'ما الجديد', newIn: 'الجديد بالإصدار',
+    textSize: 'حجم الكتابة', ts_s: 'صغير', ts_m: 'وسط', ts_l: 'كبير', ts_xl: 'كبير جداً',
+    ch21: 'موسم الأعاصير 🌪️', beginnings: 'البداية',
+    landHint: 'تگدر تهبط بهدوء على السطح أو القارب حتى الناس يصعدون للطيارة',
     h_small: 'الصغيرة', h_medic: 'الإسعاف', h_police: 'الشرطة', h_news: 'الأخبار', h_chinook: 'شينوك', h_giant: 'العملاق',
     recommended: 'مقترحة', heliLocked: 'مقفلة — تنفتح لما تخلص مهمة بيها هالطيارة', cap: 'السعة', speed: 'السرعة', ropeLen: 'الحبل', chooseHeli: 'اختار الطيارة',
     t_rescue: 'إنقاذ', t_cargo: 'نقل صناديق', t_vip: 'شخص مهم', t_animals: 'حيوانات', t_careful: 'بهدوء! (ممنوع يطيح أحد)', t_fire: 'حريق',
@@ -97,7 +104,7 @@ const STR = {
     howto: 'Bring the rope close and people jump on, each one grabbing the feet of the one above. Fly them to the boat or helipad… and don\'t swing the chain too hard!',
     credit: 'Programmed & developed by Ibrahim Al-Khazraji',
     about: 'About',
-    aboutDesc: 'A helicopter rope-rescue game — 200 missions in 20 world cities, 6 helicopters, funny Iraqi Arabic & English comments.',
+    aboutDesc: 'A helicopter rope-rescue game — 210 missions in world cities, 6 helicopters, twisters, funny Iraqi Arabic & English comments.',
     version: 'Version',
     close: 'Close',
     follow: 'Follow for updates and new apps',
@@ -111,6 +118,13 @@ const STR = {
     loading: 'Loading…',
     medic: 'Ambulance', police: 'Police (fast)', news: 'News', giant: 'The Giant (very long rope)',
     delivered: 'Delivered',
+    story: 'Story Mode', soon: 'Soon', storyTitle: 'Story Mode — Coming Soon', storyDrawing: 'The story is being drawn ✏️',
+    storyTeaser: 'Saadoun… his first day as a rescue pilot in Baghdad, and he can only ride a bicycle. With Abu Jassim in the tower, Grandma Um Razzaq who never stops talking, and Zaatout the cat who follows him on every mission. From Baghdad to the Marshes and the end of the world… in funny hand-drawn comics.',
+    storyNext: 'Coming in the next update', ok: 'OK',
+    whatsNew: "What's new", newIn: 'New in version',
+    textSize: 'Text size', ts_s: 'Small', ts_m: 'Medium', ts_l: 'Large', ts_xl: 'Extra large',
+    ch21: 'Twister Season 🌪️', beginnings: 'Beginnings',
+    landHint: 'Land gently on a roof or boat so people can climb into the helicopter',
     h_small: 'Small', h_medic: 'Ambulance', h_police: 'Police', h_news: 'News', h_chinook: 'Chinook', h_giant: 'Giant',
     recommended: 'Suggested', heliLocked: 'Locked — unlocks after you finish a mission that uses it', cap: 'Capacity', speed: 'Speed', ropeLen: 'Rope', chooseHeli: 'Choose helicopter',
     t_rescue: 'Rescue', t_cargo: 'Cargo', t_vip: 'VIP', t_animals: 'Animals', t_careful: 'Careful! (no one may fall)', t_fire: 'Fire',
@@ -125,6 +139,9 @@ const STR = {
 
 /* ---------- التعليقات المضحكة ---------- */
 const LINES = {
+  twister: { ar: ['يمّه أطير!!', 'الإعصار شالني!!', 'صرت طيارة بدون طيارة!!', 'دوخت دوخت دوخت!!', 'وين الأرض؟!', 'گولوا لأمي صرت غيمة!'], en: ['I\'m FLYING!!', 'The twister took me!!', 'I\'m a helicopter now!!', 'So dizzy!!', 'Where\'s the ground?!', 'Tell mom I\'m a cloud!'] },
+  board: { ar: ['يلا اصعدوا!', 'آني جنب الشباك!', 'أكو مكيف جوه؟', 'دفعت الأجرة؟ لا؟ زين', 'عيني الطيارة نظيفة!', 'وين أحط رجلي؟'], en: ['All aboard!', 'Window seat is mine!', 'Is there AC in here?', 'Did I pay? No? Good', 'Nice clean helicopter!', 'Where do I put my feet?'] },
+  grandma_board: { ar: ['ابني ساعدني أصعد', 'يمّه هاي الطيارة عالية', 'وين الكرسي؟ ركبتي!'], en: ['Help me up, dear', 'This helicopter is so high', 'Where\'s my seat? My knees!'] },
   jump: { ar: ['هوووب!', 'يا علي!', 'يلاااا!', 'شوفوني!', 'هسه أقفز!'], en: ['Hup!', 'Here I go!', 'Yallaaa!', 'Watch me!', 'JUMP!'] },
   missed: { ar: ['فاتني!', 'گلت لك قرّب شوية!', 'آني مو سبايدرمان!', 'مرة ثانية، مرة ثانية!', 'حچيلك بالأشارات؟ قرّب!'], en: ['Missed!', 'I said come closer!', 'I\'m not Spider-Man!', 'Again, again!', 'Come CLOSER!'] },
   dragged: { ar: ['إنت طحت وطيحتني وياك!!', 'ليش فلتت؟! ليييش؟!', 'آني شعليه؟!', 'كلنا رحنا وطي!!'], en: ['You fell and took me with you!!', 'Why did you let go?! WHY?!', 'What did I do?!', 'We\'re ALL going down!!'] },
@@ -225,6 +242,8 @@ const LINES = {
 
 /* ---------- خطوط الراديو (البرج/الطيار) ---------- */
 const RADIO = {
+  landed: { ar: ['الطيار: هبطنا… وبدون ما نفلّش شي هالمرة', 'البرج: هبوط نظيف، عفية!', 'الطيار: اصعدوا بسرعة، الطيارة مو موقف باص'], en: ['Pilot: landed… without breaking anything this time', 'Tower: clean landing, nice!', 'Pilot: hop in fast, this isn\'t a bus stop'] },
+  cabinFull: { ar: ['الطيار: الطيارة فل! ماكو مكان'], en: ['Pilot: we\'re full! no more room'] },
 
   vipNeed: { ar: ['البرج: لازم تجيب {vip}! بدونه ما ننجح', 'البرج: نسيت {vip}؟!'], en: ['Tower: you must bring {vip}!', 'Tower: did you forget {vip}?!'] },
   vipSaved: { ar: ['البرج: {vip} وصل! هسه يسوي مؤتمر صحفي'], en: ['Tower: {vip} is safe! now he wants a press conference'] },

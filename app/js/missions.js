@@ -224,6 +224,43 @@ function genMission(ch, slot) {
   return m;
 }
 
+/* ---------- الفصل 21: موسم الأعاصير 🌪️ ---------- */
+const TORNADO_CITIES = [
+  { style: 'baghdad', ar: 'بغداد', en: 'Baghdad', lat: 33.3, lon: 44.4 }, { style: 'dubai', ar: 'دبي', en: 'Dubai', lat: 25.2, lon: 55.3 },
+  { style: 'cairo', ar: 'القاهرة', en: 'Cairo', lat: 30.0, lon: 31.2 }, { style: 'tokyo', ar: 'طوكيو', en: 'Tokyo', lat: 35.7, lon: 139.7 },
+  { style: 'mumbai', ar: 'مومباي', en: 'Mumbai', lat: 19.1, lon: 72.9 }, { style: 'baghdad', ar: 'الموصل', en: 'Mosul', lat: 36.3, lon: 43.1 },
+  { style: 'dubai', ar: 'نيويورك', en: 'New York', lat: 40.7, lon: -74.0 }, { style: 'marsh', ar: 'الأهوار', en: 'Iraqi Marshes', lat: 31.0, lon: 47.0 },
+  { style: 'tokyo', ar: 'أوساكا', en: 'Osaka', lat: 34.7, lon: 135.5 }, { style: 'baghdad', ar: 'بغداد — الكرادة', en: 'Baghdad — Karrada', lat: 33.31, lon: 44.42 },
+];
+const TORNADO_NAMES = [
+  ['أول إعصار', 'First Twister'], ['الرمل يلف', 'Spinning Sand'], ['إعصار النيل', 'Nile Twister'], ['دوامة طوكيو', 'Tokyo Whirl'], ['المطر والإعصار', 'Rain & Wind'],
+  ['إعصارين!', 'Two Twisters!'], ['ناطحات تدوخ', 'Dizzy Towers'], ['دوامة الماي', 'Waterspout'], ['الجدّة والإعصار', 'Grandma vs Twister'], ['⭐ العاصفة الكبرى', '⭐ The Great Storm'],
+];
+function genTornado(slot) {
+  const c = TORNADO_CITIES[slot], rng = mulberry(hashStr('tw' + slot) + 5);
+  const types = ['rescue', 'rescue', 'vip', 'rescue', 'animals', 'rescue', 'cargo', 'rescue', 'careful', 'rescue'];
+  const type = types[slot], twin = slot >= 5, water = c.style === 'marsh' || slot === 4;
+  let goal = 5 + Math.round(slot * 0.6); if (type === 'careful') goal = 4; if (type === 'animals') goal = 4;
+  const people = type === 'animals' ? goal * 2 + 2 : goal + 3;
+  const m = {
+    id: 'tw' + slot, chapter: 21, type, style: c.style, pal: slot % 3 === 1 ? 'dusk' : 'night', heli: goal >= 8 ? 'chinook' : (type === 'careful' ? 'medic' : 'small'),
+    goal, people, time: 200 + goal * 15, worldW: Math.min(2400, 1400 + people * 60), lat: c.lat, lon: c.lon, city: { ar: c.ar, en: c.en },
+    weather: 'tornado', tornados: twin ? 2 : 1, zones: water ? 'boat' : 'pad', wind: { base: 0, gust: 14 + slot * 2 },
+    name: { ar: TORNADO_NAMES[slot][0], en: TORNADO_NAMES[slot][1] },
+  };
+  if (water) m.water = { y: 262, to: c.style === 'marsh' ? 262 : 236, rate: c.style === 'marsh' ? 0 : 0.12 };
+  if (type === 'vip') m.vipName = { ar: 'المطرب المشهور', en: 'the famous singer' };
+  if (type === 'cargo') m.cargo = 'melon';
+  if (type === 'careful') m.careful = true;
+  const n = twin ? 'إعصارين' : 'إعصار';
+  m.desc = {
+    ar: `${n} بـ${c.ar}! الإعصار يشيل الناس من السطوح ويطيّرهم بالهوا 🌪️ أنقذ ${goal} قبل لا يوصلهم، ولا تقرب منه بالطيارة… تدوخ.`,
+    en: `${twin ? 'Two twisters' : 'A twister'} in ${c.en}! It sucks people off the roofs and spins them in the air 🌪️ Rescue ${goal} before it reaches them — and keep the heli away, it gets dizzy.`
+  };
+  return m;
+}
+
 MISSIONS.forEach(m => { m.chapter = 1; });
 for (let ch = 2; ch <= 20; ch++) for (let s = 0; s < 10; s++) MISSIONS.push(genMission(ch, s));
-const CHAPTERS = 20;
+for (let s = 0; s < 10; s++) MISSIONS.push(genTornado(s));
+const CHAPTERS = 21;

@@ -1,2 +1,2 @@
 // يتحدّث تلقائياً من package.json وقت البناء
-window.APP_VERSION = '1.3.1';
+window.APP_VERSION = '1.4.0';

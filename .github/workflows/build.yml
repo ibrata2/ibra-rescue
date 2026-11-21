@@ -30,6 +30,9 @@ jobs:
       - name: Write version into the game
         shell: bash
         run: printf "// يتحدّث تلقائياً من package.json وقت البناء\nwindow.APP_VERSION = '%s';\n" "${{ steps.ver.outputs.v }}" > app/js/version.js
+      - name: Sound list
+        shell: bash
+        run: node tools/sound-manifest.js
       - run: npm install
       - run: npm run dist
         env:
@@ -53,6 +56,9 @@ jobs:
         run: echo "v=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
       - name: Write version into the game
         run: printf "// يتحدّث تلقائياً من package.json وقت البناء\nwindow.APP_VERSION = '%s';\n" "${{ steps.ver.outputs.v }}" > app/js/version.js
+      - name: Sound list
+        shell: bash
+        run: node tools/sound-manifest.js
       - name: Install Capacitor
         env: { ELECTRON_SKIP_BINARY_DOWNLOAD: 1 }
         run: npm install --save --no-package-lock @capacitor/cli@$CAP_VER @capacitor/core@$CAP_VER @capacitor/android@$CAP_VER @capacitor/app@$CAP_VER @capacitor/status-bar@$CAP_VER @capacitor/assets@3
@@ -90,6 +96,9 @@ jobs:
         run: echo "v=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
       - name: Write version into the game
         run: printf "// يتحدّث تلقائياً من package.json وقت البناء\nwindow.APP_VERSION = '%s';\n" "${{ steps.ver.outputs.v }}" > app/js/version.js
+      - name: Sound list
+        shell: bash
+        run: node tools/sound-manifest.js
       - name: Install Capacitor
         env: { ELECTRON_SKIP_BINARY_DOWNLOAD: 1 }
         run: npm install --save --no-package-lock @capacitor/cli@$CAP_VER @capacitor/core@$CAP_VER @capacitor/ios@$CAP_VER @capacitor/app@$CAP_VER @capacitor/status-bar@$CAP_VER @capacitor/assets@3
@@ -138,16 +147,4 @@ jobs:
             dist/*.exe
             dist/*.apk
             dist/*.ipa
-          body: |
-            ## IBRA RESCUE — حبل النجاة 🚁
-            لعبة إنقاذ بالهليكوبتر والحبل — 200 مهمة بـ20 مدينة، 6 طيارات، عربي وإنكليزي.
-
-            ### التحميل
-            | المنصة | الملف |
-            |---|---|
-            | 💻 ويندوز (مثبّت) | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-Setup.exe** |
-            | 💻 ويندوز (محمولة) | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-portable.exe** |
-            | 🤖 أندرويد | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-android.apk** |
-            | 🍎 آيفون (بدون توقيع) | **IBRA-RESCUE-${{ steps.ver.outputs.v }}-ios-unsigned.ipa** — وقّعه بـ Sideloadly / AltStore / ESign |
-
-            برمجة وتطوير إبراهيم الخزرجي · الموقع: ibraprogram.netlify.app · Telegram: t.me/ibraprogram · TikTok: @ibraprogram
+          body_path: RELEASE_NOTES.md

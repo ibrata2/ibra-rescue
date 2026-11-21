@@ -92,7 +92,8 @@ button{font-family:var(--font);cursor:pointer}
 #howto.show{opacity:1}
 
 /* الإيقاف والنتيجة */
-.overlay{position:fixed;inset:0;z-index:8;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:16px}
+.overlay{position:fixed;inset:0;z-index:8;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:16px;overflow-y:auto}
+.overlay .card{margin:auto}
 .overlay.on{display:flex}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;width:min(420px,94vw);text-align:center;display:flex;flex-direction:column;gap:12px;animation:in .35s}
 @keyframes in{from{transform:translateY(20px) scale(.96);opacity:0}}
@@ -141,6 +142,25 @@ button{font-family:var(--font);cursor:pointer}
 .hcard .hrec{position:absolute;top:-7px;inset-inline-start:4px;background:var(--gold);color:#1a1408;font-size:9px;font-weight:bold;padding:0 4px;border-radius:4px}
 #heliInfo{font-size:12px;color:var(--gold2);margin-top:6px;min-height:16px;direction:inherit}
 @media (max-width:520px){ #heliPick{grid-template-columns:repeat(3,1fr)} }
+
+/* نمط القصة + ما الجديد */
+.btn.story{position:relative;border-color:var(--gold);color:var(--gold2)}
+.btn.story .soon{position:absolute;top:-9px;inset-inline-start:10px;background:var(--red);color:#fff;font-size:11px;padding:1px 8px;border-radius:6px}
+.storycard{width:min(560px,94vw)}
+#sketch{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#efe7d4;image-rendering:auto}
+.drawing{color:var(--gold2);font-weight:bold;font-size:calc(15px*var(--ts,1))}
+.drawing::after{content:'';display:inline-block;width:1.2em;text-align:start;animation:dots 1.4s steps(4) infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+.teaser{font-size:calc(14px*var(--ts,1));line-height:1.8;color:var(--cream);text-align:start}
+.next{font-size:13px;color:var(--dim)}
+.newscard{width:min(520px,94vw)}
+#newsList{list-style:none;display:flex;flex-direction:column;gap:8px;text-align:start;padding:0}
+#newsList li{font-size:calc(14.5px*var(--ts,1));line-height:1.7;border-bottom:1px dashed var(--line);padding-bottom:6px}
+/* حجم الكتابة بالواجهات */
+#radio{font-size:calc(15px*var(--ts,1))}
+#howto{font-size:calc(13px*var(--ts,1))}
+.hbox{font-size:calc(15px*var(--ts,1))}
+#mDesc{font-size:calc(14px*var(--ts,1))}
 
 /* أزرار الحبل */
 #reel{position:fixed;right:14px;bottom:80px;z-index:6;display:none;flex-direction:column;gap:10px}
@@ -199,8 +219,10 @@ button{font-family:var(--font);cursor:pointer}
   <p class="tag" data-t="howto"></p>
   <div class="btns">
     <button class="btn main" id="btnPlay" data-t="play"></button>
+    <button class="btn story" id="btnStory"><span data-t="story"></span> <span class="soon" data-t="soon"></span></button>
     <button class="btn" id="btnLang" data-t="langBtn"></button>
     <button class="btn" id="btnSound"></button>
+    <button class="btn" id="btnTS"></button>
     <button class="btn" id="btnAbout" data-t="about"></button>
   </div>
   <div class="upd"></div>
@@ -284,6 +306,23 @@ button{font-family:var(--font);cursor:pointer}
   <button class="btn main" id="btnAboutClose" data-t="close"></button>
 </div></div>
 
+<!-- نمط القصة (قريباً) -->
+<div class="overlay" id="storyOv"><div class="card storycard">
+  <h3 data-t="storyTitle"></h3>
+  <canvas id="sketch" width="560" height="300"></canvas>
+  <div class="drawing" data-t="storyDrawing"></div>
+  <p class="teaser" data-t="storyTeaser"></p>
+  <div class="next" data-t="storyNext"></div>
+  <button class="btn main" id="storyClose" data-t="ok"></button>
+</div></div>
+
+<!-- ما الجديد -->
+<div class="overlay" id="newsOv"><div class="card newscard">
+  <h3><span data-t="newIn"></span> <span id="newsVer"></span></h3>
+  <ul id="newsList"></ul>
+  <button class="btn main" id="newsClose" data-t="ok"></button>
+</div></div>
+
 <!-- النتيجة -->
 <div class="overlay" id="result"><div class="card">
   <h3 id="rTitle"></h3>
@@ -297,9 +336,12 @@ button{font-family:var(--font);cursor:pointer}
 </div></div>
 
 <script src="js/version.js"></script>
+<script src="js/whatsnew.js"></script>
 <script src="js/text.js"></script>
 <script src="js/levels.js"></script>
 <script src="js/missions.js"></script>
+<script src="sounds/manifest.js"></script>
+<script src="js/sounds.js"></script>
 <script src="js/game.js"></script>
 <script src="js/ui.js"></script>
 </body>

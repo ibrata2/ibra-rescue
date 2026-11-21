@@ -23,6 +23,7 @@ const { chromium } = require('playwright');
       else {
         if (target && g.t - tStart > 9) { black.add(target); target = null; }
         if (!target || !(target.st === 'wait' || target.st === 'swim') || black.has(target)) { target = waiting.sort((a, b) => Math.abs(a.x - h.x) - Math.abs(b.x - h.x))[0]; tStart = g.t; if (black.size > 4) black.clear(); }
+        if (!target && black.size) { black.clear(); }
         if (!target) { tx = h.x; ty = CR; }
         else { tx = target.x; const dx = Math.abs(tx - h.x); ty = dx < 12 ? target.y - (target.kind === 'crate' || target.st === 'swim' ? 5 : 20) - drop() : CR; }
       }

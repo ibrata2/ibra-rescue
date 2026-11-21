@@ -15,6 +15,8 @@ function applyLang() {
   document.documentElement.dir = ar ? 'rtl' : 'ltr';
   for (const el of document.querySelectorAll('[data-t]')) el.textContent = T(el.dataset.t);
   $('#btnSound').textContent = T('sound') + ': ' + (save.sound ? T('on') : T('off'));
+  $('#btnTS').textContent = T('textSize') + ': ' + T('ts_' + (save.ts || (isTouch() ? 'l' : 'm')));
+  document.documentElement.style.setProperty('--ts', textScale());
   buildMissionList(); selectMission(selMission, true);
   $('#chPrev').textContent = ar ? '›' : '‹'; $('#chNext').textContent = ar ? '‹' : '›';
   renderUpdate();
@@ -32,7 +34,7 @@ function buildMissionList() {
   const box = $('#mlist'); box.innerHTML = '';
   const idx = chapterRange(curChapter); const first = MISSIONS[idx[0]];
   const chStars = idx.reduce((a, i) => a + (save.stars[MISSIONS[i].id] || 0), 0);
-  $('#chName').textContent = `${T('chapter')} ${curChapter} / ${CHAPTERS} · ${first.chapter === 1 ? (lang() === 'ar' ? 'البداية' : 'Beginnings') : first.city[lang()]}`;
+  $('#chName').textContent = `${T('chapter')} ${curChapter} / ${CHAPTERS} · ${first.chapter === 1 ? T('beginnings') : first.chapter === 21 ? T('ch21') : first.city[lang()]}`;
   $('#chStars').textContent = `★ ${chStars}/${idx.length * 3}  ·  ${T('totalStars')} ${totalStars()}/${MISSIONS.length * 3}`;
   $('#chPrev').disabled = curChapter <= 1; $('#chNext').disabled = curChapter >= CHAPTERS;
   for (const i of idx) {
@@ -249,6 +251,10 @@ $('#btnBack').onclick = () => { AU.click(); show('title'); };
 $('#btnAbout').onclick = () => { AU.init(); AU.click(); $('#about').classList.add('on'); };
 $('#btnAboutClose').onclick = () => { AU.click(); $('#about').classList.remove('on'); };
 $('#about').onclick = e => { if (e.target.id === 'about') $('#about').classList.remove('on'); };
+$('#btnTS').onclick = () => { AU.click(); const cur = save.ts || (isTouch() ? 'l' : 'm'); save.ts = TS_STEPS[(TS_STEPS.indexOf(cur) + 1) % TS_STEPS.length]; persist(); applyLang(); };
+$('#btnStory').onclick = () => { AU.init(); AU.click(); $('#storyOv').classList.add('on'); sketchStart(); };
+$('#storyClose').onclick = () => { AU.click(); $('#storyOv').classList.remove('on'); };
+$('#newsClose').onclick = () => { AU.click(); $('#newsOv').classList.remove('on'); save.seenVer = appVersion(); persist(); };
 $('#btnGo').onclick = () => startMission(selMission, selHeli);
 $('#btnPause').onclick = () => togglePause();
 $('#btnResume').onclick = () => togglePause();
@@ -269,6 +275,56 @@ addEventListener('keydown', e => {
     if (e.code === 'Escape') show('title');
   } else if ($('#title').classList.contains('on') && e.code === 'Enter') $('#btnPlay').click();
 });
+
+/* ---------------- ما الجديد (مرة وحدة بعد كل تحديث) ---------------- */
+function showNews(force) {
+  if (typeof WHATS_NEW === 'undefined') return;
+  if (!force && (save.seenVer === appVersion() || G)) return;
+  if (!force && !save.seenVer && !Object.keys(save.stars).length) { save.seenVer = appVersion(); persist(); return; } // لاعب جديد
+  $('#newsVer').textContent = 'v' + appVersion();
+  $('#newsList').innerHTML = WHATS_NEW[lang()].map(t => `<li>${t.replace(/</g, '&lt;')}</li>`).join('');
+  $('#newsOv').classList.add('on');
+}
+/* ---------------- رسم تجريبي لنمط القصة (قلم يرسم مشهد) ---------------- */
+let sketchRAF = 0;
+function sketchStart() {
+  const c = $('#sketch'), g = c.getContext('2d'); cancelAnimationFrame(sketchRAF);
+  const strokes = [];
+  const line = (pts) => strokes.push(pts);
+  // الأرض والبنايات
+  line([[10, 260], [550, 260]]);
+  line([[40, 260], [40, 170], [110, 170], [110, 260]]); line([[60, 190], [75, 190]]); line([[85, 210], [100, 210]]);
+  line([[130, 260], [130, 120], [138, 110], [146, 120], [146, 260]]); line([[127, 160], [149, 160]]);
+  line([[170, 260], [170, 200], [250, 200], [250, 260]]); line([[180, 200], [200, 180], [220, 180], [240, 200]]);
+  line([[430, 260], [430, 150], [520, 150], [520, 260]]); line([[445, 170], [465, 170]]); line([[480, 190], [500, 190]]);
+  // الطيارة
+  line([[260, 70], [340, 70], [350, 85], [330, 100], [270, 100], [255, 85], [260, 70]]); line([[300, 70], [300, 58]]); line([[230, 56], [370, 56]]);
+  line([[255, 85], [200, 80], [195, 70]]); line([[275, 108], [335, 108]]); line([[285, 100], [285, 108]]); line([[325, 100], [325, 108]]);
+  // الحبل والناس
+  line([[300, 108], [302, 140], [298, 175], [300, 205]]);
+  for (let i = 0; i < 3; i++) { const y = 140 + i * 30; line([[296, y], [304, y]]); line([[300, y], [300, y + 14]]); line([[300, y + 14], [295, y + 22]]); line([[300, y + 14], [305, y + 22]]); }
+  // فقاعة كلام
+  line([[350, 120], [470, 120], [470, 150], [380, 150], [370, 162], [372, 150], [350, 150], [350, 120]]);
+  let si = 0, pi = 1, t = 0;
+  g.fillStyle = '#efe7d4'; g.fillRect(0, 0, c.width, c.height);
+  g.strokeStyle = '#2a2520'; g.lineWidth = 2.2; g.lineCap = 'round'; g.lineJoin = 'round';
+  const step = () => {
+    if (!$('#storyOv').classList.contains('on')) return;
+    for (let k = 0; k < 3 && si < strokes.length; k++) {
+      const st = strokes[si], [x0, y0] = st[pi - 1], [x1, y1] = st[pi];
+      g.beginPath(); g.moveTo(x0 + Math.random() - 0.5, y0 + Math.random() - 0.5); g.lineTo(x1 + Math.random() - 0.5, y1 + Math.random() - 0.5); g.stroke();
+      pi++; if (pi >= st.length) { si++; pi = 1; }
+    }
+    if (si >= strokes.length) {
+      g.font = 'bold 15px Tahoma'; g.fillStyle = '#2a2520'; g.textAlign = 'center'; g.fillText(lang() === 'ar' ? 'أول يوم بالشغل!' : 'First day!', 410, 140);
+      t++; if (t > 160) { t = 0; si = 0; pi = 1; g.fillStyle = '#efe7d4'; g.fillRect(0, 0, c.width, c.height); }
+    }
+    // القلم
+    sketchRAF = requestAnimationFrame(step);
+  };
+  step();
+}
+setTimeout(() => showNews(false), 900);
 
 $('#appVer').textContent = appVersion();
 $('#chPrev').onclick = () => { AU.click(); setChapter(curChapter - 1); };
