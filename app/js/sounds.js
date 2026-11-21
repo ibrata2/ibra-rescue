@@ -40,7 +40,7 @@ const SOUND_LIST = {
   collapse:   { n: 3, vol: 0.9,  desc: 'بناية تنهار / حجار تطيح' },
   splash:     { n: 4, vol: 0.7,  desc: 'وگعة بالماي' },
   thud:       { n: 3, vol: 0.7,  desc: 'وگعة على الأرض' },
-  grab:       { n: 1, vol: 0.5,  desc: 'مسك الحبل' },
+  grab:       { n: 4, vol: 0.5,  desc: 'مسك الحبل' },
   land:       { n: 1, vol: 0.7,  desc: 'هبوط الطيارة' },
   rip:        { n: 5, vol: 0.7,  desc: 'تمزيق حبل الغسيل' },
   camera:     { n: 2, vol: 0.5,  desc: 'فلاش كاميرا (طيارة الأخبار)' },
