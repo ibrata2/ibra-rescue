@@ -40,16 +40,8 @@ const SOUND_LIST = {
   collapse:   { n: 3, vol: 0.9,  desc: 'بناية تنهار / حجار تطيح' },
   splash:     { n: 4, vol: 0.7,  desc: 'وگعة بالماي' },
   thud:       { n: 3, vol: 0.7,  desc: 'وگعة على الأرض' },
-  sorry:      { n: 2, vol: 0.9,  desc: 'مع كل الأسف (الطيارة مليانة / فشلت المهمة)' },
-  panic:      { n: 2, vol: 0.85, desc: 'لا لا لا لا (معلّق وخايف)' },
-  blame:      { n: 2, vol: 0.9,  desc: 'آني شعليه / ما لي دخل بيكم (اللي فوگه طاح وسحبه)' },
-  betray:     { n: 1, vol: 0.9,  desc: 'ليش الغش ليش الخيانة (الطيارة مليانة وتركته)' },
-  bye:        { n: 1, vol: 0.85, desc: 'الله وياك الله وياك (وصل ويودّع)' },
-  vip:        { n: 1, vol: 0.85, desc: 'My name is Muhammed (الشخص المهم ينتظر)' },
-  laugh:      { n: 1, vol: 0.8,  desc: 'ضحكة (وگع بالماي وطلع سالم / وصل)' },
   nooo:       { n: 1, vol: 0.9,  desc: 'لاااااا الطويلة (اللي فوگه طاح وسحبه)' },
-  no:         { n: 1, vol: 0.9,  desc: 'لا! القصيرة (فاته الحبل / فلت الحيوان)' },
-  slip:       { n: 1, vol: 0.9,  desc: 'واحد يقفز على الحبل ويزلگ منه (شتريد أگلك؟ عاشت إيدك!)' },
+  laugh:      { n: 1, vol: 0.8,  desc: 'ضحكة (وگع بالماي وطلع سالم / وصل)' },
   grab:       { n: 4, vol: 0.5,  desc: 'مسك الحبل' },
   land:       { n: 1, vol: 0.7,  desc: 'هبوط الطيارة' },
   rip:        { n: 5, vol: 0.7,  desc: 'تمزيق حبل الغسيل' },
@@ -59,6 +51,9 @@ const SOUND_LIST = {
   fail:       { n: 1, vol: 0.8,  desc: 'خسارة' },
   click:      { n: 1, vol: 0.5,  desc: 'ضغطة زر' },
 };
+
+// الجمل المسجّلة (VOICE_LINES بـ text.js) — كل وحدة ملف بإسمها
+if (typeof VOICE_LINES !== 'undefined') for (const v of VOICE_LINES) SOUND_LIST[v.id] = { n: 1, vol: 0.95, desc: v.ar };
 
 const SND = {
   ready: {}, loops: {}, ctx: null, web: location.protocol !== 'file:', started: false,

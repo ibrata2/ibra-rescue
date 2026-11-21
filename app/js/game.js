@@ -260,13 +260,28 @@ class Game {
     if (LINES[key]) return pick(LINES[key][lang()]).replace('{vip}', this.vipName());
     return line(cat);
   }
-  sayK(p, cat, opts) { const t = this.kline(p, cat); if (t) { this.say(p, t, opts); this.voice(p, cat); } }
+  sayK(p, cat, opts) { if (this.voiceLine(p, cat, opts)) return; const t = this.kline(p, cat); if (t) { this.say(p, t, opts); this.voice(p, cat); } }
+  // جملة مسجّلة بصوت: الفقاعة تكتب نفس الكلام اللي ينسمع
+  vlines(key) { return typeof VOICE_LINES === 'undefined' ? [] : VOICE_LINES.filter(v => v.cat.includes(key) && SND.has(v.id)); }
+  voiceLine(p, cat, opts) {
+    if (!save.sound || !this.onScreen(p.x) || !(p.kind === 'person' || p.kind === 'vip')) return false;
+    if (this.t - (this.lastVoice || -9) < 1.4) return false; // لا يتداخل صوتين
+    const key = p.kind === 'vip' ? 'vip_' + cat : cat;
+    const c = this.vlines(key).filter(v => v.when !== 'crowd' || this.chain.length >= 3);
+    if (!c.length || Math.random() > Math.min(0.85, 0.35 + 0.15 * c.length)) return false;
+    const fresh = c.filter(v => v.id !== this.lastVoiceId); const v = pick(fresh.length ? fresh : c);
+    this.lastVoice = this.t; this.lastVoiceId = v.id;
+    const go = () => { if (G !== this) return; this.say(p, lang() === 'ar' ? v.ar : v.en, { ...(opts || {}), force: true }); SND.play(v.id); };
+    if (v.radio) { this.radio(v.radio[lang()] || v.radio.ar); setTimeout(go, 1100); } else go();
+    return true;
+  }
   voice(p, cat) { // صوت حقيقي ويّا الكلام (إذا الملفات موجودة)
     if (!this.onScreen(p.x)) return;
     if (p.kind === 'sheep' || p.kind === 'cat') { SND.play(p.kind); return; }
     if (p.kind === 'crate') return;
-    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: ['cheer', 'laugh', 'bye'], jump: 'jump', hit: 'ouch', twister: 'scream', dragged: ['nooo', 'blame'], fall: 'scream',
-      slip: 'slip', missed: 'no', carryDrop: 'no', landZone: 'cheer', scared: 'panic', fingers: 'panic', full: ['sorry', 'betray'], landWater: 'laugh' };
+    // أصوات بدون كلام (الكلام صار جمل مسجّلة VOICE_LINES)
+    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: ['cheer', 'laugh'], jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'nooo', fall: 'scream',
+      landZone: 'cheer', landWater: 'laugh', slip: 'v_slip' };
     let n = map[cat]; if (p.kind === 'grandma' && (cat === 'scared' || cat === 'wait' || cat === 'fingers')) n = 'grandma';
     if (p.kind === 'vip' && cat === 'wait' && SND.has('vip')) n = 'vip';
     if (Array.isArray(n)) { const ok = n.filter(k => SND.has(k)); n = ok.length ? pick(ok) : n[0]; } // يختار عشوائياً من الموجود
@@ -838,7 +853,9 @@ class Game {
     this.flags.cut = true;
     // كل المعلّقين يطيحون (بس بخير — هاي لعبة مضحكة 😄)
     for (const p of this.dropFrom(0)) { p.vy = -60 - Math.random() * 60; p.vx = (Math.random() - 0.5) * 120; }
-    this.crashLine = line('crash');
+    const cv = this.vlines('crash'); const vc = cv.length && Math.random() < 0.5 ? pick(cv) : null;
+    this.crashLine = vc ? (lang() === 'ar' ? vc.ar : vc.en) : line('crash');
+    if (vc) setTimeout(() => SND.play(vc.id), 900);
     this.say({ x: h.x, y: h.y - 10, id: 999 }, this.crashLine, { force: true, big: true, life: 4, pitch: 180 });
     setTimeout(() => { if (G === this) this.end(false, 'crashed'); }, 2600);
   }
@@ -854,7 +871,7 @@ class Game {
       setTimeout(() => G === this && showResult(this), 1800);
     } else {
       if (!wasCrash) AU.fail();
-      setTimeout(() => SND.play('sorry'), wasCrash ? 1600 : 1300); // «مع كل الأسف»
+      if (!wasCrash) { const fv = this.vlines('fail'); if (fv.length) setTimeout(() => SND.play(pick(fv).id), 1300); }
       setTimeout(() => G === this && showResult(this), wasCrash ? 200 : 1200);
     }
   }
