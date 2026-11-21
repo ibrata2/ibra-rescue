@@ -118,7 +118,7 @@ if (CAP && CAP.Plugins) {
 
 /* ---------------- فحص التحديثات ---------------- */
 const REPO_API = 'https://api.github.com/repos/ibrata2/ibra-rescue/releases/latest';
-const UPD = { state: 'checking', latest: null, url: null };
+const UPD = { state: 'checking', latest: null, url: null, assets: {}, p: 0 };
 function appVersion() { return (window.ibra && window.ibra.version) || window.APP_VERSION || '0.0.0'; }
 function verCmp(a, b) { const pa = a.replace(/^v/, '').split('.').map(Number), pb = b.replace(/^v/, '').split('.').map(Number); for (let i = 0; i < 3; i++) { const d = (pa[i] || 0) - (pb[i] || 0); if (d) return d > 0 ? 1 : -1; } return 0; }
 function renderUpdate() {
@@ -128,9 +128,13 @@ function renderUpdate() {
     if (UPD.state === 'checking') el.textContent = `v${v} · ${T('upChecking')}`;
     else if (UPD.state === 'latest') { el.classList.add('ok'); el.textContent = `v${v} · ${T('upLatest')}`; }
     else if (UPD.state === 'new') {
-      el.classList.add('new'); el.textContent = `${T('upNew')}: v${UPD.latest} — ${T('upDownload')}`;
-      el.onclick = () => openExt(UPD.url);
-    } else { el.classList.add('fail'); el.textContent = `v${v} · ${T('upFail')}`; }
+      el.classList.add('new'); el.textContent = `${T('upNew')}: v${UPD.latest} — ${T(canSelfUpdate() ? 'upInstall' : 'upDownload')}`;
+      el.onclick = startUpdate;
+    }
+    else if (UPD.state === 'downloading') { el.classList.add('new', 'busy'); el.textContent = `${T('upDownloading')} v${UPD.latest}… ${UPD.p >= 0 ? Math.round(UPD.p * 100) + '%' : ''}`; el.style.setProperty('--p', Math.max(0, UPD.p)); }
+    else if (UPD.state === 'installing') { el.classList.add('new', 'busy'); el.textContent = T('upInstalling'); el.style.setProperty('--p', 1); }
+    else if (UPD.state === 'allow') { el.classList.add('new'); el.textContent = T('upAllow'); el.onclick = startUpdate; }
+    else if (UPD.state === 'error') { el.classList.add('new'); el.textContent = T('upErr'); el.onclick = startUpdate; } else { el.classList.add('fail'); el.textContent = `v${v} · ${T('upFail')}`; }
   }
 }
 async function checkUpdate() {
@@ -146,9 +150,38 @@ async function checkUpdate() {
     const want = PLATFORM === 'android' ? /android\.apk$/i : PLATFORM === 'ios' ? /\.ipa$/i : /setup\.exe$/i;
     const asset = (j.assets || []).find(a => want.test(a.name));
     UPD.url = asset ? asset.browser_download_url : j.html_url;
+    for (const a of j.assets || []) {
+      if (/setup\.exe$/i.test(a.name)) UPD.assets.setup = a.browser_download_url;
+      else if (/portable\.exe$/i.test(a.name)) UPD.assets.portable = a.browser_download_url;
+      else if (/android\.apk$/i.test(a.name)) UPD.assets.apk = a.browser_download_url;
+    }
     UPD.state = verCmp(tag, appVersion()) > 0 ? 'new' : 'latest';
   } catch (e) { UPD.state = 'fail'; }
   renderUpdate();
+}
+
+/* التحديث الداخلي: ويندوز وأندرويد ينزّل ويثبّت من داخل اللعبة، الآيفون يفتح الرابط (يحتاج توقيع) */
+function updPlugin() { return CAP && CAP.isNativePlatform && CAP.isNativePlatform() && PLATFORM === 'android' ? (CAP.registerPlugin ? CAP.registerPlugin('IbraUpdate') : CAP.Plugins.IbraUpdate) : null; }
+function canSelfUpdate() { return (window.ibra && window.ibra.update && UPD.assets.setup) || (PLATFORM === 'android' && UPD.assets.apk && updPlugin()); }
+let updListen = false;
+async function startUpdate() {
+  if (UPD.state === 'downloading' || UPD.state === 'installing') return;
+  if (!canSelfUpdate()) return openExt(UPD.url);
+  const prog = p => { UPD.p = p; UPD.state = p >= 1 ? 'installing' : 'downloading'; renderUpdate(); };
+  UPD.state = 'downloading'; UPD.p = 0; renderUpdate();
+  try {
+    if (window.ibra && window.ibra.update) {
+      if (!updListen) { window.ibra.onUpdateProgress(prog); updListen = true; }
+      await window.ibra.update({ setup: UPD.assets.setup, portable: UPD.assets.portable || UPD.assets.setup });
+      UPD.state = 'installing'; renderUpdate();
+    } else {
+      const pl = updPlugin();
+      if (!updListen) { try { await pl.addListener('progress', d => prog(d.p)); } catch (e) { } updListen = true; }
+      const r = await pl.install({ url: UPD.assets.apk });
+      if (r && r.needPermission) { UPD.state = 'allow'; renderUpdate(); return; }
+      UPD.state = 'new'; renderUpdate(); // شاشة التثبيت انفتحت؛ إذا رجع يكدر يعيد
+    }
+  } catch (e) { console.warn('update', e); UPD.state = 'error'; renderUpdate(); }
 }
 
 /* ---------------- الكرة الأرضية المنقّطة ---------------- */

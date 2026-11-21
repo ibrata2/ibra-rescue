@@ -68,7 +68,7 @@ const STR = {
     carefulFail: 'واحد طاح! المهمة تحتاج هدوء',
     vipFail: 'نسيت الشخص المهم!',
     notEnough: 'ما بقى عدد كافي',
-    upChecking: 'جاري التحقق من التحديثات…', upLatest: '✔ النسخة حديثة', upNew: '⬆ توجد نسخة جديدة', upDownload: 'اضغط للتحميل', upFail: 'تعذّر التحقق من التحديثات (بدون إنترنت؟)',
+    upChecking: 'جاري التحقق من التحديثات…', upLatest: '✔ النسخة حديثة', upNew: '⬆ توجد نسخة جديدة', upDownload: 'اضغط للتحميل', upInstall: 'اضغط للتحديث الآن', upDownloading: 'جاري تنزيل التحديث', upInstalling: 'جاري التثبيت… اللعبة راح تنفتح من جديد', upAllow: 'اسمح بتثبيت التطبيقات للعبة ثم اضغط هنا مرة ثانية', upErr: 'صار خطأ بالتنزيل — اضغط للمحاولة مرة ثانية', upFail: 'تعذّر التحقق من التحديثات (بدون إنترنت؟)',
   },
   en: {
     subtitle: 'Rope of Hope',
@@ -133,7 +133,7 @@ const STR = {
     carefulFail: 'Someone fell! This mission needed care',
     vipFail: 'You forgot the VIP!',
     notEnough: 'Not enough left',
-    upChecking: 'Checking for updates…', upLatest: '✔ You have the latest version', upNew: '⬆ A new version is available', upDownload: 'click to download', upFail: 'Could not check for updates (offline?)',
+    upChecking: 'Checking for updates…', upLatest: '✔ You have the latest version', upNew: '⬆ A new version is available', upDownload: 'click to download', upInstall: 'click to update now', upDownloading: 'Downloading update', upInstalling: 'Installing… the game will reopen', upAllow: 'Allow installing apps for the game, then tap here again', upErr: 'Download failed — tap to retry', upFail: 'Could not check for updates (offline?)',
   }
 };
 

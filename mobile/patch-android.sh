@@ -25,3 +25,29 @@ GR
 S=android/app/src/main/res/values/styles.xml
 sed -i 's|<item name="android:background">@null</item>|<item name="android:background">@null</item>\n        <item name="android:windowFullscreen">true</item>|' "$S" || true
 echo "android patched: $V ($CODE)"
+
+# ---- التحديث الداخلي (ينزّل APK ويثبّته من داخل اللعبة) ----
+J=android/app/src/main/java/com/ibraprogram/ibrarescue
+cp mobile/android/IbraUpdatePlugin.java "$J/"
+cat > "$J/MainActivity.java" <<'JV'
+package com.ibraprogram.ibrarescue;
+
+import android.os.Bundle;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(IbraUpdatePlugin.class);
+        super.onCreate(savedInstanceState);
+    }
+}
+JV
+mkdir -p android/app/src/main/res/xml
+cat > android/app/src/main/res/xml/ibra_update_paths.xml <<'XP'
+<?xml version="1.0" encoding="utf-8"?>
+<paths><cache-path name="update" path="update/" /></paths>
+XP
+sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />|' "$M"
+sed -i 's|</application>|    <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.ibraupdate" android:exported="false" android:grantUriPermissions="true">\n            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/ibra_update_paths" />\n        </provider>\n    </application>|' "$M"
+grep -q REQUEST_INSTALL_PACKAGES "$M" && grep -q ibraupdate "$M" && echo "in-app update patched"
