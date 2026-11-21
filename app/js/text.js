@@ -143,6 +143,7 @@ const LINES = {
   board: { ar: ['يلا اصعدوا!', 'آني جنب الشباك!', 'أكو مكيف جوه؟', 'دفعت الأجرة؟ لا؟ زين', 'عيني الطيارة نظيفة!', 'وين أحط رجلي؟'], en: ['All aboard!', 'Window seat is mine!', 'Is there AC in here?', 'Did I pay? No? Good', 'Nice clean helicopter!', 'Where do I put my feet?'] },
   grandma_board: { ar: ['ابني ساعدني أصعد', 'يمّه هاي الطيارة عالية', 'وين الكرسي؟ ركبتي!'], en: ['Help me up, dear', 'This helicopter is so high', 'Where\'s my seat? My knees!'] },
   jump: { ar: ['هوووب!', 'يا علي!', 'يلاااا!', 'شوفوني!', 'هسه أقفز!'], en: ['Hup!', 'Here I go!', 'Yallaaa!', 'Watch me!', 'JUMP!'] },
+  slip: { ar: ['شتريد أگلك؟ عاشت إيدك!'], en: ['What can I say? Great job!'] },
   missed: { ar: ['فاتني!', 'گلت لك قرّب شوية!', 'آني مو سبايدرمان!', 'مرة ثانية، مرة ثانية!', 'حچيلك بالأشارات؟ قرّب!'], en: ['Missed!', 'I said come closer!', 'I\'m not Spider-Man!', 'Again, again!', 'Come CLOSER!'] },
   dragged: { ar: ['إنت طحت وطيحتني وياك!!', 'ليش فلتت؟! ليييش؟!', 'آني شعليه؟!', 'كلنا رحنا وطي!!'], en: ['You fell and took me with you!!', 'Why did you let go?! WHY?!', 'What did I do?!', 'We\'re ALL going down!!'] },
   fingers: { ar: ['باقي إصبع واحد!!', 'إيدي! إيدي ترتجف!', 'رجلك تزلگ يا أخي!', 'دا أحاول! دا أحاول!', 'اللي تحتي يقرصني!'], en: ['One finger left!!', 'My hand is shaking!', 'Your foot is slippery, man!', 'I\'m trying! I\'m trying!', 'The guy below is pinching me!'] },

@@ -265,7 +265,7 @@ class Game {
     if (!this.onScreen(p.x)) return;
     if (p.kind === 'sheep' || p.kind === 'cat') { SND.play(p.kind); return; }
     if (p.kind === 'crate') return;
-    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: 'cheer', jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'scream', fall: 'scream', landZone: 'cheer' };
+    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: 'cheer', jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'scream', fall: 'scream', slip: 'slip', landZone: 'cheer' };
     let n = map[cat]; if (p.kind === 'grandma' && (cat === 'scared' || cat === 'wait' || cat === 'fingers')) n = 'grandma';
     if (n) SND.play(n, 1, 0.92 + (p.id % 5) * 0.04);
   }
@@ -690,7 +690,14 @@ class Game {
       p.jt += dt; const oy = p.y;
       p.vy += 300 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
       const E = this.chainEnd();
-      if (this.chain.length + this.cabin.length < this.ht.cap && Math.hypot(E.x - p.x, E.y - (p.y - 10)) < 8.5) { this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); return; }
+      if (this.chain.length + this.cabin.length < this.ht.cap && Math.hypot(E.x - p.x, E.y - (p.y - 10)) < 8.5) {
+        // يمسك الحبل بس يزلگ منه ويطيح (أكثر إذا الطيارة سريعة)
+        const hs = Math.hypot(this.heli.vx, this.heli.vy);
+        if (!p.slipped && p.kind === 'person' && Math.random() < (hs > 60 ? 0.5 : 0.1)) {
+          p.slipped = true; p.st = 'fall'; p.vx = this.heli.vx * 0.3 + (Math.random() - 0.5) * 30; p.vy = 20; AU.grab();
+          this.sayK(p, 'slip', { force: true }); return;
+        }
+        this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); return; }
       if (p.vy > 0) {
         for (const sd of this.L.solids) if (p.x > sd.x && p.x < sd.x + sd.w && oy <= sd.y + 0.5 && p.y >= sd.y) {
           p.y = sd.y; p.vx = p.vy = 0; p.st = 'wait'; p.cool = 1.3;
