@@ -1106,7 +1106,10 @@ class Game {
     // ضوء أحمر
     if (Math.sin(this.t * 8) > 0.6) { ctx.fillStyle = '#ff4a4a'; ctx.fillRect(-ht.cx + 1, -ht.cy + 1, 1, 1); }
     if (ht.siren) { const on = Math.floor(this.t * 6) % 2; ctx.fillStyle = on ? '#3a6ee8' : '#e83a3a'; ctx.fillRect(-1, -ht.cy + 1, 3, 1); ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.arc(1, -ht.cy + 1, 7, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
-    if (ht.camera && Math.sin(this.t * 1.7) > 0.985) { ctx.fillStyle = 'rgba(255,255,240,0.9)'; ctx.fillRect(8, 3, 4, 3); ctx.globalAlpha = 0.3; ctx.beginPath(); ctx.arc(10, 5, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+    const flash = ht.camera && Math.sin(this.t * 1.7) > 0.985;
+    if (flash && !this.flashOn && this.state === 'play') SND.play('camera', 1, 0.95 + Math.random() * 0.1); // صوت الكاميرا ويه الفلاش
+    this.flashOn = flash;
+    if (flash) { ctx.fillStyle = 'rgba(255,255,240,0.9)'; ctx.fillRect(8, 3, 4, 3); ctx.globalAlpha = 0.3; ctx.beginPath(); ctx.arc(10, 5, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
     ctx.restore();
   }
   drawWreck() {

@@ -43,7 +43,7 @@ const SOUND_LIST = {
   grab:       { n: 1, vol: 0.5,  desc: 'مسك الحبل' },
   land:       { n: 1, vol: 0.7,  desc: 'هبوط الطيارة' },
   rip:        { n: 5, vol: 0.7,  desc: 'تمزيق حبل الغسيل' },
-  camera:     { n: 1, vol: 0.5,  desc: 'فلاش كاميرا (طيارة الأخبار)' },
+  camera:     { n: 2, vol: 0.5,  desc: 'فلاش كاميرا (طيارة الأخبار)' },
   radio:      { n: 1, vol: 0.4,  desc: 'تشويش راديو قبل كلام البرج' },
   win:        { n: 1, vol: 0.8,  desc: 'فوز بالمهمة' },
   fail:       { n: 1, vol: 0.8,  desc: 'خسارة' },
