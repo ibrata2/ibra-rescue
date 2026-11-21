@@ -265,8 +265,11 @@ class Game {
     if (!this.onScreen(p.x)) return;
     if (p.kind === 'sheep' || p.kind === 'cat') { SND.play(p.kind); return; }
     if (p.kind === 'crate') return;
-    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: 'cheer', jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'nooo', fall: 'scream', slip: 'slip', missed: 'no', carryDrop: 'no', landZone: 'cheer', scared: 'panic', fingers: 'panic', full: 'sorry', landWater: 'laugh' };
+    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: ['cheer', 'laugh', 'bye'], jump: 'jump', hit: 'ouch', twister: 'scream', dragged: ['nooo', 'blame'], fall: 'scream',
+      slip: 'slip', missed: 'no', carryDrop: 'no', landZone: 'cheer', scared: 'panic', fingers: 'panic', full: ['sorry', 'betray'], landWater: 'laugh' };
     let n = map[cat]; if (p.kind === 'grandma' && (cat === 'scared' || cat === 'wait' || cat === 'fingers')) n = 'grandma';
+    if (p.kind === 'vip' && cat === 'wait' && SND.has('vip')) n = 'vip';
+    if (Array.isArray(n)) { const ok = n.filter(k => SND.has(k)); n = ok.length ? pick(ok) : n[0]; } // يختار عشوائياً من الموجود
     if (n === 'nooo' && !SND.has('nooo')) n = 'scream';
     if (n === 'cheer' && !SND.has('cheer')) n = 'laugh';
     if (n) SND.play(n, 1, 0.92 + (p.id % 5) * 0.04);
