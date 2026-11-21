@@ -109,7 +109,7 @@ if (CAP && CAP.Plugins) {
   try {
     CAP.Plugins.App && CAP.Plugins.App.addListener('backButton', () => {
       if ($('#about').classList.contains('on')) { $('#about').classList.remove('on'); return; }
-      if ($('#storyOv').classList.contains('on')) { $('#storyOv').classList.remove('on', 'playing'); return; }
+      if ($('#storyOv').classList.contains('on')) { if (ST.view === 'chapters' && !$('#storyOv').classList.contains('playing')) { stOpenPicker(); return; } $('#storyOv').classList.remove('on', 'playing'); return; }
       if (G) { if (G.state === 'play') { if (paused) toMenu(); else togglePause(); } else toMenu(); return; }
       if ($('#map').classList.contains('on')) { show('title'); return; }
       CAP.Plugins.App.exitApp();
@@ -239,8 +239,8 @@ $('#btnAbout').onclick = () => { AU.init(); AU.click(); $('#about').classList.ad
 $('#btnAboutClose').onclick = () => { AU.click(); $('#about').classList.remove('on'); };
 $('#about').onclick = e => { if (e.target.id === 'about') $('#about').classList.remove('on'); };
 $('#btnTS').onclick = () => { AU.click(); const cur = save.ts || (isTouch() ? 'l' : 'm'); save.ts = TS_STEPS[(TS_STEPS.indexOf(cur) + 1) % TS_STEPS.length]; persist(); applyLang(); };
-$('#btnStory').onclick = () => { AU.init(); AU.click(); stOpenMenu(); };
-$('#storyClose').onclick = () => { AU.click(); $('#storyOv').classList.remove('on', 'playing'); };
+$('#btnStory').onclick = () => { AU.init(); AU.click(); stOpenPicker(); };
+$('#storyClose').onclick = () => { AU.click(); if (ST.view === 'chapters') { stOpenPicker(); return; } $('#storyOv').classList.remove('on', 'playing'); };
 $('#stNextBtn').onclick = e => { e.stopPropagation(); AU.click(); stAdvance(); };
 $('#stSkip').onclick = e => { e.stopPropagation(); AU.click(); if (ST.panel && ST.panel.startBtn) { stFinish(); return; } const q = ST.queue, k = q.findIndex((p, i) => i > ST.idx && p.startBtn); if (k > 0) { ST.idx = k; stShowPanel(); } else stFinish(); };
 $('#stFrame').onclick = () => stAdvance();

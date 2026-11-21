@@ -262,6 +262,8 @@ class Game {
     if (k === 'crate') return null;
     if (k === 'sheep' || k === 'cat') return pick(LINES[k][lang()]);
     const key = k + '_' + cat;
+    const ml = this.m.lines && this.m.lines[key] && this.m.lines[key][lang()];
+    if (ml && ml.length) return pick(ml.concat(ml, (LINES[key] && LINES[key][lang()]) || [])).replace('{vip}', this.vipName());
     if (LINES[key]) return pick(LINES[key][lang()]).replace('{vip}', this.vipName());
     return line(cat);
   }
