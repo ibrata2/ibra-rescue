@@ -128,6 +128,7 @@ function px(list, x, y, flip = 1) { for (const p of list) ctx.fillRect(Math.roun
 // acc: سرعة الاستجابة · cap: كم واحد يتعلق بالحبل · segs×seg: طول الحبل · mass: ثقل الطيارة (تتأثر أقل بالحمولة)
 const HELI_TYPES = {
   small:   { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 10, seg: 6, cap: 6, mass: 1, acc: 1 },
+  golden:  { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 12, seg: 6, cap: 7, mass: 1.1, acc: 1.25 }, // الصقر الذهبي (من القصة)
   medic:   { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 9, seg: 6, cap: 5, mass: 1, acc: 1.12, calm: true },
   police:  { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 20]], segs: 8, seg: 6, cap: 4, mass: 0.9, acc: 1.32, siren: true },
   news:    { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 11, seg: 6, cap: 5, mass: 1, acc: 1.05, camera: true },
@@ -135,8 +136,8 @@ const HELI_TYPES = {
   giant:   { w: 70, h: 23, cx: 35, cy: 12, box: [58, 16], anchor: [0, 10], rotors: [[38, 0, 34]], segs: 16, seg: 6, cap: 12, mass: 2.2, acc: 0.72 },
 };
 // نبرة صوت كل طيارة (إذا ما إلها ملف خاص): الصغيرة أحد، الكبيرة أثقل
-const HELI_TONE = { small: 1.1, medic: 1.04, police: 1.18, news: 1.0, chinook: 0.74, giant: 0.62 };
-const HELI_ORDER = ['small', 'medic', 'police', 'news', 'chinook', 'giant'];
+const HELI_TONE = { golden: 1.06, small: 1.1, medic: 1.04, police: 1.18, news: 1.0, chinook: 0.74, giant: 0.62 };
+const HELI_ORDER = ['small', 'medic', 'police', 'news', 'chinook', 'giant', 'golden'];
 const SPR = {};
 function buildHeliSprites() {
   const K = '#121110', G = '#2c2c30', GH = '#8d939b';
@@ -161,6 +162,8 @@ function buildHeliSprites() {
   }
   SPR.small = smallHeli('#ebe1c8', '#c4b896', '#c8323c');
   // إسعاف: أبيض مع صليب أحمر
+  // الصقر الذهبي: ذهب غامق وخط أسود وجناح أحمر
+  SPR.golden = smallHeli('#f0c040', '#b07a18', '#121110', p => { p(11, 6, '#121110', 16, 1); p(20, 4, '#c8323c', 4, 1); p(21, 3, '#c8323c', 2, 1); p(26, 11, '#121110', 2, 1); });
   SPR.medic = smallHeli('#f6f3ec', '#d4cfc4', '#c8323c', p => { p(19, 4, '#c8323c', 1, 3); p(18, 5, '#c8323c', 3, 1); p(11, 9, '#c8323c', 16, 1); });
   // شرطة: غامقة مع خط فاتح وضوء
   SPR.police = smallHeli('#3a3f4a', '#2a2e36', '#ebe1c8', p => { p(18, 1, '#3a6ee8', 1, 1); p(20, 1, '#e83a3a', 1, 1); p(14, 6, '#ebe1c8', 3, 1); });
@@ -210,7 +213,7 @@ const input = { x: 0, y: 0, keys: {} };
 
 class Game {
   constructor(mi, heliKey) {
-    this.mi = mi; this.m = MISSIONS[mi];
+    this.mi = mi; this.m = typeof mi === 'object' ? mi : MISSIONS[mi]; // مهمة قصة = كائن
     this.L = buildLevel(this.m);
     this.heliKey = heliKey && HELI_TYPES[heliKey] ? heliKey : this.m.heli;
     const ht = HELI_TYPES[this.heliKey];

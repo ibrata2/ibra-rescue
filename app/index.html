@@ -147,7 +147,35 @@ button{font-family:var(--font);cursor:pointer}
 /* نمط القصة + ما الجديد */
 .btn.story{position:relative;border-color:var(--gold);color:var(--gold2)}
 .btn.story .soon{position:absolute;top:-9px;inset-inline-start:10px;background:var(--red);color:#fff;font-size:11px;padding:1px 8px;border-radius:6px}
-.storycard{width:min(560px,94vw)}
+[hidden]{display:none!important}
+.btn.story .soon.new{background:var(--gold);color:#1a1408}
+.storycard{width:min(620px,94vw)}
+.stsub{color:var(--dim);margin:-6px 0 12px;font-size:14px}
+.stlist{display:flex;flex-direction:column;gap:8px;max-height:min(calc(100vh - 190px),520px);overflow-y:auto;padding:2px}
+.stch{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--fg);font:inherit;cursor:pointer;text-align:start}
+.stch:hover{border-color:var(--gold)} .stch.locked{opacity:.5} .stch.done{border-color:#3b4a33}
+.stch .num{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,var(--gold2),var(--gold));color:#1a1408;font-weight:bold}
+.stch .tt{flex:1;min-width:0;display:flex;flex-direction:column} .stch .tt b{font-size:calc(16px*var(--ts,1))} .stch .tt small{color:var(--dim)}
+.stch .pr{color:var(--gold2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sthint{min-height:20px;color:var(--gold2);margin:8px 0;font-size:14px}
+#storyOv.playing{background:#000;align-items:center}
+.stplayer{width:min(100vw,calc((100vh - 70px)*16/9));display:flex;flex-direction:column;gap:8px;padding:8px}
+.stframe{position:relative;width:100%;aspect-ratio:16/9;border:3px solid #111;outline:2px solid var(--gold);border-radius:6px;overflow:hidden;cursor:pointer;background:#f1e7d0}
+#stCanvas{width:100%;height:100%;display:block;image-rendering:pixelated}
+.stcap{position:absolute;top:3%;inset-inline:3%;background:#f6e7b8;color:#1a1408;border:2px solid #1a1408;padding:6px 10px;font-weight:bold;white-space:pre-line;font-size:calc(clamp(12px,2.1vw,19px)*var(--ts,1));box-shadow:3px 3px 0 #1a1408;max-width:80%}
+.stbubbles{position:absolute;inset:0;pointer-events:none}
+.stb{position:absolute;top:22%;left:30%;width:max(30%,190px);max-width:46%;background:#fff;color:#111;border:3px solid #111;border-radius:16px;padding:6px 10px;font-size:calc(clamp(13px,2.2vw,21px)*var(--ts,1));line-height:1.35;box-shadow:3px 3px 0 rgba(0,0,0,.6);animation:stpop .18s ease-out}
+.stb b{display:block;font-size:.72em;color:#a8771c}
+.stb.at::after{content:"";position:absolute;bottom:-14px;left:var(--tail,50%);border:9px solid transparent;border-top:12px solid #111;transform:translateX(-50%)}
+.stb.old{opacity:.55;top:8%}
+.stb.radio{left:auto!important;right:3%;top:auto;bottom:6%;background:#1a2a1a;color:#b9f5b0;border-color:#4ae86a;border-radius:6px;font-family:ui-monospace,Menlo,monospace}
+.stb.radio b{color:#4ae86a}
+.stb.phone{left:3%!important;top:auto;bottom:6%;background:#fff6dc}
+.stb.narr{background:#f6e7b8}
+.stnote{position:absolute;bottom:4%;left:50%;transform:translateX(-50%);background:var(--gold);color:#1a1408;font-weight:bold;padding:6px 14px;border-radius:999px;border:2px solid #1a1408;font-size:calc(clamp(12px,2vw,18px)*var(--ts,1));white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
+.stbar{display:flex;align-items:center;gap:10px;justify-content:space-between} .stbar span{color:var(--dim);font-variant-numeric:tabular-nums}
+.stbar .btn{min-width:110px}
+@keyframes stpop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
 #sketch{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#efe7d4;image-rendering:auto}
 .drawing{color:var(--gold2);font-weight:bold;font-size:calc(15px*var(--ts,1))}
 .drawing::after{content:'';display:inline-block;width:1.2em;text-align:start;animation:dots 1.4s steps(4) infinite}
@@ -220,7 +248,7 @@ button{font-family:var(--font);cursor:pointer}
   <p class="tag" data-t="howto"></p>
   <div class="btns">
     <button class="btn main" id="btnPlay" data-t="play"></button>
-    <button class="btn story" id="btnStory"><span data-t="story"></span> <span class="soon" data-t="soon"></span></button>
+    <button class="btn story" id="btnStory"><span data-t="story"></span> <span class="soon new">جديد</span></button>
     <button class="btn" id="btnLang" data-t="langBtn"></button>
     <button class="btn" id="btnSound"></button>
     <button class="btn" id="btnTS"></button>
@@ -308,14 +336,23 @@ button{font-family:var(--font);cursor:pointer}
 </div></div>
 
 <!-- نمط القصة (قريباً) -->
-<div class="overlay" id="storyOv"><div class="card storycard">
-  <h3 data-t="storyTitle"></h3>
-  <canvas id="sketch" width="560" height="300"></canvas>
-  <div class="drawing" data-t="storyDrawing"></div>
-  <p class="teaser" data-t="storyTeaser"></p>
-  <div class="next" data-t="storyNext"></div>
-  <button class="btn main" id="storyClose" data-t="ok"></button>
-</div></div>
+<div class="overlay" id="storyOv">
+  <div class="card storycard" id="stMenu">
+    <h3 id="stTitle"></h3><div class="stsub" id="stSub"></div>
+    <div class="stlist" id="stList"></div>
+    <div class="sthint" id="stHint"></div>
+    <button class="btn" id="storyClose" data-t="back"></button>
+  </div>
+  <div class="stplayer" id="stPlayer" hidden>
+    <div class="stframe" id="stFrame">
+      <canvas id="stCanvas" width="480" height="270"></canvas>
+      <div class="stcap" id="stCap" hidden></div>
+      <div class="stbubbles" id="stBubbles"></div>
+      <div class="stnote" id="stNote" hidden></div>
+    </div>
+    <div class="stbar"><button class="btn" id="stSkip"></button><span id="stProg"></span><button class="btn main" id="stNextBtn"></button></div>
+  </div>
+</div>
 
 <!-- ما الجديد -->
 <div class="overlay" id="newsOv"><div class="card newscard">
@@ -344,6 +381,7 @@ button{font-family:var(--font);cursor:pointer}
 <script src="sounds/manifest.js"></script>
 <script src="js/sounds.js"></script>
 <script src="js/game.js"></script>
+<script src="js/story.js"></script>
 <script src="js/ui.js"></script>
 </body>
 </html>

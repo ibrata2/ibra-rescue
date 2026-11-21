@@ -71,6 +71,7 @@ let selHeli = 'small';
 function unlockedHelis() {
   const u = new Set(['small']);
   MISSIONS.forEach(m => { if (save.stars[m.id]) u.add(m.heli); });
+  if (typeof goldenUnlocked === 'function' && goldenUnlocked()) u.add('golden');
   u.add(MISSIONS[selMission].heli); // المقترحة للمهمة دايماً متاحة
   return u;
 }
@@ -108,6 +109,7 @@ if (CAP && CAP.Plugins) {
   try {
     CAP.Plugins.App && CAP.Plugins.App.addListener('backButton', () => {
       if ($('#about').classList.contains('on')) { $('#about').classList.remove('on'); return; }
+      if ($('#storyOv').classList.contains('on')) { $('#storyOv').classList.remove('on', 'playing'); return; }
       if (G) { if (G.state === 'play') { if (paused) toMenu(); else togglePause(); } else toMenu(); return; }
       if ($('#map').classList.contains('on')) { show('title'); return; }
       CAP.Plugins.App.exitApp();
@@ -257,12 +259,22 @@ function startMission(i, heliKey) {
   $('#howto').classList.add('show'); setTimeout(() => $('#howto').classList.remove('show'), 6000);
   updateHUD();
 }
-function restartMission() { if (G) startMission(G.mi, G.heliKey); }
+function restartMission() { if (!G) return; if (G.storyRef) startStoryGame(G.m, G.storyRef, G.heliKey); else startMission(G.mi, G.heliKey); }
+// مهمة من نمط القصة
+function startStoryGame(m, ref, heliKey) {
+  AU.init(); AU.click(); paused = false; acc = 0;
+  heliKey = heliKey || m.heli; selHeli = heliKey;
+  G = new Game(m, heliKey); G.storyRef = ref; window.G = G;
+  show(null); $('#pause').classList.remove('on'); $('#result').classList.remove('on');
+  $('#howto').textContent = (matchMedia('(pointer:coarse)').matches ? T('touchHint') : T('controls'));
+  $('#howto').classList.add('show'); setTimeout(() => $('#howto').classList.remove('show'), 6000);
+  updateHUD();
+}
 function togglePause() {
   if (!G || G.state !== 'play') return;
   paused = !paused; $('#pause').classList.toggle('on', paused);
 }
-function toMenu() { G = null; window.G = null; paused = false; $('#pause').classList.remove('on'); $('#result').classList.remove('on'); buildMissionList(); selectMission(selMission, true); show('map'); }
+function toMenu() { if (G && G.storyRef) { G = null; window.G = null; paused = false; $('#pause').classList.remove('on'); $('#result').classList.remove('on'); show('title'); stOpenMenu(); return; } G = null; window.G = null; paused = false; $('#pause').classList.remove('on'); $('#result').classList.remove('on'); buildMissionList(); selectMission(selMission, true); show('map'); }
 function showResult(g) {
   const win = g.state === 'win';
   const box = $('#result'); box.classList.add('on'); box.classList.toggle('win', win);
@@ -270,6 +282,8 @@ function showResult(g) {
   $('#rStars').textContent = win ? starStr(g.stars) : '';
   $('#rLine').textContent = win ? '' : (g.why === 'crashed' ? '“' + g.crashLine + '”' : '');
   $('#rStats').innerHTML = `<div><span>${g.type === 'cargo' ? T('delivered') : T('saved')}</span><b>${g.saved} / ${g.goal}</b></div><div><span>${T('falls')}</span><b>${g.falls}</b></div><div><span>${T('timeLeft')}</span><b>${fmtTime(g.timeLeft)}</b></div>`;
+  if (g.storyRef) { $('#btnNext').style.display = win ? '' : 'none'; $('#btnNext').textContent = stT('cont'); $('#rAll').textContent = ''; return; }
+  $('#btnNext').textContent = T('next');
   const hasNext = win && g.mi + 1 < MISSIONS.length;
   $('#btnNext').style.display = hasNext ? '' : 'none';
   $('#rAll').textContent = win && g.mi + 1 >= MISSIONS.length ? T('allDone') : '';
@@ -285,8 +299,12 @@ $('#btnAbout').onclick = () => { AU.init(); AU.click(); $('#about').classList.ad
 $('#btnAboutClose').onclick = () => { AU.click(); $('#about').classList.remove('on'); };
 $('#about').onclick = e => { if (e.target.id === 'about') $('#about').classList.remove('on'); };
 $('#btnTS').onclick = () => { AU.click(); const cur = save.ts || (isTouch() ? 'l' : 'm'); save.ts = TS_STEPS[(TS_STEPS.indexOf(cur) + 1) % TS_STEPS.length]; persist(); applyLang(); };
-$('#btnStory').onclick = () => { AU.init(); AU.click(); $('#storyOv').classList.add('on'); sketchStart(); };
-$('#storyClose').onclick = () => { AU.click(); $('#storyOv').classList.remove('on'); };
+$('#btnStory').onclick = () => { AU.init(); AU.click(); stOpenMenu(); };
+$('#storyClose').onclick = () => { AU.click(); $('#storyOv').classList.remove('on', 'playing'); };
+$('#stNextBtn').onclick = e => { e.stopPropagation(); AU.click(); stAdvance(); };
+$('#stSkip').onclick = e => { e.stopPropagation(); AU.click(); if (ST.panel && ST.panel.startBtn) { stFinish(); return; } const q = ST.queue, k = q.findIndex((p, i) => i > ST.idx && p.startBtn); if (k > 0) { ST.idx = k; stShowPanel(); } else stFinish(); };
+$('#stFrame').onclick = () => stAdvance();
+addEventListener('keydown', e => { if (!$('#storyOv').classList.contains('playing')) return; if (['Space', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.code)) { e.preventDefault(); stAdvance(); } if (e.code === 'Escape') $('#stSkip').click(); });
 $('#newsClose').onclick = () => { AU.click(); $('#newsOv').classList.remove('on'); save.seenVer = appVersion(); persist(); };
 $('#btnGo').onclick = () => startMission(selMission, selHeli);
 $('#btnPause').onclick = () => togglePause();
@@ -294,7 +312,7 @@ $('#btnResume').onclick = () => togglePause();
 $('#btnRestart').onclick = () => restartMission();
 $('#btnMenu').onclick = () => toMenu();
 $('#btnRetry').onclick = () => restartMission();
-$('#btnNext').onclick = () => startMission(G.mi + 1);
+$('#btnNext').onclick = () => { if (G && G.storyRef) { const ref = G.storyRef; G = null; window.G = null; $('#result').classList.remove('on'); show('title'); stAfterWin(ref); return; } startMission(G.mi + 1); };
 $('#btnMenu2').onclick = () => toMenu();
 for (const a of document.querySelectorAll('a[data-ext]')) a.onclick = e => { e.preventDefault(); openExt(a.href); };
 addEventListener('keydown', e => {
