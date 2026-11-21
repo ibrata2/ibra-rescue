@@ -265,8 +265,9 @@ class Game {
     if (!this.onScreen(p.x)) return;
     if (p.kind === 'sheep' || p.kind === 'cat') { SND.play(p.kind); return; }
     if (p.kind === 'crate') return;
-    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: 'cheer', jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'scream', fall: 'scream', slip: 'slip', landZone: 'cheer' };
+    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: 'cheer', jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'nooo', fall: 'scream', slip: 'slip', missed: 'no', carryDrop: 'no', landZone: 'cheer' };
     let n = map[cat]; if (p.kind === 'grandma' && (cat === 'scared' || cat === 'wait' || cat === 'fingers')) n = 'grandma';
+    if (n === 'nooo' && !SND.has('nooo')) n = 'scream';
     if (n) SND.play(n, 1, 0.92 + (p.id % 5) * 0.04);
   }
   radioK(cat) { this.radio(pick(RADIO[cat][lang()]).replace('{vip}', this.vipName())); }
