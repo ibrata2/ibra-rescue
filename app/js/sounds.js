@@ -33,7 +33,6 @@ const SOUND_LIST = {
   ouch:       { n: 4, vol: 0.7,  desc: 'آخ! لما يدگ بالحايط' },
   grandma:    { n: 3, vol: 0.7,  desc: 'صوت جدّة (يمّه بشويش!)' },
   sheep:      { n: 2, vol: 0.7,  desc: 'ماع' },
-  sheep_scream: { n: 1, vol: 0.85, desc: 'الخروف يصرخ مثل إنسان لما يطيح أو يطير' },
   cat:        { n: 2, vol: 0.7,  desc: 'مياو' },
   thunder:    { n: 3, vol: 0.9,  desc: 'رعد' },
   explosion:  { n: 3, vol: 1.0,  desc: 'انفجار الطيارة (على الأرض / بناية)' },

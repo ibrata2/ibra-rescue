@@ -263,10 +263,9 @@ class Game {
   sayK(p, cat, opts) { const t = this.kline(p, cat); if (t) { this.say(p, t, opts); this.voice(p, cat); } }
   voice(p, cat) { // صوت حقيقي ويّا الكلام (إذا الملفات موجودة)
     if (!this.onScreen(p.x)) return;
-    if (p.kind === 'sheep' && ['fall', 'dragged', 'twister', 'carryDrop', 'scared'].includes(cat) && SND.play('sheep_scream')) return; // الخروف يصرخ 😂
     if (p.kind === 'sheep' || p.kind === 'cat') { SND.play(p.kind); return; }
     if (p.kind === 'crate') return;
-    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: 'cheer', jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'scream', landZone: 'cheer' };
+    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: 'cheer', jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'scream', fall: 'scream', landZone: 'cheer' };
     let n = map[cat]; if (p.kind === 'grandma' && (cat === 'scared' || cat === 'wait' || cat === 'fingers')) n = 'grandma';
     if (n) SND.play(n, 1, 0.92 + (p.id % 5) * 0.04);
   }
