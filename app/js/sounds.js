@@ -36,7 +36,7 @@ const SOUND_LIST = {
   cat:        { n: 2, vol: 0.7,  desc: 'مياو' },
   thunder:    { n: 3, vol: 0.9,  desc: 'رعد' },
   explosion:  { n: 2, vol: 1.0,  desc: 'انفجار الطيارة' },
-  collapse:   { n: 2, vol: 0.9,  desc: 'بناية تنهار / حجار تطيح' },
+  collapse:   { n: 3, vol: 0.9,  desc: 'بناية تنهار / حجار تطيح' },
   splash:     { n: 2, vol: 0.7,  desc: 'وگعة بالماي' },
   thud:       { n: 2, vol: 0.7,  desc: 'وگعة على الأرض' },
   grab:       { n: 1, vol: 0.5,  desc: 'مسك الحبل' },
