@@ -2,6 +2,9 @@
 /* 📰 ما الجديد — يطلع مرة وحدة بعد كل تحديث. حدّثه مع كل إصدار. */
 const WHATS_NEW = {
   ar: [
+    '🔊 أصوات حقيقية بكل اللعبة + موسيقى عربية',
+    '🎙️ جمل عراقية بصوت حقيقي («الحگولي الحگولي!»)',
+    '🪢 جديد: الحبل يزلگ إذا طرت بسرعة!',
     '⬇️ التحديث صار من داخل اللعبة — ينزل ويثبّت وحده',
     '🚁 أصوات هليكوبتر حقيقية — كل طيارة صوتها',
     '🌪️ فصل جديد «موسم الأعاصير»: 10 مراحل، الإعصار يشيل الناس ويطيّرهم بالهوا، وبعضها بيها إعصارين',
@@ -12,6 +15,9 @@ const WHATS_NEW = {
     '📖 قريباً: نمط القصة — جاري رسم القصة ✏️',
   ],
   en: [
+    '🔊 Real sounds everywhere + Arabic music',
+    '🎙️ Funny Iraqi voice lines (subtitled in bubbles)',
+    '🪢 New: the rope can slip if you fly too fast!',
     '⬇️ Updates now download and install inside the game',
     '🌪️ New chapter "Twister Season": 10 stages where twisters suck people up and spin them, some with two twisters',
     '💥 Crash into a building and part of it collapses into rubble; minarets snap',

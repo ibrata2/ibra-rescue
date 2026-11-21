@@ -143,6 +143,7 @@ const LINES = {
   board: { ar: ['يلا اصعدوا!', 'آني جنب الشباك!', 'أكو مكيف جوه؟', 'دفعت الأجرة؟ لا؟ زين', 'عيني الطيارة نظيفة!', 'وين أحط رجلي؟'], en: ['All aboard!', 'Window seat is mine!', 'Is there AC in here?', 'Did I pay? No? Good', 'Nice clean helicopter!', 'Where do I put my feet?'] },
   grandma_board: { ar: ['ابني ساعدني أصعد', 'يمّه هاي الطيارة عالية', 'وين الكرسي؟ ركبتي!'], en: ['Help me up, dear', 'This helicopter is so high', 'Where\'s my seat? My knees!'] },
   jump: { ar: ['هوووب!', 'يا علي!', 'يلاااا!', 'شوفوني!', 'هسه أقفز!'], en: ['Hup!', 'Here I go!', 'Yallaaa!', 'Watch me!', 'JUMP!'] },
+  slip: { ar: ['شتريد أگلك؟ عاشت إيدك!'], en: ['What can I say? Great job!'] },
   missed: { ar: ['فاتني!', 'گلت لك قرّب شوية!', 'آني مو سبايدرمان!', 'مرة ثانية، مرة ثانية!', 'حچيلك بالأشارات؟ قرّب!'], en: ['Missed!', 'I said come closer!', 'I\'m not Spider-Man!', 'Again, again!', 'Come CLOSER!'] },
   dragged: { ar: ['إنت طحت وطيحتني وياك!!', 'ليش فلتت؟! ليييش؟!', 'آني شعليه؟!', 'كلنا رحنا وطي!!'], en: ['You fell and took me with you!!', 'Why did you let go?! WHY?!', 'What did I do?!', 'We\'re ALL going down!!'] },
   fingers: { ar: ['باقي إصبع واحد!!', 'إيدي! إيدي ترتجف!', 'رجلك تزلگ يا أخي!', 'دا أحاول! دا أحاول!', 'اللي تحتي يقرصني!'], en: ['One finger left!!', 'My hand is shaking!', 'Your foot is slippery, man!', 'I\'m trying! I\'m trying!', 'The guy below is pinching me!'] },
@@ -290,3 +291,50 @@ const RADIO = {
     en: ['Mission complete! Nobody fell… mostly', 'Great job! back to base', 'Tower: much better than yesterday']
   },
 };
+
+/* ============================================================
+   🎙️ الجمل المسجّلة بصوت — كل جملة إلها ملف بـ app/sounds/<id>.mp3
+   cat: المواقف اللي تطلع بيها (person = الناس العاديين، vip_ للعمدة)
+   لما تطلع، الفقاعة تكتب نفس الكلام اللي بالصوت.
+   radio: كلام يطلع بالراديو قبلها (مثلاً الطيار يحچي وهو يرد)
+   when: 'crowd' = بس إذا اكو 3 أو أكثر متعلقين
+   ============================================================ */
+const VOICE_LINES = [
+  { id: 'v_help1', cat: ['wait', 'waitWater', 'swim'], ar: 'الحگولي، الحگولي، الحگولي!', en: 'Help me! Help me! Help me!' },
+  { id: 'v_help2', cat: ['wait', 'waitWater', 'swim'], ar: 'ولك الحگولي!', en: 'Hey, HELP ME!' },
+  { id: 'v_scream2', cat: ['fall', 'twister'], ar: 'يابو حيدر!!', en: 'Oh Abu Haider!!' },
+  { id: 'v_panic1', cat: ['scared', 'fingers'], ar: 'يلا هيه خربانة خربانة!', en: "It's broken, it's all broken!" },
+  { id: 'v_c14', cat: ['scared'], ar: 'أردت أن… أردت أن… أردت أن…', en: 'I w-w-wanted to… I wanted…' },
+  { id: 'v_blame1', cat: ['dragged'], ar: 'آني شعليه؟ آني شكو؟', en: "What did I do?! What's it got to do with me?" },
+  { id: 'v_blame2', cat: ['dragged'], ar: 'وما لي دخل بيكم!', en: 'I have nothing to do with you people!' },
+  { id: 'v_slip', cat: ['slip'], ar: 'شتريد أگلك؟ عاشت إيدك!', en: 'What can I say? Great job!' },
+  { id: 'v_u1', cat: ['slip'], ar: 'هاي شنو هاي؟!', en: 'What is THIS?!' },
+  { id: 'v_u10', cat: ['missed'], ar: 'اوگف بروح أمك!', en: 'Stop, for your mother\'s sake!' },
+  { id: 'v_u9', cat: ['missed'], ar: 'هلو؟ هاي شنو هاي؟', en: 'Hello? What is this?' },
+  { id: 'v_c3', cat: ['jump'], ar: 'هاي كل قوتك؟', en: "That's all you've got?" },
+  { id: 'v_c13', cat: ['hit'], ar: 'اشبيك وجه الدبس!', en: "What's wrong with you, molasses-face!" },
+  { id: 'v_u11', cat: ['hit'], ar: 'هاي شبيك يمعود؟!', en: "What's wrong with you, man?!" },
+  { id: 'v_c7', cat: ['hot'], ar: 'انعل أبوك لأبو شرفك…!', en: 'Curse you and your whole family…!' },
+  { id: 'v_c4', cat: ['twister'], ar: 'عمي فتحولنا الحضر… وخلي يصير بينا أبو خريان!', en: 'Open the gates… let chaos rain on us!' },
+  { id: 'v_u2', cat: ['twister'], ar: 'مو جايز… حرام!', en: 'Not fair… this is wrong!' },
+  { id: 'v_u6', cat: ['heavy'], ar: 'هاي شنو؟ بغداد؟!', en: 'What is this, all of Baghdad?!' },
+  { id: 'v_u12', cat: ['heavy'], ar: 'لتدوخني!', en: "Don't make me dizzy!" },
+  { id: 'v_u4', cat: ['hang'], radio: { ar: 'الطيار: يمعود اثبت!', en: 'Pilot: Hold still, man!' }, ar: 'بخدمتك والله!', en: 'At your service, I swear!' },
+  { id: 'v_u5', cat: ['hang'], when: 'crowd', ar: '(كلهم يحچون بنفس الوقت 😂)', en: '(everyone talking at once 😂)' },
+  { id: 'v_sorry2', cat: ['full'], ar: 'مع كل الأسف، مع كل الأسف…', en: 'With all regret, with all regret…' },
+  { id: 'v_betray', cat: ['full'], ar: 'ليش الغش… ليش الخيانة!', en: 'Why the cheating… why the BETRAYAL!' },
+  { id: 'v_c2', cat: ['full'], ar: 'تف عليكم عارات!', en: 'Shame on all of you!' },
+  { id: 'v_c12', cat: ['full'], ar: 'شبيكم؟ ما شايفين؟!', en: "What's wrong with you? Can't you see me?!" },
+  { id: 'v_u3', cat: ['full'], ar: 'آآآآ… عافني!', en: 'Noooo… he left me!' },
+  { id: 'v_c11', cat: ['saved', 'landZone'], ar: 'زين ابن زين إنت!', en: "You're a good man, son of a good man!" },
+  { id: 'v_u8', cat: ['saved', 'landZone'], ar: 'أويلي!', en: 'Oh my!' },
+  { id: 'v_bye', cat: ['saved', 'landZone'], ar: 'الله وياك، الله وياك… سد الباب وراك حبيبي', en: 'God be with you… close the door behind you, dear' },
+  { id: 'v_c10', cat: ['landWater'], ar: 'رجعولي الكروة! لا أحرگ روحي!', en: 'Give me back my fare or I\'ll lose it!' },
+  { id: 'v_c8', cat: ['landWater'], ar: 'شوية عدل… فشّلتونا!', en: 'A bit straighter… you embarrassed us!' },
+  { id: 'v_c6', cat: ['landHard'], ar: 'خلص خلص…', en: 'Enough, enough…' },
+  { id: 'v_c9', cat: ['landHard'], ar: 'ترجعولي الكروة لو لا؟', en: 'Are you giving my fare back or not?' },
+  { id: 'v_vip', cat: ['vip_wait'], ar: 'ماي نيم إز مهند!', en: 'My name is Muhannad!' },
+  // تطلع بغير الفقاعات
+  { id: 'v_c5', cat: ['fail'], ar: 'لا والله شو عصبي… وتباوع صفح ومتنك!', en: 'Wow, so grumpy… looking sideways!' },
+  { id: 'v_crash1', cat: ['crash'], ar: 'خايب أكل خره!', en: 'Loser, go eat dirt!' },
+];

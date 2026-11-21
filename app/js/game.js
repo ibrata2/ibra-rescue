@@ -99,7 +99,7 @@ const AU = {
   saved() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.12, 'square', 0.05, 0, i * 0.07)); },
   splash() { if (SND.play('splash')) return; this.burst(0.45, 1800, 0.35); },
   thud() { if (SND.play('thud')) return; this.burst(0.18, 500, 0.4); this.tone(90, 0.15, 'sine', 0.2, -40); },
-  boom() { if (SND.play('explosion')) return; this.burst(1.6, 1200, 0.9); this.tone(70, 0.9, 'sine', 0.5, -50); },
+  boom(water) { if (water && SND.play('explosion_water')) return; if (SND.play('explosion')) return; this.burst(1.6, 1200, 0.9); this.tone(70, 0.9, 'sine', 0.5, -50); },
   thunder(delay) { if (SND.has('thunder')) { setTimeout(() => SND.play('thunder'), delay * 1000); return; } this.burst(2.2, 400, 0.6, 'lowpass', delay); },
   scream() { if (SND.play('scream', 1, 0.9 + Math.random() * 0.25)) return; this.tone(900, 0.8, 'sawtooth', 0.04, -600); },
   win() { if (SND.play('win')) return; [523, 659, 784, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.16, 'square', 0.06, 0, i * 0.11)); },
@@ -260,13 +260,33 @@ class Game {
     if (LINES[key]) return pick(LINES[key][lang()]).replace('{vip}', this.vipName());
     return line(cat);
   }
-  sayK(p, cat, opts) { const t = this.kline(p, cat); if (t) { this.say(p, t, opts); this.voice(p, cat); } }
+  sayK(p, cat, opts) { if (this.voiceLine(p, cat, opts)) return; const t = this.kline(p, cat); if (t) { this.say(p, t, opts); this.voice(p, cat); } }
+  // جملة مسجّلة بصوت: الفقاعة تكتب نفس الكلام اللي ينسمع
+  vlines(key) { return typeof VOICE_LINES === 'undefined' ? [] : VOICE_LINES.filter(v => v.cat.includes(key) && SND.has(v.id)); }
+  voiceLine(p, cat, opts) {
+    if (!save.sound || !this.onScreen(p.x) || !(p.kind === 'person' || p.kind === 'vip')) return false;
+    if (this.t - (this.lastVoice || -9) < 1.4) return false; // لا يتداخل صوتين
+    const key = p.kind === 'vip' ? 'vip_' + cat : cat;
+    const c = this.vlines(key).filter(v => v.when !== 'crowd' || this.chain.length >= 3);
+    if (!c.length || Math.random() > Math.min(0.85, 0.35 + 0.15 * c.length)) return false;
+    const fresh = c.filter(v => v.id !== this.lastVoiceId); const v = pick(fresh.length ? fresh : c);
+    this.lastVoice = this.t; this.lastVoiceId = v.id;
+    const go = () => { if (G !== this) return; this.say(p, lang() === 'ar' ? v.ar : v.en, { ...(opts || {}), force: true }); SND.play(v.id); };
+    if (v.radio) { this.radio(v.radio[lang()] || v.radio.ar); setTimeout(go, 1100); } else go();
+    return true;
+  }
   voice(p, cat) { // صوت حقيقي ويّا الكلام (إذا الملفات موجودة)
     if (!this.onScreen(p.x)) return;
     if (p.kind === 'sheep' || p.kind === 'cat') { SND.play(p.kind); return; }
     if (p.kind === 'crate') return;
-    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: 'cheer', jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'scream', landZone: 'cheer' };
+    // أصوات بدون كلام (الكلام صار جمل مسجّلة VOICE_LINES)
+    const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: ['cheer', 'laugh'], jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'nooo', fall: 'scream',
+      landZone: 'cheer', landWater: 'laugh', slip: 'v_slip' };
     let n = map[cat]; if (p.kind === 'grandma' && (cat === 'scared' || cat === 'wait' || cat === 'fingers')) n = 'grandma';
+    if (p.kind === 'vip' && cat === 'wait' && SND.has('vip')) n = 'vip';
+    if (Array.isArray(n)) { const ok = n.filter(k => SND.has(k)); n = ok.length ? pick(ok) : n[0]; } // يختار عشوائياً من الموجود
+    if (n === 'nooo' && !SND.has('nooo')) n = 'scream';
+    if (n === 'cheer' && !SND.has('cheer')) n = 'laugh';
     if (n) SND.play(n, 1, 0.92 + (p.id % 5) * 0.04);
   }
   radioK(cat) { this.radio(pick(RADIO[cat][lang()]).replace('{vip}', this.vipName())); }
@@ -690,7 +710,14 @@ class Game {
       p.jt += dt; const oy = p.y;
       p.vy += 300 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
       const E = this.chainEnd();
-      if (this.chain.length + this.cabin.length < this.ht.cap && Math.hypot(E.x - p.x, E.y - (p.y - 10)) < 8.5) { this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); return; }
+      if (this.chain.length + this.cabin.length < this.ht.cap && Math.hypot(E.x - p.x, E.y - (p.y - 10)) < 8.5) {
+        // يمسك الحبل بس يزلگ منه ويطيح (أكثر إذا الطيارة سريعة)
+        const hs = Math.hypot(this.heli.vx, this.heli.vy);
+        if (!p.slipped && p.kind === 'person' && Math.random() < (hs > 60 ? 0.5 : 0.1)) {
+          p.slipped = true; p.st = 'fall'; p.vx = this.heli.vx * 0.3 + (Math.random() - 0.5) * 30; p.vy = 20; AU.grab();
+          this.sayK(p, 'slip', { force: true }); return;
+        }
+        this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); return; }
       if (p.vy > 0) {
         for (const sd of this.L.solids) if (p.x > sd.x && p.x < sd.x + sd.w && oy <= sd.y + 0.5 && p.y >= sd.y) {
           p.y = sd.y; p.vx = p.vy = 0; p.st = 'wait'; p.cool = 1.3;
@@ -817,7 +844,7 @@ class Game {
     this.state = 'crash'; this.crashes++; this.shake = 8; this.flash = 0.6;
     const h = this.heli;
     if (solid && !solid.ground) this.destroyBuilding(solid, clamp(h.x, solid.x + 2, solid.x + solid.w - 2), clamp(h.y, solid.y, solid.y + solid.h)); h.rot = (Math.random() < 0.5 ? -1 : 1) * 4; h.vx *= 0.3; h.vy = -60;
-    AU.boom(); if (water) AU.splash();
+    AU.boom(water); if (water) AU.splash();
     for (let i = 0; i < 70; i++) {
       const a = Math.random() * Math.PI * 2, sp = 30 + Math.random() * 140;
       this.parts.push({ x: h.x, y: h.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, g: i % 3 ? 200 : -10, life: 0.6 + Math.random() * 1.6, c: i % 4 === 0 ? '#c8323c' : (i % 3 ? '#ebe1c8' : '#555'), s: i % 5 === 0 ? 3 : 1, solid: true, spin: (Math.random() - 0.5) * 20, a: 0 });
@@ -826,7 +853,9 @@ class Game {
     this.flags.cut = true;
     // كل المعلّقين يطيحون (بس بخير — هاي لعبة مضحكة 😄)
     for (const p of this.dropFrom(0)) { p.vy = -60 - Math.random() * 60; p.vx = (Math.random() - 0.5) * 120; }
-    this.crashLine = line('crash');
+    const cv = this.vlines('crash'); const vc = cv.length && Math.random() < 0.5 ? pick(cv) : null;
+    this.crashLine = vc ? (lang() === 'ar' ? vc.ar : vc.en) : line('crash');
+    if (vc) setTimeout(() => SND.play(vc.id), 900);
     this.say({ x: h.x, y: h.y - 10, id: 999 }, this.crashLine, { force: true, big: true, life: 4, pitch: 180 });
     setTimeout(() => { if (G === this) this.end(false, 'crashed'); }, 2600);
   }
@@ -842,6 +871,7 @@ class Game {
       setTimeout(() => G === this && showResult(this), 1800);
     } else {
       if (!wasCrash) AU.fail();
+      if (!wasCrash) { const fv = this.vlines('fail'); if (fv.length) setTimeout(() => SND.play(pick(fv).id), 1300); }
       setTimeout(() => G === this && showResult(this), wasCrash ? 200 : 1200);
     }
   }
@@ -1106,7 +1136,10 @@ class Game {
     // ضوء أحمر
     if (Math.sin(this.t * 8) > 0.6) { ctx.fillStyle = '#ff4a4a'; ctx.fillRect(-ht.cx + 1, -ht.cy + 1, 1, 1); }
     if (ht.siren) { const on = Math.floor(this.t * 6) % 2; ctx.fillStyle = on ? '#3a6ee8' : '#e83a3a'; ctx.fillRect(-1, -ht.cy + 1, 3, 1); ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.arc(1, -ht.cy + 1, 7, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
-    if (ht.camera && Math.sin(this.t * 1.7) > 0.985) { ctx.fillStyle = 'rgba(255,255,240,0.9)'; ctx.fillRect(8, 3, 4, 3); ctx.globalAlpha = 0.3; ctx.beginPath(); ctx.arc(10, 5, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+    const flash = ht.camera && Math.sin(this.t * 1.7) > 0.985;
+    if (flash && !this.flashOn && this.state === 'play') SND.play('camera', 1, 0.95 + Math.random() * 0.1); // صوت الكاميرا ويه الفلاش
+    this.flashOn = flash;
+    if (flash) { ctx.fillStyle = 'rgba(255,255,240,0.9)'; ctx.fillRect(8, 3, 4, 3); ctx.globalAlpha = 0.3; ctx.beginPath(); ctx.arc(10, 5, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
     ctx.restore();
   }
   drawWreck() {

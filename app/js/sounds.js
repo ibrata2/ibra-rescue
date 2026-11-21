@@ -35,19 +35,25 @@ const SOUND_LIST = {
   sheep:      { n: 2, vol: 0.7,  desc: 'ماع' },
   cat:        { n: 2, vol: 0.7,  desc: 'مياو' },
   thunder:    { n: 3, vol: 0.9,  desc: 'رعد' },
-  explosion:  { n: 2, vol: 1.0,  desc: 'انفجار الطيارة' },
-  collapse:   { n: 2, vol: 0.9,  desc: 'بناية تنهار / حجار تطيح' },
-  splash:     { n: 2, vol: 0.7,  desc: 'وگعة بالماي' },
-  thud:       { n: 2, vol: 0.7,  desc: 'وگعة على الأرض' },
-  grab:       { n: 1, vol: 0.5,  desc: 'مسك الحبل' },
+  explosion:  { n: 3, vol: 1.0,  desc: 'انفجار الطيارة (على الأرض / بناية)' },
+  explosion_water: { n: 2, vol: 1.0, desc: 'انفجار الطيارة داخل الماي' },
+  collapse:   { n: 3, vol: 0.9,  desc: 'بناية تنهار / حجار تطيح' },
+  splash:     { n: 4, vol: 0.7,  desc: 'وگعة بالماي' },
+  thud:       { n: 3, vol: 0.7,  desc: 'وگعة على الأرض' },
+  nooo:       { n: 1, vol: 0.9,  desc: 'لاااااا الطويلة (اللي فوگه طاح وسحبه)' },
+  laugh:      { n: 1, vol: 0.8,  desc: 'ضحكة (وگع بالماي وطلع سالم / وصل)' },
+  grab:       { n: 4, vol: 0.5,  desc: 'مسك الحبل' },
   land:       { n: 1, vol: 0.7,  desc: 'هبوط الطيارة' },
-  rip:        { n: 1, vol: 0.7,  desc: 'تمزيق حبل الغسيل' },
-  camera:     { n: 1, vol: 0.5,  desc: 'فلاش كاميرا (طيارة الأخبار)' },
-  radio:      { n: 1, vol: 0.4,  desc: 'تشويش راديو قبل كلام البرج' },
+  rip:        { n: 5, vol: 0.7,  desc: 'تمزيق حبل الغسيل' },
+  camera:     { n: 2, vol: 0.5,  desc: 'فلاش كاميرا (طيارة الأخبار)' },
+  radio:      { n: 3, vol: 0.4,  desc: 'تشويش راديو قبل كلام البرج' },
   win:        { n: 1, vol: 0.8,  desc: 'فوز بالمهمة' },
   fail:       { n: 1, vol: 0.8,  desc: 'خسارة' },
   click:      { n: 1, vol: 0.5,  desc: 'ضغطة زر' },
 };
+
+// الجمل المسجّلة (VOICE_LINES بـ text.js) — كل وحدة ملف بإسمها
+if (typeof VOICE_LINES !== 'undefined') for (const v of VOICE_LINES) SOUND_LIST[v.id] = { n: 1, vol: 0.95, desc: v.ar };
 
 const SND = {
   ready: {}, loops: {}, ctx: null, web: location.protocol !== 'file:', started: false,
