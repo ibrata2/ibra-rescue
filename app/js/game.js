@@ -99,7 +99,7 @@ const AU = {
   saved() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.12, 'square', 0.05, 0, i * 0.07)); },
   splash() { if (SND.play('splash')) return; this.burst(0.45, 1800, 0.35); },
   thud() { if (SND.play('thud')) return; this.burst(0.18, 500, 0.4); this.tone(90, 0.15, 'sine', 0.2, -40); },
-  boom() { if (SND.play('explosion')) return; this.burst(1.6, 1200, 0.9); this.tone(70, 0.9, 'sine', 0.5, -50); },
+  boom(water) { if (water && SND.play('explosion_water')) return; if (SND.play('explosion')) return; this.burst(1.6, 1200, 0.9); this.tone(70, 0.9, 'sine', 0.5, -50); },
   thunder(delay) { if (SND.has('thunder')) { setTimeout(() => SND.play('thunder'), delay * 1000); return; } this.burst(2.2, 400, 0.6, 'lowpass', delay); },
   scream() { if (SND.play('scream', 1, 0.9 + Math.random() * 0.25)) return; this.tone(900, 0.8, 'sawtooth', 0.04, -600); },
   win() { if (SND.play('win')) return; [523, 659, 784, 659, 784, 1046].forEach((f, i) => this.tone(f, 0.16, 'square', 0.06, 0, i * 0.11)); },
@@ -817,7 +817,7 @@ class Game {
     this.state = 'crash'; this.crashes++; this.shake = 8; this.flash = 0.6;
     const h = this.heli;
     if (solid && !solid.ground) this.destroyBuilding(solid, clamp(h.x, solid.x + 2, solid.x + solid.w - 2), clamp(h.y, solid.y, solid.y + solid.h)); h.rot = (Math.random() < 0.5 ? -1 : 1) * 4; h.vx *= 0.3; h.vy = -60;
-    AU.boom(); if (water) AU.splash();
+    AU.boom(water); if (water) AU.splash();
     for (let i = 0; i < 70; i++) {
       const a = Math.random() * Math.PI * 2, sp = 30 + Math.random() * 140;
       this.parts.push({ x: h.x, y: h.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, g: i % 3 ? 200 : -10, life: 0.6 + Math.random() * 1.6, c: i % 4 === 0 ? '#c8323c' : (i % 3 ? '#ebe1c8' : '#555'), s: i % 5 === 0 ? 3 : 1, solid: true, spin: (Math.random() - 0.5) * 20, a: 0 });

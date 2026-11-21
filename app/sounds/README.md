@@ -36,7 +36,8 @@
 | `sheep_1.mp3` … `sheep_2.mp3` | قصير (2 نسخ) | ماع |
 | `cat_1.mp3` … `cat_2.mp3` | قصير (2 نسخ) | مياو |
 | `thunder_1.mp3` … `thunder_3.mp3` | قصير (3 نسخ) | رعد |
-| `explosion_1.mp3` … `explosion_2.mp3` | قصير (2 نسخ) | انفجار الطيارة |
+| `explosion_1.mp3` … `explosion_3.mp3` | قصير (3 نسخ) | انفجار الطيارة على الأرض/بناية |
+| `explosion_water_1.mp3` … `explosion_water_2.mp3` | قصير (2 نسخ) | انفجار الطيارة داخل الماي |
 | `collapse_1.mp3` … `collapse_3.mp3` | قصير (3 نسخ) | بناية تنهار / حجار تطيح |
 | `splash_1.mp3` … `splash_2.mp3` | قصير (2 نسخ) | وگعة بالماي |
 | `thud_1.mp3` … `thud_2.mp3` | قصير (2 نسخ) | وگعة على الأرض |
