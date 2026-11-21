@@ -45,7 +45,9 @@ button{font-family:var(--font);cursor:pointer}
 /* خريطة المهمات */
 #map{align-items:stretch;justify-content:center;gap:18px;padding:18px;flex-wrap:wrap;overflow:auto}
 .globeWrap{flex:1 1 380px;max-width:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:260px;position:relative}
-#globe{width:min(100%,62vh);aspect-ratio:1;display:block}
+#globe{width:min(100%,56vh);aspect-ratio:4/5;display:block;image-rendering:pixelated;border:1px solid var(--line,#333);touch-action:pan-y}
+.wmNav{display:flex;gap:10px;justify-content:center;margin-top:8px}.wmNav .chbtn{width:56px}
+[dir=rtl] #wmPrev,[dir=rtl] #wmNext{transform:scaleX(-1)}
 .globeWrap .mhead{font-family:"Courier New",monospace;letter-spacing:.2em;color:var(--dim);font-size:13px;margin-bottom:6px}
 .side{flex:1 1 360px;max-width:520px;display:flex;flex-direction:column;gap:12px;min-width:280px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;backdrop-filter:blur(8px)}
@@ -206,7 +208,7 @@ button{font-family:var(--font);cursor:pointer}
 @media (max-height:520px){
   #map{padding-top:8px;padding-bottom:8px;gap:10px;align-items:flex-start}
   .globeWrap{flex:0 0 34%;min-width:180px}
-  #globe{width:min(100%,80vh)}
+  #globe{width:min(100%,62vh)}
   .side{flex:1 1 300px;gap:8px}
   .panel{padding:10px}
   #mDesc{font-size:12.5px;min-height:0;line-height:1.6}
@@ -266,6 +268,7 @@ button{font-family:var(--font);cursor:pointer}
   <div class="globeWrap">
     <div class="mhead">IBRA RESCUE · <span data-t="missions"></span></div>
     <canvas id="globe"></canvas>
+    <div class="wmNav"><button class="chbtn" id="wmPrev" aria-label="prev">‹</button><button class="chbtn" id="wmNext" aria-label="next">›</button></div>
   </div>
   <div class="side">
     <div class="panel">
@@ -383,5 +386,6 @@ button{font-family:var(--font);cursor:pointer}
 <script src="js/game.js"></script>
 <script src="js/story.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/worldmap.js"></script>
 </body>
 </html>
