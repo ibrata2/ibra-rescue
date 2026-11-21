@@ -39,7 +39,7 @@ const SOUND_LIST = {
   explosion_water: { n: 2, vol: 1.0, desc: 'انفجار الطيارة داخل الماي' },
   collapse:   { n: 3, vol: 0.9,  desc: 'بناية تنهار / حجار تطيح' },
   splash:     { n: 4, vol: 0.7,  desc: 'وگعة بالماي' },
-  thud:       { n: 2, vol: 0.7,  desc: 'وگعة على الأرض' },
+  thud:       { n: 3, vol: 0.7,  desc: 'وگعة على الأرض' },
   grab:       { n: 1, vol: 0.5,  desc: 'مسك الحبل' },
   land:       { n: 1, vol: 0.7,  desc: 'هبوط الطيارة' },
   rip:        { n: 1, vol: 0.7,  desc: 'تمزيق حبل الغسيل' },
