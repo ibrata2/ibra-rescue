@@ -126,7 +126,8 @@ jobs:
   # ---------------- النشر ----------------
   release:
     needs: [windows, android, ios]
-    if: always() && needs.windows.result == 'success'
+    # النشر بالإصدارات بس من main — الفروع الثانية نسخ فحص (تنزل من Actions)
+    if: always() && needs.windows.result == 'success' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
