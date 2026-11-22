@@ -27,7 +27,8 @@ const T = k => (STR[lang()] && STR[lang()][k]) || STR.en[k] || k;
 const pick = arr => arr[(Math.random() * arr.length) | 0];
 // يجمع التعليقات العامة + التعليقات الخاصة بالمهمة الحالية (إذا موجودة)
 const line = cat => {
-  const base = (LINES[cat] && LINES[cat][lang()]) || [];
+  const hl = G && G.m.dark && typeof HORROR_LINES !== 'undefined' && HORROR_LINES[cat] && HORROR_LINES[cat][lang()];
+  const base = hl || (LINES[cat] && LINES[cat][lang()]) || [];
   const extra = (G && G.m.lines && G.m.lines[cat] && G.m.lines[cat][lang()]) || [];
   return pick(base.concat(extra, extra)); // الخاصة لها فرصة أكبر
 };
@@ -271,6 +272,7 @@ class Game {
   // جملة مسجّلة بصوت: الفقاعة تكتب نفس الكلام اللي ينسمع
   vlines(key) { return typeof VOICE_LINES === 'undefined' ? [] : VOICE_LINES.filter(v => v.cat.includes(key) && SND.has(v.id)); }
   voiceLine(p, cat, opts) {
+    if (this.m.dark) return false; // قصة الرعب: بلا ميمز
     if (!save.sound || !this.onScreen(p.x) || !(p.kind === 'person' || p.kind === 'vip')) return false;
     if (this.t - (this.lastVoice || -9) < 1.4) return false; // لا يتداخل صوتين
     const key = p.kind === 'vip' ? 'vip_' + cat : cat;
@@ -1085,6 +1087,7 @@ class Game {
     ctx.setTransform(S, 0, 0, S, 0, 0);
     this.drawWeather(cam);
     if (this.flash > 0) { ctx.fillStyle = `rgba(240,235,220,${this.flash * 0.6})`; ctx.fillRect(0, 0, VW, VH); }
+    if (this.m.dark) this.drawDark(cam, cy, sy);
     // تظليل الحواف
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     const vg = ctx.createRadialGradient(CW / 2, CH / 2, CH * 0.35, CW / 2, CH / 2, CH * 0.95);
@@ -1107,6 +1110,35 @@ class Game {
         ctx.fillStyle = `rgba(235,225,200,${a})`; ctx.fillText(txt, CW / 2, y + hh / 2 + 1);
       }
     }
+  }
+  /* ---------- الظلام (قصة الرعب): بس ضوء الطيارة يكشف ---------- */
+  drawDark(cam, cy, sy) {
+    const d = this.darkCv || (this.darkCv = document.createElement('canvas'));
+    if (d.width !== CW || d.height !== CH) { d.width = CW; d.height = CH; }
+    const g = d.getContext('2d'), h = this.heli;
+    g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, CW, CH);
+    g.fillStyle = `rgba(2,3,5,${Math.max(0.15, 0.9 - this.flash * 0.85)})`; g.fillRect(0, 0, CW, CH);
+    g.globalCompositeOperation = 'destination-out';
+    const X = x => (x - cam) * S, Y = y => (y - cy + sy) * S;
+    const hole = (x, y, r, a) => { const cx = X(x), cyy = Y(y), R = r * S, gr = g.createRadialGradient(cx, cyy, 0, cx, cyy, R); gr.addColorStop(0, `rgba(0,0,0,${a})`); gr.addColorStop(0.55, `rgba(0,0,0,${a * 0.75})`); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.beginPath(); g.arc(cx, cyy, R, 0, 7); g.fill(); };
+    // الضوء يرمش أحياناً
+    this.flickT = (this.flickT || 0) - 1 / 60; if (this.flickT <= 0 && Math.random() < 0.004) this.flickT = 0.25 + Math.random() * 0.5;
+    const on = this.state === 'crash' ? 0.35 : (this.flickT > 0 ? (Math.random() < 0.5 ? 0.15 : 0.7) : 1);
+    hole(h.x, h.y, 38, on);
+    // كشّاف لتحت (يميل ويه الطيارة)
+    const ang = Math.PI / 2 + h.tilt * 0.9 + clamp(h.vx * 0.002, -0.3, 0.3), L = 190, half = 0.34, sx0 = X(h.x), sy0 = Y(h.y + 5);
+    const gr = g.createRadialGradient(sx0, sy0, 0, sx0, sy0, L * S); gr.addColorStop(0, `rgba(0,0,0,${0.95 * on})`); gr.addColorStop(0.7, `rgba(0,0,0,${0.55 * on})`); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.beginPath(); g.moveTo(sx0, sy0); g.lineTo(sx0 + Math.cos(ang - half) * L * S, sy0 + Math.sin(ang - half) * L * S); g.lineTo(sx0 + Math.cos(ang + half) * L * S, sy0 + Math.sin(ang + half) * L * S); g.closePath(); g.fill();
+    const E = this.chainEnd(); hole(E.x, E.y, 16, 0.6 * on);
+    for (const z of this.zones()) hole(z.x + z.w / 2, z.y - 6, 30, 0.85);
+    for (const f of this.L.fires || []) hole(f.x + f.w / 2, f.y - 12, 56, 1);
+    const blink = [];
+    for (const p of this.people) if ((p.st === 'wait' || p.st === 'swim') && Math.sin(this.t * 2.6 + p.id * 1.7) > 0.55) { hole(p.x, p.y - 8, 10, 0.55); blink.push(p); }
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(d, 0, 0);
+    // ضوا موبايل صغير بإيد اللي ينتظر
+    ctx.fillStyle = '#f2e8b0'; for (const p of blink) ctx.fillRect(Math.round(X(p.x + 2 * (p.face || 1))), Math.round(Y(p.y - 9)), Math.max(2, S), Math.max(2, S));
+    ctx.restore();
+    ctx.setTransform(S, 0, 0, S, 0, 0);
   }
   drawMoon(x, y, P) {
     const r = 17;

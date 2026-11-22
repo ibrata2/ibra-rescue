@@ -13,7 +13,7 @@ const ST_CHARS = {
   // الطوفان الأخير
   younis: { ar: 'يونس', en: 'Younis', skin: '#c99670', hair: '#1c1612', top: '#4d5a3c', bottom: '#3c4630', hat: 'helmet', beard: 1 },
   laila:  { ar: 'ليلى', en: 'Laila', skin: '#e0ae86', hair: '#2a1a10', top: '#e2b43c', bottom: '#2f3a52', hat: 'long', kid: 1, item: 'walkie' },
-  saad:   { ar: 'الحجية سعدية', en: 'Hajjiya Saadiya', skin: '#d2a07a', hair: '#111', top: '#141414', bottom: '#141414', hat: 'abaya', glasses: 1, dress: 1, short: 1 },
+  saadiya: { ar: 'الحجية سعدية', en: 'Hajjiya Saadiya', skin: '#d2a07a', hair: '#111', top: '#141414', bottom: '#141414', hat: 'abaya', glasses: 1, dress: 1, short: 1 },
   salma:  { ar: 'سلمى', en: 'Salma', skin: '#dcae88', hair: '#2a1a10', top: '#2a3a5a', bottom: '#2a3a5a', hat: 'hijab', scarf: '#6b2f3a', item: 'headset' },
   murad:  { ar: 'الكابتن مراد', en: 'Captain Murad', skin: '#c08a62', hair: '#bdb8ac', top: '#5a5040', bottom: '#4a4234', hat: 'helmet', mustache: 1 },
   asim:   { ar: 'عاصم', en: 'Asim', skin: '#d8a882', hair: '#111', top: '#a8853a', bottom: '#222', hat: 'slick', shades: 1 },
@@ -25,6 +25,25 @@ const ST_CHARS = {
   dijk:   { ar: 'فان دايك', en: 'Van Dijk', skin: '#ecc8a8', hair: '#d9c27a', top: '#1f2533', bottom: '#1f2533', hat: 'slick', tie: '#7a1a2a' },
   kenji:  { ar: 'كينجي', en: 'Kenji', skin: '#e6c09a', hair: '#cfcac0', top: '#6a6f60', bottom: '#3a3a36', hat: 'bald', glasses: 1 },
   guard:  { ar: 'حارس', en: 'Guard', skin: '#d0a07a', hair: '#222', top: '#1a1a1a', bottom: '#1a1a1a', hat: 'slick', shades: 1 },
+  // قصة الرعب
+  haider: { ar: 'حيدر', en: 'Haider', skin: '#c48f68', hair: '#161210', top: '#3a4450', bottom: '#2a3038', hat: 'helmet' },
+  nadia:  { ar: 'نادية', en: 'Nadia', skin: '#dcae88', hair: '#2a1a10', top: '#3a2a3a', bottom: '#2a2030', hat: 'hijab', scarf: '#2a2a2e', item: 'headset' },
+  kadhim: { ar: 'الحجي كاظم', en: 'Hajji Kadhim', skin: '#a87650', hair: '#e8e4da', top: '#2a2620', bottom: '#2a2620', hat: 'yashmagh', beard: 1, dress: 1 },
+  zainab: { ar: 'زينب', en: 'Zainab', skin: '#e0ae86', hair: '#1a120c', top: '#f0ece0', bottom: '#f0ece0', hat: 'long', kid: 1, dress: 1 },
+  father: { ar: 'أبو زينب', en: "Zainab's father", skin: '#c08a62', hair: '#222', top: '#4a3a2a', bottom: '#4a3a2a', hat: null, mustache: 1, dress: 1 },
+  // القصة المضحكة: سعدون
+  saad:  { ar: 'سعدون', en: 'Saadoun', skin: '#d9a77a', hair: '#2a1e16', top: '#c8323c', bottom: '#2f3a52', hat: 'helmet' },
+  abuj:  { ar: 'أبو جاسم', en: 'Abu Jassim', skin: '#c9946a', hair: '#1c1612', top: '#7a5a3a', bottom: '#3a3530', hat: 'bald', mustache: 1, item: 'tea', wide: 1 },
+  umr:   { ar: 'أم رزاق', en: 'Umm Razzaq', skin: '#d6a27c', hair: '#111', top: '#141414', bottom: '#141414', hat: 'abaya', glasses: 1, dress: 1, short: 1 },
+  abb:   { ar: 'عبّود', en: 'Abboud', skin: '#c8956e', hair: '#eee', top: '#5e6a3a', bottom: '#3c3a2a', hat: 'gold', beard: 1 },
+  raad:  { ar: 'المهندس رعد', en: 'Engineer Raad', skin: '#e0b48e', hair: '#151515', top: '#6b6f78', bottom: '#4a4e56', hat: 'slick', shades: 1, tie: '#3a6ee8' },
+  nas:   { ar: 'نسيم', en: 'Naseem', skin: '#d8a882', hair: '#111', top: '#2c5aa0', bottom: '#2c5aa0', hat: 'quiff', item: 'phone' },
+  sura:  { ar: 'سُرى', en: 'Sura', skin: '#e2b38e', hair: '#3a2416', top: '#b8302e', bottom: '#2a2a2e', hat: 'long', item: 'mic' },
+  muh:   { ar: 'العمدة مهند', en: 'Mayor Muhannad', skin: '#d4a07a', hair: '#222', top: '#1f2533', bottom: '#1f2533', hat: 'crown', tie: '#c8323c', wide: 1 },
+  ghas:  { ar: 'أبو الغسيل', en: 'Laundry Man', skin: '#c9946a', hair: '#555', top: '#ece6d6', bottom: '#ece6d6', hat: 'bald', dress: 1, vest: '#4a4036' },
+  ham:   { ar: 'حميد', en: 'Hamid', skin: '#b98258', hair: '#ddd', top: '#3a3026', bottom: '#3a3026', hat: 'yashmagh', beard: 1, dress: 1 },
+  groom: { ar: 'العريس', en: 'The Groom', skin: '#d6a47e', hair: '#111', top: '#151515', bottom: '#151515', hat: 'slick', tie: '#e8e0c8' },
+  zat:   { ar: 'زعطوط', en: 'Zaatout', cat: 1 },
   man:    { ar: 'واحد', en: 'A man', skin: '#d0a07a', hair: '#222', top: '#4a6a4a', bottom: '#33302a', hat: null },
 };
 function stDrawChar(g, key, cx, by, u, flip, t) {
@@ -195,6 +214,12 @@ function stDrawScene(g, sc, t) {
     if (k === 'ark') { const x = (a ?? 0.5) * ST_W, y = b ?? 214, tl = Math.sin(t * 0.8) * 0.04; g.save(); g.translate(x, y); g.rotate(tl + (k === 'ark' && a === -1 ? 0.2 : 0)); g.fillStyle = '#20252b'; g.beginPath(); g.moveTo(-150, -10); g.lineTo(150, -10); g.lineTo(120, 22); g.lineTo(-120, 22); g.fill(); g.fillStyle = '#2e353c'; g.fillRect(40, -46, 70, 36); g.fillStyle = '#e8d8a8'; for (let i = 0; i < 4; i++) g.fillRect(48 + i * 16, -36, 7, 5); for (let i = 0; i < 60; i++) { g.fillStyle = '#c9c0a8'; g.fillRect(-140 + i * 3.2, -14 - (i % 3), 1, 4); } g.restore(); }
     if (k === 'tablet') { const x = (a ?? 0.5) * ST_W, y = b ?? 180; g.fillStyle = `rgba(232,200,110,${0.2 + 0.1 * Math.sin(t * 3)})`; g.beginPath(); g.arc(x, y, 34, 0, 7); g.fill(); g.fillStyle = '#9a7a52'; g.fillRect(x - 16, y - 20, 32, 40); g.fillStyle = '#7a5a3a'; for (let r = 0; r < 7; r++) for (let c = 0; c < 6; c++) if ((r * 7 + c * 3) % 4) g.fillRect(x - 13 + c * 5, y - 16 + r * 5, 3, 1); }
     if (k === 'crate') { const x = (a ?? 0.5) * ST_W; g.fillStyle = '#6a4a2a'; g.fillRect(x - 22, 214, 44, 30); g.fillStyle = '#8a6a3a'; g.fillRect(x - 22, 214, 44, 3); g.fillRect(x - 22, 228, 44, 2); g.fillStyle = '#c8323c'; g.font = 'bold 8px monospace'; g.textAlign = 'center'; g.fillText('FRAGILE', x, 225); }
+    if (k === 'static') { for (let i = 0; i < 900; i++) { g.fillStyle = `rgba(230,225,210,${Math.random() * 0.25})`; g.fillRect((Math.random() * ST_W) | 0, (Math.random() * ST_H) | 0, 2, 1); } if (Math.random() < 0.08) { g.fillStyle = 'rgba(255,255,255,0.08)'; g.fillRect(0, (Math.random() * ST_H) | 0, ST_W, 6); } }
+    if (k === 'fog') { for (let i = 0; i < 5; i++) { const y = 150 + i * 22, x = ((t * (8 + i * 3) + i * 90) % (ST_W + 300)) - 300; g.fillStyle = 'rgba(170,175,180,0.10)'; g.fillRect(x, y, 300, 26); g.fillRect(x + 200, y + 8, 260, 18); } g.fillStyle = 'rgba(10,12,14,0.35)'; g.fillRect(0, 0, ST_W, ST_H); }
+    if (k === 'eyes') { const x = (a ?? 0.7) * ST_W, y = b ?? 200, open = (t + x) % 3.5 > 0.15; if (open) { g.fillStyle = '#e8d84a'; g.fillRect(x - 6, y, 3, 2); g.fillRect(x + 4, y, 3, 2); g.fillStyle = 'rgba(232,216,74,0.25)'; g.fillRect(x - 8, y - 1, 17, 4); } }
+    if (k === 'tantal') { const x = (a ?? 0.7) * ST_W + Math.sin(t * 0.4) * 4, base = 236, hgt = 170; g.fillStyle = 'rgba(6,6,8,0.92)';
+      g.beginPath(); g.moveTo(x - 10, base); g.lineTo(x - 7, base - hgt * 0.55); g.lineTo(x - 18, base - hgt * 0.5); g.lineTo(x - 26, base - hgt * 0.2); g.lineTo(x - 22, base - hgt * 0.18); g.lineTo(x - 12, base - hgt * 0.6); g.lineTo(x - 8, base - hgt * 0.82); g.lineTo(x, base - hgt); g.lineTo(x + 8, base - hgt * 0.82); g.lineTo(x + 12, base - hgt * 0.6); g.lineTo(x + 22, base - hgt * 0.18); g.lineTo(x + 26, base - hgt * 0.2); g.lineTo(x + 18, base - hgt * 0.5); g.lineTo(x + 7, base - hgt * 0.55); g.lineTo(x + 10, base); g.fill();
+      if ((t % 4) > 0.12) { g.fillStyle = '#d8c84a'; g.fillRect(x - 5, base - hgt * 0.88, 3, 2); g.fillRect(x + 3, base - hgt * 0.88, 3, 2); } }
     if (k === 'tape') { g.fillStyle = '#222'; g.fillRect(a * ST_W, 224, 30, 18); g.fillStyle = '#eee'; g.beginPath(); g.arc(a * ST_W + 9, 233, 4, 0, 7); g.arc(a * ST_W + 21, 233, 4, 0, 7); g.fill(); }
   }
 }
@@ -388,7 +413,7 @@ const STORY_FLOOD = [
     ],
     outro: [
       { scene: { lvl: ['mountain', 'night'], cam: 0.4, fx: [['heli', 'chinook', 0.5]] }, cap: ['الطيارة تنزل فوگ الجبل، وليلى بآخر السلّم. المروحة توگف شوية شوية.', 'The heli settles on the Mountain, Laila at the end of the ladder. The rotor slows… and stops.'], note: ['لأول مرة باللعبة… ماكو صوت مطر.', 'For the first time in the game… no sound of rain.'] },
-      { scene: { lvl: ['mountain', 'dusk'], cam: 0.5 }, chars: [['laila', 0.4], ['younis', 0.6, 1], ['saad', 0.2]], lines: [['laila', 'بابا، گلتلك ترجع قبل لا يوصل الماي للسطح… وصل.', 'Dad, I told you to come back before the water reached the roof… it did.'], ['younis', 'أدري… بس آني ما وگفت. ولا ليلة.', 'I know… but I never stopped. Not one night.'], ['saad', '(لأول مرة تبچي) الله يرحم أمها… لو شافتك.', '(crying for the first time) God rest her mother… if only she could see you.']] },
+      { scene: { lvl: ['mountain', 'dusk'], cam: 0.5 }, chars: [['laila', 0.4], ['younis', 0.6, 1], ['saadiya', 0.2]], lines: [['laila', 'بابا، گلتلك ترجع قبل لا يوصل الماي للسطح… وصل.', 'Dad, I told you to come back before the water reached the roof… it did.'], ['younis', 'أدري… بس آني ما وگفت. ولا ليلة.', 'I know… but I never stopped. Not one night.'], ['saadiya', '(لأول مرة تبچي) الله يرحم أمها… لو شافتك.', '(crying for the first time) God rest her mother… if only she could see you.']] },
       { scene: { lvl: ['mountain', 'dusk'], cam: 0.7, fx: ['sun'] }, chars: [['abuali', 0.3]], cap: ['الشمس تطلع بعد أربعين ليلة. آلاف الناس فوگ الجبل… وبينهم أبو علي وجاموسه.', 'The sun rises after forty nights. Thousands on the Mountain… among them, Abu Ali and his buffalo.'], lines: [['radio', 'سلمى: لكل الطيارين… الماي دا ينزل.', 'Salma: To all pilots… the water is going down.']] },
     ],
     ending: true,
@@ -500,9 +525,343 @@ const STORY_URUK_POST = [
   { scene: { lvl: ['baghdad', 'day'], cam: 0.3, fx: [['parked', 'police', 0.55]] }, chars: [['jabbar', 0.3], ['ali', 0.65, 1]], cap: ['بعد شهرين.', 'Two months later.'], lines: [['jabbar', 'علي… عندي طلبية. صندوق من بغداد لـ…', 'Ali… I\'ve got a job. One crate from Baghdad to…'], ['ali', 'جبّار.', 'Jabbar.'], ['jabbar', 'طحين! والله طحين!', 'Flour! I swear, flour!']] },
 ];
 
+/* ============================================================
+   القصة المضحكة: سعدون وغيمة بغداد
+   ============================================================ */
+function smF(id, o) { return sm(id, Object.assign({ pal: 'day', worldW: 1300, time: 200 }, o.style === 'mountain' && !o.city ? { city: { ar: 'جبال كردستان', en: 'Kurdistan Mountains' } } : {}, o)); }
+const STORY_FUNNY = [
+  { // ───────── الفصل 1
+    id: 'ch1', title: ['أول يوم… آخر يوم؟', 'First Day… Last Day?'], city: ['بغداد', 'Baghdad'],
+    intro: [
+      { scene: { lvl: ['baghdad', 'day'], cam: 0.1, pan: 6, fx: ['runway'] }, chars: [['saad', 0.3]], cap: ['بغداد. سعدون، عامل توصيل على بايسكل، جايب طلبية كباب للمطار…', 'Baghdad. Saadoun, a bike delivery guy, brings a kebab order to the airport…'], lines: [['saad', 'طلبية كباب لـ… «قسم الطيارين الجدد»؟', 'Kebab order for… "New Pilots Department"?']] },
+      { scene: { room: 'tower' }, chars: [['abuj', 0.62, 1], ['saad', 0.3]], lines: [['abuj', 'إنت سعدون؟ اسمك أول واحد بالقائمة. اصعد!', "You're Saadoun? You're first on the list. Get in!"], ['saad', 'عمي آني جايب كباب…', "Sir, I'm just delivering kebab…"], ['abuj', 'زين، اكله بالطيارة. اليوم بلا حوادث رجاءً!', 'Fine, eat it in the heli. No accidents today, please!']] },
+      { scene: { lvl: ['baghdad', 'day'], cam: 0.3, fx: ['runway', ['parked', 'small', 0.55]] }, chars: [['saad', 0.35], ['zat', 0.48]], lines: [['saad', 'هاي… الطيارة؟ وين الدواسات؟', 'This… is the heli? Where are the pedals?'], ['radio', 'أبو جاسم: الأسهم للطيران، والحبل ينزل وحده. يلا!', 'Abu Jassim: Arrows to fly, the rope lowers itself. Go!']], note: ['ما انتبه أحد لشي رمادي صغير دخل للطيارة…', 'Nobody noticed something small and grey sneaking into the heli…'] },
+    ],
+    missions: [
+      smF('1_1', { style: 'baghdad', name: ['التدريب', 'Training'], desc: ['أول طيران إلك. نزّل الحبل جنب الناس، يقفزون ويمسكون. وصّل 2 للمهبط.', 'Your first flight. Lower the rope near people — they jump on. Bring 2 to the helipad.'], goal: 2, people: 3, time: 220, worldW: 1100, lines: { wait: { ar: ['إنت الطيار الجديد؟ يمّه!', 'جبت الكباب؟'], en: ['You\'re the new pilot? Oh no!', 'Did you bring the kebab?'] } } }),
+      smF('1_2', { style: 'baghdad', pal: 'dusk', name: ['سطح الكرادة', 'Karrada Rooftop'], desc: ['3 ناس فوگ سطح بالكرادة. خلي الحبل يرفرف بهدوء.', '3 people on a Karrada rooftop. Keep the rope steady.'], goal: 3, people: 4, time: 210 }),
+      smF('1_3', { style: 'baghdad', name: ['حبل الغسيل', 'The Clothesline'], desc: ['انتبه لحبال الغسيل! أبو الغسيل ما يسامح.', 'Mind the clotheslines! The laundry man never forgives.'], goal: 4, people: 5, time: 220, wind: { base: 4, gust: 10 }, lines: { laundry: { ar: ['أبو الغسيل: هاي دشداشة أبوي!!'], en: ['Laundry man: My father\'s dishdasha!!'] } } }),
+      smF('1_4', { style: 'baghdad', pal: 'night', name: ['السلسلة', 'The Chain'], desc: ['الناس يمسكون رجول بعض. 5 واحد مرة وحدة؟ جرّب!', 'People hold each other\'s feet. 5 at once? Try it!'], goal: 5, people: 6, time: 230 }),
+      smF('1_5', { style: 'baghdad', pal: 'dusk', name: ['المنارة', 'The Minaret'], desc: ['آخر مهمة باليوم الأول. وصّل 5… وحاول ما تضرب المنارة.', 'Last mission of day one. Bring 5… and try not to hit the minaret.'], goal: 5, people: 7, time: 240, wind: { base: -4, gust: 12 } }),
+    ],
+    outro: [
+      { scene: { lvl: ['baghdad', 'dusk'], cam: 0.5, fx: [['tv', 'طيار جديد يهدم نص بغداد بأول يوم!']] }, chars: [['sura', 0.3]], lines: [['sura', 'نحن على الهواء مباشرة! طيار جديد ضرب منارة بأول يوم!', 'We\'re live! A new pilot hit a minaret on his first day!']] },
+      { scene: { room: 'tower' }, chars: [['abuj', 0.6, 1], ['saad', 0.32]], lines: [['abuj', 'ذاك كان أثر تاريخي!!', 'That was a historic landmark!!'], ['saad', 'هسه صار أثرين…', 'Now it\'s two landmarks…'], ['abuj', 'روح للبيت… وتعال باچر. ماكو غيرك.', 'Go home… and come back tomorrow. There\'s nobody else.']] },
+      { scene: { room: 'home' }, chars: [['umr', 0.4], ['saad', 0.62, 1]], lines: [['umr', 'ابني شفتك بالتلفزيون! ليش الطيارة بيها دخان؟', 'Son, I saw you on TV! Why was the heli smoking?'], ['saad', 'يمّه… أول يوم بالشغل.', 'Grandma… first day on the job.'], ['umr', 'زين… تغديت؟', 'Fine… did you eat?']] },
+    ],
+  },
+  { // ───────── الفصل 2
+    id: 'ch2', title: ['فيضان بلا غيم', 'A Flood Without Clouds'], city: ['دجلة', 'The Tigris'],
+    intro: [
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.4, fx: [['flood', 226]] }, cap: ['نص الليل. السما صافية والقمر بايّن… ودجلة تفيض فجأة.', 'Midnight. Clear sky, full moon… and the Tigris suddenly floods.'] },
+      { scene: { room: 'tower' }, chars: [['abuj', 0.6, 1], ['saad', 0.3]], lines: [['abuj', 'ما شايف غيمة وحدة! منين هالماي؟', 'Not a single cloud! Where is all this water from?'], ['saad', 'يمكن أحد نسى الحنفية مفتوحة؟', 'Maybe someone left the tap on?'], ['abuj', 'روح! والقوارب تنتظر تحت.', 'Go! The boats are waiting below.']] },
+    ],
+    missions: [
+      smF('2_1', { style: 'baghdad', pal: 'night', name: ['فيضان بلا غيم', 'Cloudless Flood'], desc: ['الماي يصعد. وصّل الناس للقوارب.', 'The water is rising. Get people to the boats.'], goal: 4, weather: 'flood', zones: 'boat', water: W_FLOOD(262, 238, 0.14), time: 220 }),
+      smF('2_2', { style: 'baghdad', pal: 'night', name: ['السبّاحين', 'The Swimmers'], desc: ['ناس طاحوا بالماي ويسبحون. نزّل الحبل عليهم.', 'People fell in and are swimming. Lower the rope to them.'], goal: 5, weather: 'flood', zones: 'boat', water: W_FLOOD(256, 236, 0.12), time: 230 }),
+      smF('2_3', { style: 'baghdad', pal: 'night', name: ['قارب النجاة', 'The Lifeboat'], desc: ['جرّب تهبط على القارب بهدوء، الناس ينزلون وحدهم.', 'Try landing gently on the boat — people climb down by themselves.'], goal: 6, people: 8, weather: 'flood', zones: 'boat', water: W_FLOOD(262, 232, 0.16), time: 240, heli: 'medic' }),
+      smF('2_4', { style: 'baghdad', pal: 'night', type: 'animals', name: ['الخروف', 'The Sheep'], desc: ['خرفان عالقة! الحيوان ما يمسك الحبل، لازم واحد معلّق يشيله بإيده.', 'Stranded sheep! Animals can\'t hold the rope — a hanging person must carry them.'], goal: 3, weather: 'flood', zones: 'boat', water: W_FLOOD(262, 240, 0.1), time: 240 }),
+      smF('2_5', { style: 'baghdad', pal: 'night', name: ['البخار الأزرق', 'The Blue Steam'], desc: ['المطر بدا فجأة… من وين؟ آخر الناس بالحي.', 'Rain started from nowhere… Last people in the district.'], goal: 6, people: 8, weather: 'rain', zones: 'boat', water: W_FLOOD(260, 230, 0.18), time: 250 }),
+    ],
+    outro: [
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.7, fx: [['flood', 230], ['steam', 0.8, 120], ['heli', 'small', 0.35]] }, lines: [['radio', 'سعدون: أبو جاسم… اكو جهاز فوگ السطح يطلع بخار أزرق!', 'Saadoun: Abu Jassim… there\'s a machine on that roof puffing blue steam!'], ['radio', 'سعدون: …اختفى! صوّرته، بس الصورة طلعت مهزوزة.', 'Saadoun: …it vanished! I took a photo, but it\'s blurry.']] },
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.2, fx: [['parked', 'small', 0.45]] }, chars: [['saad', 0.3], ['zat', 0.55]], lines: [['zat', 'مياو.', 'Meow.'], ['saad', 'زعطوط؟! شلون صعدتي للطيارة؟!', 'Zaatout?! How did you get in the heli?!'], ['zat', '(نظرة احتقار)', '(look of contempt)']] },
+    ],
+  },
+  { // ───────── الفصل 3
+    id: 'ch3', title: ['حچي الجدّة', "Grandma's Secret"], city: ['الحي', 'The Neighborhood'],
+    intro: [
+      { scene: { room: 'home' }, chars: [['saad', 0.62, 1], ['umr', 0.38]], lines: [['saad', 'يمّه شوفي هالصورة… جهاز يطلع بخار أزرق.', 'Grandma, look at this photo… a machine with blue steam.'], ['umr', '……', '……'], ['saad', 'يمّه؟ ليش سكتي؟ أول مرة بحياتج تسكتين!', 'Grandma? Why so quiet? First time in your life!']] },
+      { scene: { room: 'home' }, chars: [['umr', 0.38], ['saad', 0.62, 1]], lines: [['umr', 'جدّك عبّود شاف نفس الشي قبل 30 سنة… وبعدها اختفى.', 'Your grandpa Abboud saw the same thing 30 years ago… then he vanished.'], ['saad', 'يعني مو مات بحادث؟', 'So he didn\'t die in an accident?'], ['umr', 'خذ هالمفتاح. عليه صقر… مثل طيارته.', 'Take this key. It has a falcon on it… like his heli.']] },
+      { scene: { room: 'home' }, chars: [['saad', 0.5], ['zat', 0.66, 1]], lines: [['zat', '(تخطف المفتاح… وتبلعه)', '(snatches the key… and swallows it)'], ['saad', 'زعطوووط!!', 'ZAATOUUUT!!']] },
+    ],
+    missions: [
+      smF('3_1', { style: 'baghdad', name: ['الجيران', 'The Neighbors'], desc: ['زعطوط هربت فوگ السطوح، والجيران عالقين بسبب حريق صغير. ساعدهم.', 'Zaatout fled over the rooftops, and neighbors are stuck by a small fire. Help them.'], goal: 4, type: 'fire', fire: 2, time: 220 }),
+      smF('3_2', { style: 'baghdad', pal: 'day', name: ['أبو الغسيل', 'The Laundry Man'], desc: ['حبال غسيل بكل مكان والريح قوية. أبو الغسيل يراقبك…', 'Clotheslines everywhere and strong wind. The laundry man is watching…'], goal: 5, wind: { base: 8, gust: 18 }, weather: 'wind', time: 230 }),
+      smF('3_3', { style: 'baghdad', pal: 'dusk', type: 'cargo', cargo: 'flour', name: ['صواني أم رزاق', "Grandma's Trays"], desc: ['أم رزاق تطبخ سمچ حتى ترجّع زعطوط المفتاح! وصّل الطحين والصواني.', 'Grandma is cooking fish to lure Zaatout! Deliver flour and trays.'], goal: 4, time: 220 }),
+      smF('3_4', { style: 'baghdad', pal: 'night', type: 'animals', name: ['ملاحقة زعطوط', 'Chasing Zaatout'], desc: ['بزازين الحي كلها فوگ السطوح! واحدة منهن زعطوط.', 'All the neighborhood cats are on the roofs! One of them is Zaatout.'], goal: 3, time: 240 }),
+    ],
+    outro: [
+      { scene: { room: 'home' }, chars: [['umr', 0.3], ['zat', 0.5], ['saad', 0.7, 1]], lines: [['umr', 'تعالي حبيبتي… سمچة مسگوف إلج. بس رجّعي المفتاح.', 'Come, sweetie… a grilled fish for you. Just give back the key.'], ['zat', '(تفكر… ثم تطلع المفتاح)', '(thinks… then coughs up the key)'], ['saad', 'يع… بس شكراً.', 'Ew… but thanks.']] },
+      { scene: { room: 'home' }, chars: [['saad', 0.5]], lines: [['saad', 'المفتاح مكتوب عليه: «الأهوار – المضيف الكبير».', 'The key says: "The Marshes – the Great Mudhif".']], note: ['الطريق للسر بدا…', 'The road to the secret begins…'] },
+    ],
+  },
+  { // ───────── الفصل 4
+    id: 'ch4', title: ['المنافس', 'The Rival'], city: ['طوكيو', 'Tokyo'],
+    intro: [
+      { scene: { room: 'tower' }, chars: [['abuj', 0.6, 1], ['saad', 0.3]], lines: [['abuj', 'مسابقة إنقاذ دولية بطوكيو… وسجّلت اسمك بدل اسمي بالغلط.', 'International rescue contest in Tokyo… and I accidentally entered your name instead of mine.'], ['saad', 'بالغلط؟', 'Accidentally?'], ['abuj', '…لا تسأل. روح مثّل العراق!', '…Don\'t ask. Go represent Iraq!']] },
+      { scene: { lvl: ['tokyo', 'night'], cam: 0.3, fx: [['parked', 'news', 0.62]] }, chars: [['nas', 0.65, 1], ['saad', 0.3]], lines: [['nas', 'شوفوا المحترفين شلون يسوونها. (يصوّر سيلفي)', 'Watch how the pros do it. (takes a selfie)'], ['saad', 'شنو هذا الشعار على طيارتك؟ «غيمة»؟', 'What\'s that logo on your heli? "Ghayma"?'], ['nas', 'أكبر شركة طقس بالعالم، حبيبي.', 'The biggest weather company in the world, buddy.']] },
+    ],
+    missions: [
+      smF('4_1', { style: 'tokyo', pal: 'night', name: ['المسابقة', 'The Contest'], desc: ['الجولة الأولى: أنقذ 6 قبل نسيم!', 'Round one: rescue 6 before Naseem!'], goal: 6, people: 8, time: 220 }),
+      smF('4_2', { style: 'tokyo', pal: 'night', heli: 'police', name: ['ضد الوقت', 'Against the Clock'], desc: ['وقت قليل وطيارة سريعة. لا تضرب الباگودا!', 'Little time and a fast heli. Don\'t hit the pagoda!'], goal: 6, time: 170 }),
+      smF('4_3', { style: 'tokyo', pal: 'night', name: ['العاصفة', 'The Storm'], desc: ['مطر وبرق والشوارع غرگت. وصّل للقوارب.', 'Rain, lightning, flooded streets. Get them to the boats.'], goal: 7, people: 9, weather: 'storm', zones: 'boat', water: W_FLOOD(272, 240, 0.15), wind: { base: 6, gust: 20 }, time: 250 }),
+      smF('4_4', { style: 'tokyo', pal: 'dusk', name: ['الإعصار الأول', 'The First Twister'], desc: ['إعصار من العدم بنص المسابقة! يشيل الناس من السطوح.', 'A twister out of nowhere mid-contest! It lifts people off roofs.'], goal: 5, weather: 'tornado', tornados: 1, time: 240 }),
+      smF('4_5', { style: 'tokyo', pal: 'night', type: 'vip', vipName: { ar: 'الكابتن نسيم', en: 'Captain Naseem' }, name: ['إنقاذ نسيم', 'Saving Naseem'], desc: ['طيارة نسيم تعطلت وهو معلّق بحبل غسيل! لازم يكون وياهم.', 'Naseem\'s heli broke down and he\'s hanging on a clothesline! He must be rescued.'], goal: 4, time: 220 }),
+    ],
+    outro: [
+      { scene: { lvl: ['tokyo', 'night'], cam: 0.5 }, chars: [['nas', 0.4], ['saad', 0.62, 1]], lines: [['nas', 'هاي… ما صارت. محد يگول لأحد.', 'This… never happened. Tell no one.'], ['saad', 'ولا يهمك.', 'Sure thing.']] },
+      { scene: { lvl: ['tokyo', 'night'], cam: 0.6, fx: [['tv', 'طيار عراقي ينقذ منافسه المعلّق بحبل غسيل!']] }, chars: [['sura', 0.3]], lines: [['sura', 'نحن على الهواء مباشرة! العراقي فاز… والمنافس معلّق بالغسيل!', "We're live! The Iraqi won… and his rival is hanging on laundry!"]] },
+    ],
+  },
+  { // ───────── الفصل 5
+    id: 'ch5', title: ['العمدة والبرج', 'The Mayor and the Tower'], city: ['دبي', 'Dubai'],
+    intro: [
+      { scene: { lvl: ['dubai', 'dusk'], cam: 0.3, fx: ['sand'] }, cap: ['عاصفة ترابية تغطّي الأبراج… وبالأعلى، شخص مهم يلوّح.', 'A sandstorm covers the towers… and at the top, an important man waves.'] },
+      { scene: { lvl: ['dubai', 'dusk'], cam: 0.5, fx: ['sand'] }, chars: [['muh', 0.6, 1]], lines: [['muh', 'My name is مهند! قبل لا تنقذوني أريد مؤتمر صحفي!', 'My name is Muhannad! Before you rescue me I want a press conference!'], ['radio', 'سعدون: عمي التراب غطّى الكاميرات!', 'Saadoun: Sir, the sand covered the cameras!']] },
+    ],
+    missions: [
+      smF('5_1', { style: 'dubai', pal: 'dusk', name: ['عاصفة الرمل', 'Sandstorm'], desc: ['الرؤية قليلة والريح تدفع. وصّل 6 للمهبط.', 'Low visibility and pushing wind. Bring 6 to the helipad.'], goal: 6, weather: 'sand', wind: { base: 10, gust: 26 }, time: 240 }),
+      smF('5_2', { style: 'dubai', pal: 'dusk', heli: 'medic', name: ['الأبراج', 'The Towers'], desc: ['أبراج عالية… الحبل لازم يكون مرفوع (Q/E).', 'Tall towers… keep the rope raised (Q/E).'], goal: 6, people: 8, weather: 'sand', wind: { base: -8, gust: 22 }, time: 240 }),
+      smF('5_3', { style: 'dubai', pal: 'day', type: 'cargo', cargo: 'medicine', heli: 'police', name: ['الدوا', 'The Medicine'], desc: ['المستشفى محتاج دوا. وصّل الصناديق.', 'The hospital needs medicine. Deliver the crates.'], goal: 5, time: 220 }),
+      smF('5_4', { style: 'dubai', pal: 'dusk', type: 'vip', vipName: { ar: 'العمدة مهند', en: 'Mayor Muhannad' }, name: ['العمدة مهند', 'Mayor Muhannad'], desc: ['العمدة يرفض يمسك رجول أحد! خلّيه أول واحد بالحبل.', 'The mayor refuses to hold anyone\'s feet! Make him first on the rope.'], goal: 5, weather: 'sand', time: 240, lines: { wait: { ar: ['آني ما أمسك رجول أحد!'], en: ["I don't hold anyone's feet!"] } } }),
+      smF('5_5', { style: 'dubai', pal: 'night', type: 'fire', fire: 4, name: ['حريق البرج', 'Tower Fire'], desc: ['حريق بالأبراج بعد العاصفة. لا تطير فوگ النار.', 'Fires in the towers after the storm. Don\'t fly over the flames.'], goal: 6, time: 240 }),
+    ],
+    outro: [
+      { scene: { lvl: ['dubai', 'night'], cam: 0.4, fx: [['tv', 'شركة غيمة: اشترك بتأمين الكوارث اليوم!']] }, chars: [['raad', 0.35]], lines: [['raad', 'الطقس مو قدر، الطقس خدمة. اشترك اليوم بسعر مميز!', "Weather isn't fate, weather is a service. Subscribe today!"]] },
+      { scene: { lvl: ['dubai', 'night'], cam: 0.6 }, chars: [['sura', 0.38], ['saad', 0.62, 1]], lines: [['sura', 'لاحظت؟ العاصفة بدت قبل إعلانه بنص ساعة بالضبط.', 'Did you notice? The storm started exactly half an hour before his ad.'], ['saad', 'يعني… كان يعرف؟', 'So… he knew?'], ['sura', 'شلون عرف بالعاصفة قبل لا تصير؟', 'How did he know about the storm before it happened?']] },
+    ],
+  },
+  { // ───────── الفصل 6
+    id: 'ch6', title: ['الصقر الذهبي', 'The Golden Falcon'], city: ['الأهوار', 'The Marshes'],
+    intro: [
+      { scene: { lvl: ['marsh', 'dusk'], cam: 0.3 }, chars: [['ham', 0.62, 1], ['saad', 0.32]], lines: [['saad', 'عمي، تعرف هالمفتاح؟', 'Uncle, do you know this key?'], ['ham', 'هذا مفتاح عبّود… صارلي 30 سنة أنتظر أحد يجيبه.', "That's Abboud's key… I've waited 30 years for someone to bring it."]] },
+      { scene: { lvl: ['marsh', 'dusk'], cam: 0.5 }, chars: [['ham', 0.5]], lines: [['ham', 'بس أول… الهوا هنا ما يرحم. لازم تتعلم تقرا الهوا مثل ما تقرا الماي.', 'But first… the wind here is merciless. Learn to read the wind like you read water.']] },
+    ],
+    missions: [
+      smF('6_1', { style: 'marsh', pal: 'dusk', name: ['المضيف', 'The Mudhif'], desc: ['صيادين فوگ المضايف والريح قوية.', 'Fishermen on the mudhifs, and strong wind.'], goal: 5, weather: 'wind', zones: 'boat', water: W_FLOOD(258, 258, 0), wind: { base: -10, gust: 24 }, time: 230 }),
+      smF('6_2', { style: 'marsh', pal: 'day', name: ['الصيادين', 'The Fishermen'], desc: ['الهبّات تزيد. «الحبل مثل الشبچة، ارخي وشدّ» (Q/E).', 'Gusts get stronger. "The rope is like a net — slack and pull" (Q/E).'], goal: 6, weather: 'wind', zones: 'boat', water: W_FLOOD(258, 258, 0), wind: { base: 8, gust: 30 }, time: 240 }),
+      smF('6_3', { style: 'marsh', pal: 'dusk', type: 'animals', name: ['الجاموس… قصدي الخرفان', 'Buffalo… I mean Sheep'], desc: ['الجاموس ثقيل هواية، فخلّينا بالخرفان.', 'Buffalo are way too heavy, so let\'s stick to sheep.'], goal: 3, zones: 'boat', water: W_FLOOD(258, 258, 0), wind: { base: 0, gust: 16 }, time: 240 }),
+      smF('6_4', { style: 'marsh', pal: 'night', name: ['ليل الأهوار', 'Marsh Night'], desc: ['ظلام ومطر. حميد يأشّر بالفانوس على الناس.', 'Dark and rainy. Hamid points his lantern at the people.'], goal: 6, people: 8, weather: 'storm', zones: 'boat', water: W_FLOOD(258, 250, 0.05), wind: { base: -6, gust: 22 }, time: 250 }),
+    ],
+    outro: [
+      { scene: { room: 'hangar' }, chars: [['ham', 0.2], ['saad', 0.82, 1]], cap: ['تحت القصب، باب مخفي. وجوّه…', 'Beneath the reeds, a hidden door. And inside…'], lines: [['saad', 'الصقر الذهبي… طيارة جدّي!', 'The Golden Falcon… my grandpa\'s heli!']] },
+      { scene: { room: 'hangar' }, chars: [['saad', 0.82, 1]], fx: [['tape', 0.6]], lines: [['saad', 'اكو شريط… خلي أشغّله.', "There's a tape… let me play it."], ['phone:abb', '(صوت مشوّش) إذا دتسمع هذا… فالغيمة رجعت.', '(static) If you\'re hearing this… the Cloud has returned.']], note: ['🏆 انفتحت طيارة «الصقر الذهبي» بكل اللعبة!', '🏆 The "Golden Falcon" heli is now unlocked everywhere!'] },
+    ],
+    unlockGolden: true,
+  },
+  { // ───────── الفصل 7
+    id: 'ch7', title: ['الخيانة', 'The Betrayal'], city: ['القاهرة', 'Cairo'],
+    intro: [
+      { scene: { lvl: ['cairo', 'day'], cam: 0.3, fx: ['lights'] }, chars: [['groom', 0.6, 1]], cap: ['عرس على سطح يطل على النيل… والعريس رفض يشتري «تأمين غيمة».', 'A wedding on a rooftop by the Nile… and the groom refused to buy "Ghayma insurance".'], lines: [['groom', 'تأمين؟ على عرسي؟ لا شكراً!', 'Insurance? For my wedding? No thanks!']] },
+      { scene: { lvl: ['cairo', 'day'], cam: 0.5, fx: [['flood', 232]] }, cap: ['بعد ساعة… النيل طاف على العرس.', 'An hour later… the Nile floods the wedding.'] },
+    ],
+    missions: [
+      smF('7_1', { style: 'cairo', pal: 'day', name: ['العرس', 'The Wedding'], desc: ['المعازيم فوگ السطوح والماي يصعد.', 'Guests on the roofs and the water is rising.'], goal: 5, weather: 'flood', zones: 'boat', water: W_FLOOD(268, 238, 0.13), time: 230, lines: { wait: { ar: ['خلّصوني قبل لا يخلص الكيك!'], en: ['Save me before the cake runs out!'] } } }),
+      smF('7_2', { style: 'cairo', pal: 'day', type: 'cargo', cargo: 'melon', name: ['البطيخ', 'The Watermelons'], desc: ['بطيخ العرس! إذا طاح من عالي يتفلّش.', 'The wedding watermelons! Drop one from high up and it splatters.'], goal: 4, time: 220 }),
+      smF('7_3', { style: 'cairo', pal: 'dusk', heli: 'chinook', name: ['المعازيم', 'The Guests'], desc: ['كل العائلة عالقة! جبتلك شينوك.', 'The whole family is stuck! Here\'s a Chinook.'], goal: 8, people: 10, weather: 'flood', zones: 'boat', water: W_FLOOD(270, 234, 0.15), time: 270 }),
+      smF('7_4', { style: 'cairo', pal: 'dusk', type: 'vip', vipName: { ar: 'العريس', en: 'the groom' }, name: ['العريس', 'The Groom'], desc: ['العريس لازم يوصل… العروسة تنتظر!', 'The groom must make it… the bride is waiting!'], goal: 5, weather: 'flood', zones: 'boat', water: W_FLOOD(266, 240, 0.12), time: 240 }),
+      smF('7_5', { style: 'cairo', pal: 'night', name: ['الحقيقة', 'The Truth'], desc: ['عاصفة «مصنوعة» على القاهرة. نسيم يطير وياك هالمرة.', 'A "manufactured" storm over Cairo. Naseem flies with you this time.'], goal: 7, people: 9, weather: 'storm', zones: 'boat', water: W_FLOOD(270, 236, 0.16), wind: { base: 6, gust: 22 }, time: 260 }),
+    ],
+    outro: [
+      { scene: { lvl: ['cairo', 'night'], cam: 0.4 }, chars: [['nas', 0.38], ['saad', 0.65, 1]], lines: [['nas', 'سمعت رعد بالتلفون… هو اللي يصنع العواصف حتى يبيع التأمين!', 'I heard Raad on the phone… he makes the storms to sell insurance!'], ['nas', 'رفضت أكمل… فطردني وسرق طيارتي. ليش الغش… ليش الخيانة!', 'I refused… so he fired me and stole my heli. Why the cheating… why the BETRAYAL!']] },
+      { scene: { room: 'tower' }, chars: [['abuj', 0.5]], cap: ['ولأول مرة بحياته…', 'And for the first time in his life…'], lines: [['abuj', '(يحط استكان الچاي) لا… هاي صارت جدية.', '(puts down his tea glass) No… this just got serious.']] },
+    ],
+  },
+  { // ───────── الفصل 8
+    id: 'ch8', title: ['عين الإعصار', 'Eye of the Twister'], city: ['جبال كردستان', 'Kurdistan Mountains'],
+    intro: [
+      { scene: { lvl: ['mountain', 'night'], cam: 0.4, fx: [['tornado', 0.7]] }, cap: ['بين الجبال، محطة سرية… يحرسها إعصار ما يوقف.', 'Among the mountains, a secret station… guarded by a twister that never stops.'] },
+      { scene: { lvl: ['mountain', 'night'], cam: 0.3, fx: [['parked', 'golden', 0.4]] }, chars: [['saad', 0.3], ['nas', 0.75, 1]], lines: [['nas', 'إذا دخلنا هناك… ما اكو رجعة.', "If we go in there… there's no turning back."], ['saad', 'جدّي هناك. أحس بيها.', "My grandpa is there. I can feel it."]] },
+    ],
+    missions: [
+      smF('8_1', { style: 'mountain', pal: 'day', type: 'animals', heli: 'golden', name: ['الرعاة', 'The Shepherds'], desc: ['رعاة وغنم عالقين، والإعصار يتمشى بالوادي.', 'Shepherds and sheep stranded, a twister roaming the valley.'], goal: 3, weather: 'tornado', tornados: 1, time: 250 }),
+      smF('8_2', { style: 'mountain', pal: 'dusk', heli: 'golden', name: ['زعطوط بالهوا', 'Zaatout Airborne'], desc: ['الإعصار طيّر زعطوط! أنقذ الناس قبل ما يشيلهم هم.', 'The twister blew Zaatout away! Save people before it takes them too.'], goal: 5, weather: 'tornado', tornados: 1, wind: { base: 0, gust: 18 }, time: 250 }),
+      smF('8_3', { style: 'mountain', pal: 'night', heli: 'golden', name: ['المحطة', 'The Station'], desc: ['حراس «غيمة» هربوا وتركوا العمال فوگ الجبل. إعصارين!', 'Ghayma guards fled, leaving workers on the peak. Two twisters!'], goal: 6, people: 8, weather: 'tornado', tornados: 2, time: 260 }),
+      smF('8_4', { style: 'mountain', pal: 'night', type: 'vip', careful: true, heli: 'golden', vipName: { ar: 'الجد عبّود', en: 'Grandpa Abboud' }, name: ['الهروب ويه الجد', 'Escape with Grandpa'], desc: ['الجد عبّود حي! طلّعه هو والباقين… وبهدوء، محد يطيح!', 'Grandpa Abboud is alive! Get him and the others out… gently, nobody falls!'], goal: 4, weather: 'storm', wind: { base: 4, gust: 18 }, time: 260 }),
+    ],
+    outro: [
+      { scene: { room: 'lab' }, chars: [['abb', 0.62, 1], ['saad', 0.32]], fx: [['cage', 0.62]], lines: [['abb', 'إنت سعدون؟… كبرت!', "You're Saadoun?… You've grown!"], ['saad', 'جدّي؟! الجدّة تگول الغدا برد!', 'Grandpa?! Grandma says lunch is getting cold!']] },
+      { scene: { room: 'lab' }, chars: [['abb', 0.5]], lines: [['abb', 'هذا الجهاز آني اخترعته… حتى يجيب المطر للزرع. رعد سرقه وخلّاني 30 سنة أصلّحله.', 'I invented this machine… to bring rain to the farms. Raad stole it and kept me 30 years to fix it.'], ['abb', 'وهسه يريد يشغّله بكل قوته… على بغداد.', 'And now he wants to run it at full power… on Baghdad.']] },
+      { scene: { lvl: ['mountain', 'night'], cam: 0.7, fx: [['heli', 'golden', 0.5], ['tornado', 0.85]] }, chars: [['zat', 0.4]], lines: [['zat', '(تنزل من الهوا وتگعد على راس سعدون)', '(lands from the sky right on Saadoun\'s head)'], ['radio', 'سعدون: زعطوط! رجعتي!', 'Saadoun: Zaatout! You\'re back!']] },
+    ],
+  },
+  { // ───────── الفصل 9
+    id: 'ch9', title: ['موسم الأعاصير', 'Twister Season'], city: ['مدن العالم', 'World Cities'],
+    intro: [
+      { scene: { lvl: ['dubai', 'night'], cam: 0.4, fx: [['tv', 'أعاصير بكل مدن العالم بنفس اللحظة!'], ['tornado', 0.3], ['tornado', 0.75]] }, chars: [['raad', 0.5]], lines: [['raad', 'الطقس مو قدر… الطقس خدمة. ومن اليوم، الكل يشترك.', "Weather isn't fate… weather is a service. From today, everyone subscribes."]] },
+      { scene: { room: 'home' }, chars: [['umr', 0.4]], fx: [['tv', 'الطيار عبّود يظهر بعد 30 سنة!']], lines: [['umr', 'عبّود؟!… وين جنت؟! الغدا برد!', 'Abboud?!… Where have you been?! Lunch is cold!'], ['phone:abb', 'آسف حجية… انحبست شوية.', 'Sorry dear… I got a bit locked up.']] },
+      { scene: { room: 'tower' }, chars: [['abuj', 0.25], ['nas', 0.5], ['sura', 0.75, 1]], lines: [['abuj', 'الكل يطير! نسيم، خذ طيارة الإسعاف. سُرى، بثّي أماكن العالقين.', 'Everyone flies! Naseem, take the ambulance heli. Sura, broadcast where people are stuck.'], ['sura', 'نحن على الهواء… ونحن وياكم!', "We're live… and we're with you!"]] },
+    ],
+    missions: [
+      smF('9_1', { style: 'baghdad', pal: 'dusk', heli: 'golden', name: ['بغداد تدور', 'Baghdad Spins'], desc: ['إعصارين ببغداد! سُرى تبث مكان الناس.', 'Two twisters in Baghdad! Sura broadcasts where people are.'], goal: 6, weather: 'tornado', tornados: 2, time: 260 }),
+      smF('9_2', { style: 'dubai', pal: 'night', heli: 'golden', name: ['دبي تدوخ', 'Dizzy Dubai'], desc: ['رمل وإعصار. الأبراج عالية والحبل لازم يرتفع.', 'Sand and twisters. Tall towers — keep the rope up.'], goal: 6, weather: 'tornado', tornados: 2, time: 260 }),
+      smF('9_3', { style: 'cairo', pal: 'dusk', heli: 'golden', name: ['النيل يلف', 'The Nile Spins'], desc: ['إعصار فوگ النيل والماي يصعد.', 'A twister over the Nile, and the water rises.'], goal: 6, weather: 'tornado', tornados: 1, zones: 'boat', water: W_FLOOD(266, 240, 0.12), time: 260 }),
+      smF('9_4', { style: 'tokyo', pal: 'night', heli: 'chinook', name: ['طوكيو', 'Tokyo'], desc: ['نسيم يساعدك من بعيد. 8 لازم يوصلون.', 'Naseem helps from afar. 8 must make it.'], goal: 8, people: 10, weather: 'tornado', tornados: 2, time: 280 }),
+      smF('9_5', { style: 'mumbai', pal: 'night', heli: 'chinook', name: ['مومباي', 'Mumbai'], desc: ['مطر وإعصار وفيضان مرة وحدة. حميد بالقارب ينتظر.', 'Rain, twister and flood at once. Hamid waits in the boat.'], goal: 8, people: 10, weather: 'tornado', tornados: 1, zones: 'boat', water: W_FLOOD(266, 230, 0.16), time: 290 }),
+    ],
+    outro: [
+      { scene: { room: 'tower' }, chars: [['abb', 0.3], ['saad', 0.6, 1]], lines: [['abb', 'رعد نقل الجهاز فوگ أعلى برج ببغداد. هناك المعركة الأخيرة.', 'Raad moved the machine to the tallest tower in Baghdad. The final battle is there.'], ['saad', 'جدّي… تطير وياي؟', 'Grandpa… will you fly with me?'], ['abb', 'اقرا الهوا مثل ما تقرا الماي. يلا.', 'Read the wind like you read water. Let\'s go.']] },
+    ],
+  },
+  { // ───────── الفصل 10
+    id: 'ch10', title: ['غيمة بغداد', 'The Cloud over Baghdad'], city: ['بغداد', 'Baghdad'],
+    intro: [
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.5, fx: ['bigTornado', 'storm'] }, cap: ['إعصار عملاق فوگ بغداد كلها.', 'A giant twister over all of Baghdad.'], lines: [['radio', 'رعد: اشتركوا… أو خلّوا الغيمة تقرر!', 'Raad: Subscribe… or let the Cloud decide!']] },
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.3, fx: [['heli', 'golden', 0.55], 'storm'] }, chars: [], lines: [['radio', 'عبّود: الصقر الذهبي جاهز. بسم الله.', 'Abboud: The Golden Falcon is ready. In God\'s name.'], ['radio', 'سعدون: أول يوم بالشغل… وآخر إعصار.', 'Saadoun: First day on the job… last twister.']] },
+    ],
+    missions: [
+      smF('10_1', { style: 'baghdad', pal: 'night', heli: 'golden', name: ['الأحياء', 'The Neighborhoods'], desc: ['الناس بطريق الإعصار. طلّعهم قبل لا يوصلهم.', 'People in the twister\'s path. Get them out before it reaches them.'], goal: 7, people: 9, weather: 'tornado', tornados: 2, time: 280 }),
+      smF('10_2', { style: 'baghdad', pal: 'night', type: 'vip', careful: true, heli: 'golden', vipName: { ar: 'أبو جاسم', en: 'Abu Jassim' }, name: ['أبو جاسم والچاي', 'Abu Jassim and the Tea'], desc: ['البرج دا ينهار وأبو جاسم ماسك استكان الچاي! بهدوء… ولا قطرة تطيح.', 'The tower is collapsing and Abu Jassim holds his tea! Gently… not a drop spilled.'], goal: 5, weather: 'storm', wind: { base: -6, gust: 22 }, time: 260, lines: { wait: { ar: ['أبو جاسم: الچاي! لا يطيح الچاي!'], en: ['Abu Jassim: The tea! Don\'t spill the tea!'] } } }),
+      smF('10_3', { style: 'baghdad', pal: 'night', heli: 'chinook', name: ['الجهاز', 'The Machine'], desc: ['إعصارين حول البرج. نسيم يشتت الحراس وإنت تنقذ.', 'Two twisters around the tower. Naseem distracts the guards while you rescue.'], goal: 8, people: 10, weather: 'tornado', tornados: 2, zones: 'boat', water: W_FLOOD(266, 236, 0.14), time: 290 }),
+      smF('10_4', { style: 'baghdad', pal: 'night', heli: 'giant', name: ['⭐ غيمة بغداد', '⭐ The Cloud over Baghdad'], desc: ['المعركة الأخيرة! 10 أشخاص، إعصارين، وفيضان. زعطوط جاهزة تقطع السلك.', 'The final battle! 10 people, two twisters and a flood. Zaatout is ready to cut the wire.'], goal: 10, people: 12, weather: 'tornado', tornados: 2, zones: 'boat', water: W_FLOOD(266, 226, 0.18), wind: { base: 0, gust: 24 }, time: 330 }),
+    ],
+    outro: [
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.5, fx: [['tornado', 0.5], 'storm'] }, chars: [['zat', 0.5]], cap: ['فوگ البرج، الحبل ينزل على الجهاز…', 'Above the tower, the rope descends onto the machine…'], lines: [['zat', '(تقفز… وتگطع السلك بسنونها!)', '(leaps… and bites through the wire!)']] },
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.6 }, chars: [['raad', 0.55], ['ghas', 0.25]], cap: ['الإعصار اختفى. ورعد…', 'The twister is gone. And Raad…'], lines: [['raad', 'نزّلوني!! هاي مو بالعقد!', 'Get me down!! This isn\'t in the contract!'], ['ghas', 'هاي دشداشة أبوي!! بس هالمرة… حلال عليك.', "That's my father's dishdasha!! But this time… you can keep it."]] },
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.4, fx: ['lights', 'fireworks', ['pot', 0.5]] }, chars: [['umr', 0.38], ['abb', 0.62, 1]], cap: ['احتفال بالكرادة.', 'A celebration in Karrada.'], lines: [['umr', 'تعالوا كلكم! جبت قدر دولمة!', 'Come everyone! I brought a pot of dolma!'], ['abb', 'الحمد لله… بعد 30 سنة، دولمة حجية.', 'Thank God… after 30 years, her dolma.']] },
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.45, fx: ['lights', ['tv', 'الطيار اللي هدم نص بغداد… أنقذ بغداد كلها!']] }, chars: [['sura', 0.3], ['saad', 0.65, 1]], lines: [['sura', 'نحن على الهواء! وسام «أكثر طيار ضرب بنايات وما تأذى أحد» يروح لـ… سعدون!', "We're live! The medal for \"Most Buildings Hit Without Hurting Anyone\" goes to… Saadoun!"], ['saad', 'شكراً… آسف على المنارة.', 'Thank you… sorry about the minaret.']] },
+      { scene: { room: 'tower' }, chars: [['abuj', 0.4], ['saad', 0.66, 1]], lines: [['abuj', 'باچر نفس الوقت…', 'Tomorrow, same time…'], ['abuj', '…وبلا حوادث!', '…and NO accidents!']] },
+    ],
+    ending: true,
+  },
+];
+// مشهد بعد النهاية (بعد الشكر)
+const STORY_FUNNY_POST = [
+  { scene: { lvl: ['baghdad', 'night'], cam: 0.8, pan: 4, fx: [['heli', 'golden', 0.5]] }, chars: [['zat', 0.5]], cap: ['بعد منتصف الليل…', 'After midnight…'], lines: [['zat', '(زعطوط تسوق الصقر الذهبي… وتطير)', '(Zaatout flies the Golden Falcon… away)']] },
+  { scene: { lvl: ['baghdad', 'night'], cam: 0.9, fx: [['steam', 0.85, 140]] }, cap: ['وعلى سطح بعيد… ضوء أزرق صغير يرجع يشتعل.', 'And on a distant roof… a small blue light flickers back on.'], note: ['يتبع… الجزء الثاني 😼', 'To be continued… Part Two 😼'] },
+];
+
+
+
+/* ============================================================
+   قصة الرعب: صوت من الهور
+   حيدر، طيار إنقاذ ليلي بالبصرة، يجيه نداء من قرية غرقت قبل 20 سنة.
+   المهمات «dark»: ظلام كامل، بس ضوء الطيارة يكشف الناس.
+   ============================================================ */
+const H = (o) => Object.assign({ dark: true, pal: 'night' }, o);
+// كلام الناس بمهمات الرعب (بدل النكت)
+const HORROR_LINES = {
+  wait: LL(['لا تطفي الضوا!', 'سمعته… جان ينادي بصوت أخوي', 'بسرعة! قبل لا يرجع!', 'هنا! إحنا هنا!', 'شفت عيون بالقصب…'], ['Don\'t turn off the light!', 'I heard it… it called in my brother\'s voice', 'Hurry! Before it comes back!', 'Here! We\'re here!', 'I saw eyes in the reeds…']),
+  waitWater: LL(['الماي يصعد… وأكو شي يتحرك بيه', 'لا تخليني بالظلام!'], ['The water\'s rising… and something moves in it', 'Don\'t leave me in the dark!']),
+  swim: LL(['أكو شي يمسك رجلي!', 'طلّعني من الماي! بسرعة!'], ['Something is grabbing my leg!', 'Get me out of the water! Now!']),
+  jump: LL(['بسم الله!', 'لا تباوع لتحت…'], ['In God\'s name!', 'Don\'t look down…']),
+  grab: LL(['مسكته!', 'الحمد لله… الحمد لله'], ['Got it!', 'Thank God… thank God']),
+  hang: LL(['لا تنزل قريب من الماي…', 'سمعت؟ أحد يضحك تحت', 'ضوّي على القصب… لا، لا تضوّي', 'الهوا بارد… مو طبيعي'], ['Don\'t fly low over the water…', 'Did you hear? Someone is laughing below', 'Shine on the reeds… no, don\'t', 'The air is cold… not natural']),
+  scared: LL(['أسرع! هو ورانا!', 'لا توگف! لا توگف!', 'يا ربي…'], ['Faster! It\'s behind us!', 'Don\'t stop! Don\'t stop!', 'Oh God…']),
+  fingers: LL(['إيدي… ما أگدر…', 'لا تخليني أطيح بالماي!'], ['My hand… I can\'t…', 'Don\'t let me fall into the water!']),
+  fall: LL(['لاااا!', 'مو بالماي! مو بالماي!'], ['NOOO!', 'Not the water! Not the water!']),
+  dragged: LL(['ليش فلتت؟!', 'كلنا طحنا!'], ['Why did you let go?!', 'We\'re all falling!']),
+  hit: LL(['آخ!', 'انتبه للبيوت!'], ['Ouch!', 'Watch the houses!']),
+  missed: LL(['فاتني! ارجع!', 'لا تتركني هنا!'], ['Missed! Come back!', 'Don\'t leave me here!']),
+  saved: LL(['وصلنا… الحمد لله', 'أبد ما أرجع لهالمكان', 'شكراً… لا تطفي الضوا'], ['We made it… thank God', 'I\'m never coming back here', 'Thank you… keep the light on']),
+  landWater: LL(['طلّعوني! بسرعة!', 'الماي… جان بيه شي'], ['Get me out! Quickly!', 'The water… there was something in it']),
+  landHard: LL(['آخ… بس عايش', 'لا تخلوني بالظلام'], ['Ugh… but alive', 'Don\'t leave me in the dark']),
+  full: LL(['لا تتركوني! أرجوكم!', 'ارجع إلي… وعد؟'], ['Don\'t leave me! Please!', 'Come back for me… promise?']),
+  board: LL(['بسرعة، سكّر الباب!', 'طير! طير!'], ['Quick, shut the door!', 'Fly! Fly!']),
+  slip: LL(['زلگت!'], ['I slipped!']),
+  groan: LL(['آخ…', 'هو هنا… أحس بيه…'], ['Ugh…', 'It\'s here… I can feel it…']),
+};
+const STORY_HORROR = [
+  { // ───────── 1
+    id: 'h1', title: ['النداء', 'The Call'], city: ['قرية أم الطيور', 'Umm al-Tuyur Village'],
+    intro: [
+      { scene: { room: 'tower' }, chars: [['nadia', 0.62, 1], ['haider', 0.32]], cap: ['البصرة. الساعة 3 وربع بعد نص الليل.', 'Basra. 3:15 in the morning.'], lines: [['nadia', 'حيدر… نداء استغاثة من قرية «أم الطيور».', 'Haider… a distress call from the village of Umm al-Tuyur.'], ['haider', 'أم الطيور؟ هاي غرقت قبل عشرين سنة. ماكو بيها أحد.', 'Umm al-Tuyur? That village drowned twenty years ago. Nobody lives there.'], ['nadia', 'أدري… بس اسمع.', 'I know… but listen.']] },
+      { scene: { room: 'dark', fx: ['static'] }, cap: ['(صوت من الراديو، بعيد ومقطّع)', '(a voice on the radio, distant and broken)'], lines: [['radio', '…الماي دا يصعد… إحنا فوگ السطح… من زمان ننتظر… من زمان…', '…the water is rising… we are on the roof… we have been waiting so long… so long…']] },
+    ],
+    missions: [
+      sm('h1_1', H({ at: 'marsh', style: 'marsh', name: ['الضوا', 'The Light'], desc: ['ظلام كامل. بس ضوا الطيارة يكشف. الناس فوگ المضايف القديمة.', 'Total darkness. Only your light reveals anything. People on the old mudhifs.'], goal: 3, people: 4, zones: 'boat', water: W_FLOOD(258, 258, 0), time: 240, lines: { wait: LL(['لا تطفي الضوا…', 'وأخيراً… وأخيراً جيت'], ['Don\'t turn off the light…', 'At last… at last you came']) } })),
+      sm('h1_2', H({ at: 'marsh', style: 'marsh', name: ['القرية الغرقانة', 'The Drowned Village'], desc: ['البيوت نصها بالماي. الأصوات تجي من كل مكان.', 'Houses half underwater. The voices come from everywhere.'], goal: 4, zones: 'boat', water: W_FLOOD(258, 250, 0.03), weather: 'wind', wind: { base: -4, gust: 14 }, time: 250, lines: { hang: LL(['لا تباوع للماي…', 'سمعت؟ أحد ينادي اسمك'], ['Don\'t look at the water…', 'Did you hear? Someone is calling your name']) } })),
+      sm('h1_3', H({ at: 'marsh', style: 'marsh', name: ['السبّاحين', 'The Swimmers'], desc: ['ناس بالماي… بس ماكو أي قارب وصلهم. منين جوا؟', 'People in the water… but no boat ever reached them. Where did they come from?'], goal: 4, zones: 'boat', water: W_FLOOD(258, 244, 0.05), weather: 'rain', time: 250 })),
+      sm('h1_4', H({ at: 'marsh', style: 'marsh', name: ['الفجر بعيد', 'Dawn Is Far'], desc: ['آخر ناس بالقرية. والضوا يرمش.', 'The last people in the village. And your light keeps flickering.'], goal: 5, people: 7, zones: 'boat', water: W_FLOOD(258, 244, 0.06), weather: 'storm', time: 260 })),
+    ],
+    outro: [
+      { scene: { lvl: ['marsh', 'night'], cam: 0.5, fx: [['flood', 230], ['fog']] }, chars: [['haider', 0.4]], lines: [['radio', 'حيدر: القارب استلم الناس؟ كم عددهم؟', 'Haider: Did the boat take the people? How many?'], ['radio', 'القارب: …أي ناس؟ ماكو أحد نزل عدنا. ولا واحد.', 'Boat: …What people? Nobody came down to us. Not a single one.']] },
+      { scene: { lvl: ['marsh', 'night'], cam: 0.55, fx: [['flood', 230], ['fog'], ['eyes', 0.75, 200]] }, cap: ['وبين القصب… شي يباوع.', 'And in the reeds… something is watching.'] },
+    ],
+  },
+  { // ───────── 2
+    id: 'h2', title: ['الحجي كاظم', 'Hajji Kadhim'], city: ['الهور', 'The Marsh'],
+    intro: [
+      { scene: { lvl: ['marsh', 'dusk'], cam: 0.3, fx: [['flood', 236]] }, chars: [['kadhim', 0.35], ['haider', 0.66, 1]], lines: [['kadhim', 'رحت لأم الطيور؟ بالليل؟ الله يستر عليك يا ابني.', 'You went to Umm al-Tuyur? At night? God protect you, son.'], ['haider', 'حجي، أكو ناس هناك. سمعتهم.', 'Hajji, there are people there. I heard them.'], ['kadhim', 'لا. سمعت «الطنطل».', 'No. You heard the Tantal.']] },
+      { scene: { lvl: ['marsh', 'night'], cam: 0.4, fx: [['tantal', 0.7], ['fog']] }, chars: [['kadhim', 0.3]], lines: [['kadhim', 'الطنطل يعيش بالهور من قبل جدّ جدّي. يقلّد صوت اللي تحبهم… حتى يجرّك للماي.', 'The Tantal has lived in the marsh since before my grandfather\'s grandfather. It imitates the voices of those you love… to drag you into the water.'], ['kadhim', 'إذا سمعت صوت ميت يناديك… لا تجاوب.', 'If you hear a dead voice calling you… don\'t answer.']] },
+    ],
+    missions: [
+      sm('h2_1', H({ style: 'marsh', type: 'animals', name: ['الجاموس يصرخ', 'The Buffalo Scream'], desc: ['الحيوانات هربت من شي بالماي. رجّعها لأصحابها.', 'The animals fled from something in the water. Bring them back to their owners.'], goal: 3, zones: 'boat', water: W_FLOOD(258, 258, 0), time: 250 })),
+      sm('h2_2', H({ style: 'marsh', name: ['الضباب', 'The Fog'], desc: ['ضباب وظلام. الصيادين ضايعين. ضوّي عليهم.', 'Fog and darkness. The fishermen are lost. Shine your light on them.'], goal: 5, zones: 'boat', water: W_FLOOD(258, 252, 0.03), weather: 'rain', time: 260, lines: { wait: LL(['شفت ظل طويل… أطول من النخلة', 'هنا! بس لا تنزل للماي!'], ['I saw a tall shadow… taller than a palm tree', 'Here! But don\'t go near the water!']) } })),
+      sm('h2_3', H({ style: 'marsh', type: 'fire', fire: 3, name: ['القصب يحترگ', 'The Reeds Burn'], desc: ['أهل القرية ولّعوا نار حتى يبعدونه. النار وصلت للبيوت.', 'The villagers lit fires to keep it away. The fire reached the houses.'], goal: 5, time: 250 })),
+      sm('h2_4', H({ style: 'marsh', name: ['بيت الحجي', 'The Hajji\'s House'], desc: ['عائلة الحجي كاظم محاصرة. الماي يصعد والضوا يرمش.', 'Hajji Kadhim\'s family is trapped. The water rises and your light flickers.'], goal: 6, people: 8, zones: 'boat', water: W_FLOOD(258, 242, 0.07), weather: 'storm', time: 270 })),
+    ],
+    outro: [
+      { scene: { room: 'cockpit', fx: ['static'] }, chars: [], cap: ['بطريق الرجعة، الراديو يشتغل وحده.', 'On the way back, the radio switches on by itself.'], lines: [['radio', '…حيدر… يمّه حيدر… تعال… البرد هنا…', '…Haider… my son Haider… come… it\'s so cold here…'], ['radio', 'حيدر: …يمّه؟', 'Haider: …Mom?']] },
+      { scene: { room: 'dark' }, cap: ['أمه ماتت قبل 20 سنة. بفيضان أم الطيور.', 'His mother died 20 years ago. In the Umm al-Tuyur flood.'] },
+    ],
+  },
+  { // ───────── 3
+    id: 'h3', title: ['الصوت', 'The Voice'], city: ['البصرة القديمة', 'Old Basra'],
+    intro: [
+      { scene: { room: 'tower' }, chars: [['nadia', 0.62, 1], ['haider', 0.32]], lines: [['haider', 'نادية… سمعتي الراديو البارحة؟ صوت أمي.', 'Nadia… did you hear the radio last night? My mother\'s voice.'], ['nadia', 'حيدر… الراديو جان مطفي. آني طفيته قبل لا تطلع.', 'Haider… the radio was off. I switched it off before you took off.'], ['haider', '……', '……']] },
+    ],
+    missions: [
+      sm('h3_1', H({ at: 'basra', style: 'baghdad', type: 'careful', careful: true, heli: 'medic', name: ['المستشفى المهجور', 'The Abandoned Hospital'], desc: ['نداء من مستشفى مسكّر من سنين. بس أكو مرضى فوگ السطح. بهدوء.', 'A call from a hospital closed for years. Yet there are patients on the roof. Gently.'], goal: 4, time: 270, lines: { wait: LL(['الممرضة گالت ننتظر هنا… من زمان', 'شكد صار الوقت؟ أي سنة؟'], ['The nurse said wait here… long ago', 'What time is it? What year?']) } })),
+      sm('h3_2', H({ at: 'basra', style: 'baghdad', name: ['الشناشيل', 'The Shanasheel'], desc: ['البيوت القديمة. الأبواب تنفتح وحدها.', 'The old houses. The doors open by themselves.'], goal: 5, weather: 'rain', wind: { base: 4, gust: 12 }, time: 260 })),
+      sm('h3_3', H({ at: 'basra', style: 'baghdad', name: ['الكورنيش', 'The Corniche'], desc: ['ناس على الكورنيش والماي يصعد بالليل… والمد ما المفروض يجي هالوكت.', 'People on the Corniche and the water rising at night… the tide shouldn\'t come at this hour.'], goal: 5, zones: 'boat', water: W_FLOOD(260, 244, 0.08), time: 260 })),
+      sm('h3_4', H({ at: 'basra', style: 'baghdad', type: 'fire', fire: 4, name: ['الحريق', 'The Fire'], desc: ['حريق بعمارة… والناس فوگ يگولون «لا تخلي يطفي الضوا».', 'A building fire… and the people on top say "don\'t let the light go out."'], goal: 6, time: 260 })),
+    ],
+    outro: [
+      { scene: { lvl: ['baghdad', 'night'], cam: 0.5, fx: [['fog'], ['tantal', 0.8]] }, chars: [['haider', 0.3]], cap: ['على سطح بعيد، ظل طويل… أطول من البيت.', 'On a distant roof, a tall shadow… taller than the house.'], lines: [['haider', 'إنت منو؟!', 'Who are you?!'], ['cap', '(الظل يحچي بصوت حيدر نفسه) «إنت منو؟!»', '(the shadow speaks in Haider\'s own voice) "Who are you?!"', '']] },
+    ],
+  },
+  { // ───────── 4
+    id: 'h4', title: ['زينب', 'Zainab'], city: ['أم الطيور', 'Umm al-Tuyur'],
+    intro: [
+      { scene: { room: 'home' }, chars: [['father', 0.35], ['haider', 0.66, 1]], lines: [['father', 'بنتي زينب، 8 سنين. طلعت تلعب على الجرف… وسمعت أحد يناديها من الهور.', 'My daughter Zainab, 8 years old. She went to play by the bank… and heard someone calling her from the marsh.'], ['father', 'الشرطة ما تروح لأم الطيور بالليل. إنت بس.', 'The police won\'t go to Umm al-Tuyur at night. Only you.'], ['haider', 'أرجّعها. وعد.', 'I\'ll bring her back. I promise.']] },
+    ],
+    missions: [
+      sm('h4_1', H({ style: 'marsh', name: ['آثار رجول', 'Footprints'], desc: ['آثار رجول صغيرة على الجرف… تمشي للماي. أنقذ اللي تلگاهم بالطريق.', 'Small footprints on the bank… walking into the water. Rescue whoever you find on the way.'], goal: 5, zones: 'boat', water: W_FLOOD(258, 250, 0.04), weather: 'rain', time: 260 })),
+      sm('h4_2', H({ style: 'marsh', name: ['المضيف الأسود', 'The Black Mudhif'], desc: ['مضيف محروگ بنص الهور. أصوات أطفال يضحكون.', 'A burnt mudhif in the middle of the marsh. The sound of children laughing.'], goal: 5, zones: 'boat', water: W_FLOOD(258, 248, 0.04), wind: { base: -6, gust: 16 }, time: 260, lines: { wait: LL(['شفت بنية صغيرة… مشت فوگ الماي', 'لا تصدّق كل صوت تسمعه'], ['I saw a little girl… she walked on the water', 'Don\'t believe every voice you hear']) } })),
+      sm('h4_3', H({ style: 'marsh', type: 'animals', name: ['الطيور', 'The Birds'], desc: ['اسم القرية «أم الطيور»… والطيور كلها ساكتة. الحيوانات خايفة.', 'The village is named "Mother of Birds"… and every bird is silent. The animals are terrified.'], goal: 3, zones: 'boat', water: W_FLOOD(258, 258, 0), time: 250 })),
+      sm('h4_4', H({ style: 'marsh', type: 'vip', careful: true, vipName: { ar: 'زينب', en: 'Zainab' }, name: ['⭐ زينب', '⭐ Zainab'], desc: ['زينب فوگ سطح بآخر القرية. بس أكو زينبين… وحدة منهن مو زينب. وصّلهم كلهم بهدوء.', 'Zainab is on a roof at the edge of the village. But there are two Zainabs… one of them isn\'t her. Bring them all, gently.'], goal: 5, zones: 'boat', water: W_FLOOD(258, 246, 0.05), weather: 'storm', time: 280, lines: { vip_wait: LL(['عمو… أريد بابا', 'عمو، ليش الماي بارد هواية؟'], ['Mister… I want my dad', 'Mister, why is the water so cold?']) } })),
+    ],
+    outro: [
+      { scene: { lvl: ['marsh', 'night'], cam: 0.5, fx: [['flood', 230], ['fog']] }, chars: [['zainab', 0.4], ['haider', 0.62, 1]], lines: [['zainab', 'عمو… البنية اللي جانت وياي فوگ السطح… وين راحت؟', 'Mister… the girl who was with me on the roof… where did she go?'], ['haider', 'أي بنية؟', 'What girl?'], ['zainab', 'اللي تشبهني.', 'The one who looked like me.']] },
+      { scene: { lvl: ['marsh', 'night'], cam: 0.6, fx: [['flood', 230], ['fog'], ['eyes', 0.3, 214], ['eyes', 0.8, 206]] }, cap: ['الطيور ما رجعت تغني.', 'The birds never sang again.'] },
+    ],
+  },
+  { // ───────── 5
+    id: 'h5', title: ['المراية', 'The Mirror'], city: ['الهور', 'The Marsh'],
+    intro: [
+      { scene: { room: 'tower' }, chars: [['nadia', 0.5]], cap: ['البرج. نادية وحدها.', 'The tower. Nadia, alone.'], lines: [['radio', 'حيدر: نادية، آني راجع. افتحي ضوا المهبط.', 'Haider: Nadia, I\'m coming back. Turn on the pad lights.'], ['radio', 'حيدر: نادية لا تفتحين الضوا! هذا مو آني!', 'Haider: Nadia, don\'t turn on the lights! That isn\'t me!'], ['nadia', '…صوتين. نفس الصوت.', '…Two voices. The same voice.']] },
+      { scene: { room: 'tower' }, chars: [['nadia', 0.5]], lines: [['nadia', 'حيدر… شنو آخر شي گلته إلي قبل لا تطلع؟', 'Haider… what was the last thing you said to me before you took off?'], ['radio', '(الصوتين سوا) «لا تطفين الراديو».', '(both voices at once) "Don\'t switch off the radio."']] },
+    ],
+    missions: [
+      sm('h5_1', H({ style: 'marsh', name: ['الدوامة', 'The Whirlpool'], desc: ['دوامة بنص الهور تسحب كل شي. الناس بطريقها.', 'A whirlpool in the middle of the marsh pulls everything in. People are in its path.'], goal: 5, weather: 'tornado', tornados: 1, zones: 'boat', water: W_FLOOD(258, 250, 0.03), time: 270 })),
+      sm('h5_2', H({ style: 'marsh', name: ['القرية تتكرر', 'The Village Repeats'], desc: ['نفس البيوت… نفس الناس… كأن الليلة تعيد نفسها.', 'The same houses… the same people… as if the night is repeating itself.'], goal: 6, people: 8, zones: 'boat', water: W_FLOOD(258, 244, 0.06), weather: 'rain', time: 270, lines: { wait: LL(['مو إنت أنقذتني قبل شوية؟', 'هاي ثاني مرة تجي…'], ['Didn\'t you save me a minute ago?', 'This is the second time you\'ve come…']) } })),
+      sm('h5_3', H({ style: 'marsh', type: 'careful', careful: true, heli: 'medic', name: ['الجدّات', 'The Grandmothers'], desc: ['جدّات القرية يعرفون القصة من زمان. بهدوء… ولا وحدة تطيح.', 'The village grandmothers have known the story for ages. Gently… not one falls.'], goal: 4, zones: 'boat', water: W_FLOOD(258, 252, 0.03), time: 270, lines: { wait: LL(['يا ابني، اقرا المعوذات وانت طاير'], ['Son, say your prayers while you fly']) } })),
+    ],
+    outro: [
+      { scene: { room: 'cockpit', fx: ['static'] }, chars: [], lines: [['radio', 'نادية: حيدر… إذا إنت إنت… الطنطل يخاف من شي واحد.', 'Nadia: Haider… if you\'re really you… the Tantal fears only one thing.'], ['radio', 'نادية: الفجر. الحجي كاظم گال: أول ضوا للشمس يرجّعه للماي.', 'Nadia: Dawn. Hajji Kadhim said: the first light of the sun sends it back to the water.'], ['radio', 'حيدر: كم باقي للفجر؟', 'Haider: How long until dawn?'], ['radio', 'نادية: ساعة.', 'Nadia: One hour.']] },
+    ],
+  },
+  { // ───────── 6
+    id: 'h6', title: ['الفجر', 'Dawn'], city: ['أم الطيور', 'Umm al-Tuyur'],
+    intro: [
+      { scene: { lvl: ['marsh', 'night'], cam: 0.5, fx: [['flood', 226], ['tantal', 0.5], 'storm'] }, cap: ['آخر ساعة بالليل. الطنطل ما يريد حيدر يوصل للفجر.', 'The last hour of night. The Tantal doesn\'t want Haider to reach dawn.'] },
+      { scene: { room: 'dark', fx: ['static'] }, lines: [['radio', '…يمّه حيدر… انزل… الماي دافي…', '…my son Haider… come down… the water is warm…'], ['radio', 'حيدر: إنتي مو أمي. أمي جانت تگول «اصعد».', 'Haider: You\'re not my mother. My mother used to say "climb up."']] },
+    ],
+    missions: [
+      sm('h6_1', H({ style: 'marsh', name: ['آخر الليل', 'End of the Night'], desc: ['الأصوات تزيد. الناس الحقيقيين ينتظرون. لا توگف.', 'The voices grow louder. The real people are waiting. Don\'t stop.'], goal: 6, people: 8, zones: 'boat', water: W_FLOOD(260, 240, 0.08), weather: 'storm', wind: { base: -6, gust: 20 }, time: 280 })),
+      sm('h6_2', H({ style: 'marsh', name: ['دوامتين', 'Two Whirlpools'], desc: ['الهور كله يلف. دوامتين وشي طويل بينهم.', 'The whole marsh is spinning. Two whirlpools and something tall between them.'], goal: 6, weather: 'tornado', tornados: 2, zones: 'boat', water: W_FLOOD(258, 248, 0.04), time: 290 })),
+      sm('h6_3', H({ style: 'marsh', heli: 'chinook', name: ['⭐ قبل الفجر', '⭐ Before Dawn'], desc: ['آخر أهل أم الطيور. السلّم نازل، والفجر بعد دقايق. كل واحد يصعد… لازم يكون حقيقي.', 'The last people of Umm al-Tuyur. The ladder is down and dawn is minutes away. Everyone who climbs… must be real.'], goal: 8, people: 10, zones: 'boat', water: W_FLOOD(260, 238, 0.1), weather: 'storm', time: 300 })),
+    ],
+    outro: [
+      { scene: { lvl: ['marsh', 'dusk'], cam: 0.5, fx: [['flood', 232], 'sun'] }, chars: [['kadhim', 0.3], ['zainab', 0.5], ['haider', 0.7, 1]], cap: ['الشمس تطلع على أم الطيور لأول مرة من عشرين سنة.', 'The sun rises over Umm al-Tuyur for the first time in twenty years.'], lines: [['kadhim', 'رجع للماي. يمكن يرجع بعد عشرين سنة… يمكن ما يرجع.', 'It went back to the water. Maybe it returns in twenty years… maybe never.'], ['zainab', 'عمو، اسمع… الطيور رجعت تغني.', 'Mister, listen… the birds are singing again.']] },
+      { scene: { room: 'tower' }, chars: [['nadia', 0.5]], cap: ['البرج. نادية تسجّل آخر شي بدفتر الليلة.', 'The tower. Nadia writes the last line in the night log.'], lines: [['radio', 'حيدر: نادية، آني نزلت. جاي للبرج.', 'Haider: Nadia, I\'ve landed. Coming up to the tower.'], ['nadia', '(تبتسم)… الحمد لله.', '(smiles)… Thank God.']] },
+      { scene: { room: 'tower' }, chars: [['haider', 0.32], ['nadia', 0.62, 1]], cap: ['الباب ينفتح. حيدر يدخل.', 'The door opens. Haider walks in.'], lines: [['haider', 'نادية… آني نزلت قبل ساعة. ونمت بالطيارة.', 'Nadia… I landed an hour ago. I fell asleep in the heli.'], ['haider', '…منو اللي جان يحچي وياچ هسه؟', '…Who was talking to you just now?']] },
+      { scene: { room: 'dark', fx: ['static'] }, cap: ['(الراديو يشتغل وحده)', '(the radio turns itself on)'], lines: [['radio', '…نادية… افتحي ضوا المهبط…', '…Nadia… turn on the pad lights…']] },
+    ],
+    ending: true,
+  },
+];
+const STORY_HORROR_POST = [
+  { scene: { lvl: ['marsh', 'night'], cam: 0.7, fx: [['flood', 230], ['fog'], ['eyes', 0.5, 210]] }, cap: ['بعد عشرين سنة…', 'Twenty years later…'], note: ['يتبع؟', 'To be continued?'] },
+];
+
 const STORIES = [
-  { id: 'flood', title: ['الطوفان الأخير', 'The Last Flood'], sub: ['يونس، آخر طيار، يسابق الماي حتى يوصل لبنته', 'Younis, the last pilot, races the water to reach his daughter'], chapters: STORY_FLOOD, post: STORY_FLOOD_POST, icon: '🌊' },
-  { id: 'uruk', title: ['لوح أوروك', 'The Uruk Tablet'], sub: ['علي ونوال يرجّعون ألواح كلكامش المسروقة', 'Ali and Nawal bring the stolen Gilgamesh tablets home'], chapters: STORY_URUK, post: STORY_URUK_POST, icon: '🏺' },
+  { id: 'flood', title: ['الطوفان الأخير', 'The Last Flood'], sub: ['دراما — يونس، آخر طيار، يسابق الماي حتى يوصل لبنته', 'Drama — Younis, the last pilot, races the water to reach his daughter'], chapters: STORY_FLOOD, post: STORY_FLOOD_POST, icon: '🌊' },
+  { id: 'funny', title: ['سعدون وغيمة بغداد', 'Saadoun and the Cloud over Baghdad'], sub: ['كوميديا — موصّل كباب صار طيار إنقاذ بالغلط', 'Comedy — a kebab delivery guy becomes a rescue pilot by mistake'], chapters: STORY_FUNNY, post: STORY_FUNNY_POST, icon: '😂' },
+  { id: 'uruk', title: ['لوح أوروك', 'The Uruk Tablet'], sub: ['مغامرة — علي ونوال يرجّعون ألواح كلكامش المسروقة', 'Adventure — Ali and Nawal bring the stolen Gilgamesh tablets home'], chapters: STORY_URUK, post: STORY_URUK_POST, icon: '🏺' },
+  { id: 'horror', title: ['صوت من الهور', 'A Voice from the Marsh'], sub: ['رعب — نداء استغاثة من قرية غرقت قبل 20 سنة', 'Horror — a distress call from a village that drowned 20 years ago'], chapters: STORY_HORROR, post: STORY_HORROR_POST, icon: '👁️' },
 ];
 let CUR = STORIES[0], STORY = CUR.chapters, STORY_POST = CUR.post;
 function stSelect(si) { CUR = STORIES[si]; STORY = CUR.chapters; STORY_POST = CUR.post; }
@@ -516,7 +875,7 @@ const stT = k => (STT[lang()] || STT.ar)[k];
 const L2 = a => (a ? (lang() === 'ar' ? a[0] : a[1]) : '');
 
 /* ---------- التقدم ---------- */
-function stSave() { if (!save.story) save.story = { ch: {} }; const s = save.story; if (!s.c) s.c = {}; if (!s.c[CUR.id]) s.c[CUR.id] = { ch: {} }; return s.c[CUR.id]; }
+function stSave() { if (!save.story) save.story = { ch: {} }; const s = save.story; if (!s.c) s.c = {}; if (!s.c[CUR.id]) s.c[CUR.id] = { ch: CUR.id === 'funny' && s.ch ? Object.assign({}, s.ch) : {} }; return s.c[CUR.id]; }
 function stChapterDone(ci) { return !!stSave().ch[STORY[ci].id]; }
 function stChapterUnlocked(ci) { return ci === 0 || stChapterDone(ci - 1); }
 function stFirstOpen(ci) { const ms = STORY[ci].missions; for (let i = 0; i < ms.length; i++) if (!save.stars[ms[i].id]) return i; return ms.length; }
