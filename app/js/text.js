@@ -144,6 +144,7 @@ const LINES = {
   grandma_board: { ar: ['ابني ساعدني أصعد', 'يمّه هاي الطيارة عالية', 'وين الكرسي؟ ركبتي!'], en: ['Help me up, dear', 'This helicopter is so high', 'Where\'s my seat? My knees!'] },
   jump: { ar: ['هوووب!', 'يا علي!', 'يلاااا!', 'شوفوني!', 'هسه أقفز!'], en: ['Hup!', 'Here I go!', 'Yallaaa!', 'Watch me!', 'JUMP!'] },
   slip: { ar: ['شتريد أگلك؟ عاشت إيدك!'], en: ['What can I say? Great job!'] },
+  groan: { ar: ['آآآخ… ظهري…', 'نَفَسي… ما يطلع…', 'منو جان يسوق؟!', 'رجلي… لا، رجلي موجودة', 'ما أركب طيارة بعد عمري', 'وين صرنا؟', 'حسبي الله…', 'ماما…'], en: ['Ouch… my back…', 'Can\'t… breathe…', 'Who was flying?!', 'My leg… oh, it\'s still there', 'Never flying again', 'Where are we?', 'Why me…', 'Mommy…'] },
   missed: { ar: ['فاتني!', 'گلت لك قرّب شوية!', 'آني مو سبايدرمان!', 'مرة ثانية، مرة ثانية!', 'حچيلك بالأشارات؟ قرّب!'], en: ['Missed!', 'I said come closer!', 'I\'m not Spider-Man!', 'Again, again!', 'Come CLOSER!'] },
   dragged: { ar: ['إنت طحت وطيحتني وياك!!', 'ليش فلتت؟! ليييش؟!', 'آني شعليه؟!', 'كلنا رحنا وطي!!'], en: ['You fell and took me with you!!', 'Why did you let go?! WHY?!', 'What did I do?!', 'We\'re ALL going down!!'] },
   fingers: { ar: ['باقي إصبع واحد!!', 'إيدي! إيدي ترتجف!', 'رجلك تزلگ يا أخي!', 'دا أحاول! دا أحاول!', 'اللي تحتي يقرصني!'], en: ['One finger left!!', 'My hand is shaking!', 'Your foot is slippery, man!', 'I\'m trying! I\'m trying!', 'The guy below is pinching me!'] },

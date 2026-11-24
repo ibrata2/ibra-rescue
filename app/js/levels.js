@@ -229,6 +229,60 @@ function paintBridge(g, P, x, base) {
   for (let k = 0; k < 14; k++) { const top = base - 140 + k * 8; for (let t = 0; t < 1; t += 0.008) R(g, x + 25 - k + t * (90 + k * 9), top + t * (140 - k * 8) * 0.98, 1, 1, P.farD); }
   R(g, x - 120, base - 4, 360, 3, P.far);
 }
+/* ---------- معالم المدن (وحدة بكل مرحلة) ---------- */
+function paintLattice(g, col, x0, y0, x1, y1, w0, w1, step) { // برج شبكي مستدق: سكتين + عوارض + X
+  const cx = (x0 + x1) / 2, n = Math.max(1, Math.ceil((y1 - y0) / step));
+  const line = (ax, ay, bx, by) => { const m = Math.max(1, Math.ceil(Math.max(Math.abs(bx - ax), Math.abs(by - ay)))); for (let k = 0; k <= m; k++) R(g, ax + (bx - ax) * k / m, ay + (by - ay) * k / m, 1, 1, col); };
+  for (let i = 0; i < n; i++) {
+    const ya = y0 + (y1 - y0) * i / n, yb = y0 + (y1 - y0) * (i + 1) / n, ha = w0 + (w1 - w0) * i / n, hb = w0 + (w1 - w0) * (i + 1) / n;
+    line(cx - ha, ya, cx - hb, yb); line(cx + ha, ya, cx + hb, yb); line(cx - ha, ya, cx + ha, ya);
+    line(cx - ha, ya, cx + hb, yb); line(cx + ha, ya, cx - hb, yb);
+  }
+}
+function paintDeck(g, P, cx, y, w, h) {
+  R(g, cx - w / 2, y, w, h, P.edge); R(g, cx - w / 2 + 1, y + 1, w - 2, h - 2, P.bldD);
+  for (let xx = cx - w / 2 + 2; xx < cx + w / 2 - 2; xx += 3) R(g, xx, y + 2, 2, h - 4, (xx | 0) % 4 ? P.win : P.winOff);
+  R(g, cx - w / 2 - 1, y, w + 2, 1, P.bldL); R(g, cx - w / 2, y + h, w, 1, P.edge);
+}
+function paintTokyoTower(g, P, x, base, H) { // برج طوكيو: أرجل شبكية + شرفتين
+  const cx = x + 40, top = base - H;
+  paintLattice(g, P.bldL, cx, base - H * 0.55, cx, base, 16, 38, 7);
+  paintLattice(g, P.bldL, cx, base - H * 0.86, cx, base - H * 0.55, 6, 16, 6);
+  paintLattice(g, P.edge, cx, top, cx, base - H * 0.86, 1, 6, 5);
+  // قوس بين الرجلين
+  for (let a = 0; a < Math.PI; a += 0.05) R(g, cx + Math.cos(a) * 20, base - 6 - Math.sin(a) * 26, 2, 1, P.edge);
+  paintDeck(g, P, cx, base - H * 0.55 - 12, 52, 12);
+  paintDeck(g, P, cx, base - H * 0.86 - 7, 22, 7);
+  R(g, cx - 0.5, top - 12, 1, 12, P.edge); R(g, cx - 1, top - 4, 3, 1, '#c8323c');
+}
+function paintDeckTower(g, P, cx, base, H, kind) { // برج بغداد / برج القاهرة
+  const top = base - H, dy = base - H * 0.82;
+  if (kind === 'cairo') { // جسم شبكي مثل زهرة اللوتس
+    for (let y = dy + 14; y < base; y++) { const t = (y - dy) / H, hw = 5 + t * 3; R(g, cx - hw, y, hw * 2, 1, (y % 4) ? P.bld : P.edge); if (y % 6 < 3) { R(g, cx - hw + 2, y, 1, 1, P.bldL); R(g, cx + hw - 3, y, 1, 1, P.bldL); } }
+    for (let i = 0; i < 9; i++) R(g, cx - 14 + i * 0.6, dy + 6 + i, 28 - i * 1.2, 1, P.edge);
+    paintDeck(g, P, cx, dy - 4, 30, 10);
+  } else { // برج بغداد: عمود + كرة + هوائي
+    R(g, cx - 4, dy + 12, 8, base - dy - 12, P.edge); R(g, cx - 3, dy + 12, 6, base - dy - 12, P.bldL);
+    for (let y = dy + 16; y < base; y += 7) R(g, cx - 3, y, 6, 1, P.bldD);
+    for (let yy = -11; yy <= 11; yy++) { const hw = Math.round(Math.sqrt(144 - yy * yy) * 1.4); R(g, cx - hw, dy + yy, hw * 2, 1, yy === 0 ? P.win : (yy < 0 ? P.bldL : P.bld)); }
+    R(g, cx - 17, dy - 1, 34, 3, P.edge); for (let xx = -14; xx < 14; xx += 3) R(g, cx + xx, dy, 2, 1, P.win);
+  }
+  R(g, cx - 1, top, 2, dy - top - 8, P.edge); R(g, cx - 0.5, top - 14, 1, 14, P.edge);
+  if (Math.random() < 2) R(g, cx - 1, top - 14, 2, 1, '#c8323c');
+}
+function paintHotelNY(g, P, x, top, w, base) { // Hotel New York بروتردام
+  R(g, x, top, w, base - top, P.edge); R(g, x + 1, top + 1, w - 2, base - top, P.bld);
+  for (let yy = top + 6; yy < base - 4; yy += 9) for (let xx = x + 4; xx < x + w - 4; xx += 7) R(g, xx, yy, 4, 5, (xx * 3 + yy) % 7 < 3 ? P.win : P.winOff);
+  for (const tx of [x + 6, x + w - 14]) { R(g, tx, top - 22, 8, 22, P.edge); R(g, tx + 1, top - 21, 6, 21, P.bldL); for (let i = 0; i < 6; i++) R(g, tx + 4 - (6 - i) * 0.7, top - 28 + i, (6 - i) * 1.4, 1, P.edge); R(g, tx + 2, top - 16, 4, 6, P.win); }
+  g.save(); g.font = 'bold 8px monospace'; g.textBaseline = 'top'; g.fillStyle = '#c8323c'; g.globalAlpha = 0.35; g.fillText('HOTEL NEW YORK', x + w / 2 - 33, top - 11); g.globalAlpha = 1; g.fillStyle = '#efe3c2'; g.fillText('HOTEL NEW YORK', x + w / 2 - 34, top - 12); g.restore();
+}
+function paintGateway(g, P, x, top, w, base) { // بوابة الهند - مومباي
+  R(g, x, top, w, base - top, P.edge); R(g, x + 1, top + 1, w - 2, base - top, P.bldL);
+  const ah = (base - top) * 0.55, aw = w * 0.34, ax = x + w / 2;
+  for (let yy = 0; yy < ah; yy++) { const hw = yy < aw / 2 ? Math.sqrt((aw / 2) ** 2 - (aw / 2 - yy) ** 2) : aw / 2; R(g, ax - hw, base - ah + yy + (yy < aw / 2 ? 0 : 0), hw * 2, 1, P.bldD); }
+  for (const tx of [x + 2, x + w - 10, x + w * 0.3 - 4, x + w * 0.7 - 4]) { R(g, tx, top - 12, 8, 12, P.edge); R(g, tx + 1, top - 11, 6, 11, P.bld); paintDome(g, P, tx + 4, top - 12, 4); }
+  R(g, x - 2, top, w + 4, 2, P.edge);
+}
 function paintText(g, txt, x, y, col, size) {
   g.save(); g.font = `bold ${size || 8}px monospace`; g.fillStyle = col; g.textBaseline = 'top'; g.fillText(txt, x, y); g.restore();
 }
@@ -326,6 +380,40 @@ function buildLevel(m) {
     R(g, b.x + b.w / 2 - 1, b.y + 9, 2, 6, '#c8323c'); R(g, b.x + b.w / 2 - 3, b.y + 11, 6, 2, '#c8323c');
   }
 
+  // ---------- معلم المدينة: مرة وحدة بنص المرحلة ----------
+  const cityEn = (m.city && m.city.en) || '';
+  const LM_CITY = { tokyo: /Tokyo|Osaka/, baghdad: /Baghdad/, rotterdam: /Rotterdam/, cairo: /Cairo/, mumbai: /Mumbai/ };
+  let lmDone = !(LM_CITY[style] && LM_CITY[style].test(cityEn));
+  function landmark(x) {
+    lmDone = true;
+    if (style === 'tokyo') {
+      const H = 228, base = baseLine; paintTokyoTower(g, P, x, base, H); const cx = x + 40;
+      const d1 = base - H * 0.55 - 12, d2 = base - H * 0.86 - 7;
+      solid(cx - 26, d1, 52, 12, { kind: 'deck' }); solid(cx - 11, d2, 22, 7, { kind: 'deck' });
+      solid(cx - 3, base - H, 6, H - (base - d2) + 7, { kind: 'mast' }); solid(cx - 8, d2 + 7, 16, d1 - d2 - 7, { kind: 'lattice' }); solid(cx - 22, d1 + 12, 44, base - d1, { kind: 'lattice' });
+      spot(cx - 22, cx - 12, d1); spot(cx + 12, cx + 22, d1); spot(cx - 8, cx + 8, d2);
+      return 92;
+    }
+    if (style === 'baghdad' || style === 'cairo') {
+      const H = style === 'cairo' ? 200 : 214, base = baseLine, cx = x + 22, dy = base - H * 0.82;
+      paintDeckTower(g, P, cx, base, H, style);
+      const dw = style === 'cairo' ? 30 : 34;
+      solid(cx - dw / 2, dy - (style === 'cairo' ? 4 : 1), dw, style === 'cairo' ? 18 : 12, { kind: 'deck' }); solid(cx - 5, dy + 10, 10, base - dy, { kind: 'shaft' }); solid(cx - 1, base - H - 14, 2, H * 0.18 + 14, { kind: 'mast' });
+      spot(cx - dw / 2 + 3, cx + dw / 2 - 3, dy - (style === 'cairo' ? 4 : 1));
+      return 50;
+    }
+    if (style === 'rotterdam') {
+      const w = 92, top = waterY - 6 - 78; R(g, x - 6, waterY - 6, w + 12, 60, P.bldD); solid(x - 6, waterY - 6, w + 12, 60, { kind: 'pier' });
+      paintHotelNY(g, P, x, top, w, waterY - 6); solid(x, top, w, 80, { kind: 'block' }); solid(x + 6, top - 22, 8, 22); solid(x + w - 14, top - 22, 8, 22);
+      spot(x + 18, x + w - 18, top); return w + 30;
+    }
+    if (style === 'mumbai') {
+      const w = 74, top = baseLine - 78; paintGateway(g, P, x, top, w, baseLine); solid(x, top, w, baseLine - top + 40, { kind: 'block' });
+      spot(x + 12, x + w - 12, top); return w + 16;
+    }
+    return 0;
+  }
+
   // ---------- بناء المدينة حسب النوع ----------
   if (style === 'baghdad') {
     let x = 30;
@@ -333,6 +421,7 @@ function buildLevel(m) {
     x = 200;
     while (x < W - 60) {
       if (skipRes(x) !== x) { x = skipRes(x); continue; }
+      if (!lmDone && x > W * 0.42 && skipRes(x) === x && skipRes(x + 100) === x + 100) { x += landmark(x) + 10; continue; }
       const r = rng();
       if (r < 0.16 && x > 300) { // منارة
         const mh = 150 + rng() * 40; const mb = { x: x + 4, y: baseLine - mh, w: 7, h: mh + 40 };
@@ -358,6 +447,7 @@ function buildLevel(m) {
     let x = 200;
     while (x < W - 60) {
       if (skipRes(x) !== x) { x = skipRes(x); continue; }
+      if (!lmDone && x > W * 0.42 && skipRes(x) === x && skipRes(x + 100) === x + 100) { x += landmark(x) + 10; continue; }
       const r = rng();
       if (r < 0.1 && x > 400) { // باگودا
         const ph = 150 + rng() * 30, b = { x, y: baseLine - ph, w: 44, h: ph };
@@ -396,6 +486,7 @@ function buildLevel(m) {
     let x = 180;
     while (x < W - 80) {
       if (skipRes(x) !== x) { x = skipRes(x); continue; }
+      if (!lmDone && x > W * 0.42 && skipRes(x) === x && skipRes(x + 100) === x + 100) { x += landmark(x) + 10; continue; }
       const r = rng();
       if (r < 0.22) { // رافعة
         const mh = 170 + rng() * 30, mx = x + 10;
@@ -436,6 +527,7 @@ function buildLevel(m) {
     let x = 160;
     while (x < W - 60) {
       if (skipRes(x) !== x) { x = skipRes(x); continue; }
+      if (!lmDone && x > W * 0.42 && skipRes(x) === x && skipRes(x + 100) === x + 100) { x += landmark(x) + 10; continue; }
       const w = 40 + rng() * 36, top = 196 + rng() * 56;
       block(x, w, top, { lit: 0.12, noProps: rng() < 0.5 });
       spot(x + 8, x + w - 8, top);
@@ -480,6 +572,7 @@ function buildLevel(m) {
     let x = 150;
     while (x < W - 60) {
       if (skipRes(x) !== x) { x = skipRes(x); continue; }
+      if (!lmDone && x > W * 0.42 && skipRes(x) === x && skipRes(x + 100) === x + 100) { x += landmark(x) + 10; continue; }
       const w = 34 + rng() * 40, top = 120 + rng() * 120;
       block(x, w, top, { lit: 0.25 });
       spot(x + 8, x + w - 8, top);

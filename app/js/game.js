@@ -27,7 +27,8 @@ const T = k => (STR[lang()] && STR[lang()][k]) || STR.en[k] || k;
 const pick = arr => arr[(Math.random() * arr.length) | 0];
 // يجمع التعليقات العامة + التعليقات الخاصة بالمهمة الحالية (إذا موجودة)
 const line = cat => {
-  const base = (LINES[cat] && LINES[cat][lang()]) || [];
+  const hl = G && G.m.dark && typeof HORROR_LINES !== 'undefined' && HORROR_LINES[cat] && HORROR_LINES[cat][lang()];
+  const base = hl || (LINES[cat] && LINES[cat][lang()]) || [];
   const extra = (G && G.m.lines && G.m.lines[cat] && G.m.lines[cat][lang()]) || [];
   return pick(base.concat(extra, extra)); // الخاصة لها فرصة أكبر
 };
@@ -132,7 +133,7 @@ const HELI_TYPES = {
   medic:   { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 9, seg: 6, cap: 5, mass: 1, acc: 1.12, calm: true },
   police:  { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 20]], segs: 8, seg: 6, cap: 4, mass: 0.9, acc: 1.32, siren: true },
   news:    { w: 36, h: 15, cx: 18, cy: 8,  box: [26, 11], anchor: [1, 6], rotors: [[18, 0, 21]], segs: 11, seg: 6, cap: 5, mass: 1, acc: 1.05, camera: true },
-  chinook: { w: 54, h: 19, cx: 27, cy: 10, box: [44, 13], anchor: [0, 8], rotors: [[45, 1, 22], [8, 0, 22]], segs: 13, seg: 6, cap: 9, mass: 1.5, acc: 0.88 },
+  chinook: { w: 54, h: 19, cx: 27, cy: 10, box: [44, 13], anchor: [9, 7], ladder: 7, door: [9, -1], rotors: [[45, 1, 22], [8, 0, 22]], segs: 13, seg: 6, cap: 9, mass: 1.5, acc: 0.88 },
   giant:   { w: 70, h: 23, cx: 35, cy: 12, box: [58, 16], anchor: [0, 10], rotors: [[38, 0, 34]], segs: 16, seg: 6, cap: 12, mass: 2.2, acc: 0.72 },
 };
 // نبرة صوت كل طيارة (إذا ما إلها ملف خاص): الصغيرة أحد، الكبيرة أثقل
@@ -211,6 +212,7 @@ buildHeliSprites();
 let G = null;           // اللعبة الحالية
 const input = { x: 0, y: 0, keys: {} };
 
+const SKY_TOP = -150; // تگدر تطير أعلى من الشاشة والكاميرا تصعد وياك
 class Game {
   constructor(mi, heliKey) {
     this.mi = mi; this.m = typeof mi === 'object' ? mi : MISSIONS[mi]; // مهمة قصة = كائن
@@ -238,6 +240,7 @@ class Game {
     this.goal = Math.min(this.m.goal, this.people.length);
     this.vip = this.people.find(p => p.kind === 'vip') || null;
     this.broken = 0;
+    this.initBirds();
     setTimeout(() => {
       this.radio(this.ht.siren ? pick(RADIO.police[lang()]) : this.ht.camera ? pick(RADIO.news[lang()]) : pick(RADIO.start[lang()]));
     }, 600);
@@ -260,6 +263,8 @@ class Game {
     if (k === 'crate') return null;
     if (k === 'sheep' || k === 'cat') return pick(LINES[k][lang()]);
     const key = k + '_' + cat;
+    const ml = this.m.lines && this.m.lines[key] && this.m.lines[key][lang()];
+    if (ml && ml.length) return pick(ml.concat(ml, (LINES[key] && LINES[key][lang()]) || [])).replace('{vip}', this.vipName());
     if (LINES[key]) return pick(LINES[key][lang()]).replace('{vip}', this.vipName());
     return line(cat);
   }
@@ -267,6 +272,7 @@ class Game {
   // جملة مسجّلة بصوت: الفقاعة تكتب نفس الكلام اللي ينسمع
   vlines(key) { return typeof VOICE_LINES === 'undefined' ? [] : VOICE_LINES.filter(v => v.cat.includes(key) && SND.has(v.id)); }
   voiceLine(p, cat, opts) {
+    if (this.m.dark) return false; // قصة الرعب: بلا ميمز
     if (!save.sound || !this.onScreen(p.x) || !(p.kind === 'person' || p.kind === 'vip')) return false;
     if (this.t - (this.lastVoice || -9) < 1.4) return false; // لا يتداخل صوتين
     const key = p.kind === 'vip' ? 'vip_' + cat : cat;
@@ -284,7 +290,7 @@ class Game {
     if (p.kind === 'crate') return;
     // أصوات بدون كلام (الكلام صار جمل مسجّلة VOICE_LINES)
     const map = { wait: 'help', waitWater: 'help', swim: 'help', saved: ['cheer', 'laugh'], jump: 'jump', hit: 'ouch', twister: 'scream', dragged: 'nooo', fall: 'scream',
-      landZone: 'cheer', landWater: 'laugh', slip: 'v_slip' };
+      landZone: 'cheer', landWater: 'laugh', slip: 'v_slip', groan: 'ouch' };
     let n = map[cat]; if (p.kind === 'grandma' && (cat === 'scared' || cat === 'wait' || cat === 'fingers')) n = 'grandma';
     if (p.kind === 'vip' && cat === 'wait' && SND.has('vip')) n = 'vip';
     if (Array.isArray(n)) { const ok = n.filter(k => SND.has(k)); n = ok.length ? pick(ok) : n[0]; } // يختار عشوائياً من الموجود
@@ -295,7 +301,7 @@ class Game {
   radioK(cat) { this.radio(pick(RADIO[cat][lang()]).replace('{vip}', this.vipName())); }
   weightInv(p) { return { crate: 0.22, grandma: 0.3, cat: 0.6, sheep: 0.3 }[p.kind] || 0.28; }
   initRope() {
-    const ht = this.ht, base = ht.segs + 1, N = base + ht.cap + 4;
+    const ht = this.ht, base = (ht.ladder || ht.segs) + 1, N = base + ht.cap + 4;
     const F = () => new Float32Array(N);
     this.rope = { n: base, base, x: F(), y: F(), px: F(), py: F(), inv: F(), hit: F(), ent: new Array(N).fill(null) };
     for (const p of this.chain || []) { p.k = -1; }
@@ -319,6 +325,13 @@ class Game {
     r.inv[i] = this.weightInv(p); r.ent[i] = p; r.hit[i] = 0; r.n++;
     this.chain.push(p); p.k = i; p.st = 'hang'; p.grip = 1; p.cool = 1.2;
   }
+  grabRope(p) { // الشينوك: الإنسان يصعد السلّم لداخل الطيارة بدل ما يتعلّق
+    if (this.ht.ladder && this.isHuman(p) && !this.chain.length) {
+      p.st = 'climb'; p.cs = this.rope.base - 1.01; p.vx = p.vy = 0; p.cool = 1; this.cabin.push(p); return;
+    }
+    this.attach(p);
+  }
+  ejectCabin() { const h = this.heli; for (const p of this.cabin) { p.st = 'fall'; p.x = h.x + (Math.random() - 0.5) * 16; p.y = h.y; p.vx = (Math.random() - 0.5) * 120; p.vy = -70 - Math.random() * 50; p.k = -1; } this.cabin = []; }
   dropFrom(j) { // يطيح الشخص j وكل اللي تحته (لأنهم ماسكين رجوله)
     const r = this.rope, fallen = this.chain.splice(j);
     for (const q of fallen) {
@@ -395,10 +408,11 @@ class Game {
       h.x += h.vx * dt; h.y += h.vy * dt;
       if (h.x < 14) { h.x = 14; h.vx = Math.abs(h.vx) * 0.3; }
       if (h.x > L.W - 14) { h.x = L.W - 14; h.vx = -Math.abs(h.vx) * 0.3; }
-      if (h.y < 14) { h.y = 14; h.vy = Math.max(0, h.vy); }
+      if (h.y < SKY_TOP) { h.y = SKY_TOP; h.vy = Math.max(0, h.vy); }
       if (load >= ht.cap - 1 && !this.flags.heavy) { this.flags.heavy = 1; this.radio(pick(RADIO.heavy[lang()])); }
     } else if (this.state === 'crash') {
-      h.vy += 260 * dt; h.x += h.vx * dt; h.y += h.vy * dt; h.tilt += h.rot * dt;
+      if (!h.wrecked) { h.vy += 260 * dt; h.x += h.vx * dt; h.y += h.vy * dt; h.tilt += h.rot * dt; }
+      this.updateCrash(dt);
     }
 
     // ---------------- رفع وتنزيل الحبل (Q / E) ----------------
@@ -436,7 +450,17 @@ class Game {
     }
     // ---------------- الناس ----------------
     for (const p of this.people) this.updatePerson(p, dt, wind);
+    this.updateBoats(dt);
 
+    // ---------------- الشينوك: الركّاب ينزلون بالسلّم فوگ القارب/المهبط ----------------
+    if (alive && ht.ladder && !h.landed && !this.chain.length) {
+      this.ladderT = (this.ladderT || 0) - dt;
+      const bi = rope.base - 1, z = this.zoneAt(rope.x[bi], rope.y[bi] + 2);
+      if (z && Math.abs(h.vx) < 70 && this.ladderT <= 0) {
+        const p = this.cabin.find(q => q.st === 'cabin');
+        if (p) { p.st = 'climbDown'; p.cs = 0.2; p.x = rope.x[0]; p.y = rope.y[0]; this.ladderT = 0.55; if (!this.flags.wegT || this.t - this.flags.wegT > 6) { this.flags.wegT = this.t; this.sayK(p, 'board', { force: true }); } }
+      }
+    }
     // ---------------- اصطدام الطيارة / الهبوط ----------------
     if (alive && !h.landed) {
       const bw = ht.box[0] / 2, bh = ht.box[1] / 2;
@@ -468,6 +492,7 @@ class Game {
     this.flash = Math.max(0, this.flash - dt * 3);
     if (this.bolt) { this.bolt.t -= dt; if (this.bolt.t <= 0) this.bolt = null; }
 
+    this.updateBirds(dt);
     // ---------------- الجزيئات ----------------
     for (const q of this.parts) {
       q.vx += (q.wind ? wind * 0.6 : 0) * dt; q.vy += (q.g || 0) * dt;
@@ -652,6 +677,7 @@ class Game {
     const full = this.chain.length + this.cabin.length >= this.ht.cap;
     if (p.st === 'carried') { const c = p.carrier; if (c) { p.x = c.x + 4 * (c.face || 1); p.y = c.y + 5; } return; }
     if (p.st === 'cabin') { p.x = h.x; p.y = h.y; return; }
+    if (p.st === 'gone') return;
     if (p.st === 'twister') { this.updateTwister(p, dt); return; }
     // الإعصار يشيل الناس من الأرض والحبل
     for (const tor of this.L.tornados || []) {
@@ -665,7 +691,22 @@ class Game {
     if (p.st === 'wait' || p.st === 'swim') {
       // الماي يغطي السطح؟
       if (p.st === 'wait' && wY !== null && wY < p.y - 1) { p.st = 'swim'; AU.splash(); this.splash(p.x, wY, 6); this.sayK(p, 'swim'); }
-      if (p.st === 'swim') { p.y = wY; p.x += Math.sin(this.t * 0.8 + p.id) * 4 * dt + wind * 0.05 * dt; }
+      if (p.st === 'swim') {
+        p.y = wY; p.x += Math.sin(this.t * 0.8 + p.id) * 4 * dt + wind * 0.05 * dt;
+        p.swimT = (p.swimT || 0) + dt;
+        // بعد شوية يسبح لأقرب بناية ويتسلّق للسطح
+        if (p.swimT > 2.5 && this.isHuman(p) && Math.abs(this.chainEnd().x - p.x) > 30) {
+          if (!p.wall || p.swimT % 3 < dt) {
+            let best = null;
+            for (const sd of this.L.solids) { if (sd.ground || sd.y > wY - 4 || sd.y < wY - 90 || sd.w < 10) continue; for (const ex of [sd.x - 1, sd.x + sd.w + 1]) { const d = Math.abs(ex - p.x); if (d < 160 && (!best || d < best.d)) best = { d, ex, sd, side: ex < sd.x + 1 ? 1 : -1 }; } }
+            p.wall = best;
+          }
+          if (p.wall) {
+            const dx = p.wall.ex - p.x; p.x += Math.sign(dx) * Math.min(Math.abs(dx), 11 * dt); p.face = Math.sign(dx) || p.face;
+            if (Math.abs(dx) < 1) { p.st = 'scale'; p.f = 0; this.sayK(p, 'missed'); }
+          }
+        }
+      }
       const E = this.chainEnd(), dx = E.x - p.x;
       const near = Math.abs(h.x - p.x) < 140 && p.kind !== 'crate';
       if (p.st === 'wait') {
@@ -698,7 +739,7 @@ class Game {
       if (full) { if (Math.abs(dx) < 16 && Math.abs(E.y - (p.y - 8)) < 16 && p.cool <= 0) { p.cool = 3; this.sayK(p, 'full'); } return; }
       if (p.kind === 'crate' || p.st === 'swim') {
         const reach = p.kind === 'crate' ? 10 : 10, hy = p.kind === 'crate' ? p.y - 7 : p.y - 3;
-        if (Math.hypot(dx, E.y - hy) < reach) { p.vx = p.vy = 0; this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); }
+        if (Math.hypot(dx, E.y - hy) < reach) { p.vx = p.vy = 0; this.grabRope(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); }
         return;
       }
       // إنسان على السطح: يقفز على الحبل
@@ -720,7 +761,7 @@ class Game {
           p.slipped = true; p.st = 'fall'; p.vx = this.heli.vx * 0.3 + (Math.random() - 0.5) * 30; p.vy = 20; AU.grab();
           this.sayK(p, 'slip', { force: true }); return;
         }
-        this.attach(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); return; }
+        this.grabRope(p); AU.grab(); this.sayK(p, 'grab', { force: true }); this.afterGrab(p); return; }
       if (p.vy > 0) {
         for (const sd of this.L.solids) if (p.x > sd.x && p.x < sd.x + sd.w && oy <= sd.y + 0.5 && p.y >= sd.y) {
           p.y = sd.y; p.vx = p.vy = 0; p.st = 'wait'; p.cool = 1.3;
@@ -730,6 +771,34 @@ class Game {
         if (wY !== null && p.y > wY) { p.y = wY; p.st = 'swim'; AU.splash(); this.splash(p.x, wY, 8); this.sayK(p, 'landWater', { force: true }); return; }
       }
       if (p.jt > 1.2) { p.st = 'fall'; }
+    }
+    else if (p.st === 'scale') { // يتسلّق الحايط من الماي
+      const w = p.wall; p.f += dt * 2; p.y -= 14 * dt;
+      if (!w || !this.L.solids.includes(w.sd)) { p.st = 'fall'; p.vx = 0; p.vy = 0; p.wall = null; return; }
+      if (p.y <= w.sd.y) { const sd = w.sd; p.y = sd.y; p.x = clamp(p.x + w.side * 5, sd.x + 3, sd.x + sd.w - 3); p.st = 'wait'; p.cool = 1; p.swimT = 0; p.wall = null; p.spot = { x0: sd.x + 3, x1: sd.x + sd.w - 3, y: sd.y }; }
+      return;
+    }
+    else if (p.st === 'climb' || p.st === 'climbDown') {
+      const i = clamp(Math.floor(p.cs), 0, r.base - 2), f = clamp(p.cs - i, 0, 1);
+      p.x = lerp(r.x[i], r.x[i + 1], f); p.y = lerp(r.y[i], r.y[i + 1], f); p.f += dt * 2;
+      const sp = (p.kind === 'grandma' ? 2.2 : 4.2) * dt;
+      const fallOff = () => { const j = this.cabin.indexOf(p); if (j >= 0) this.cabin.splice(j, 1); p.st = 'fall'; p.vx = h.vx * 0.5 + (Math.random() - 0.5) * 30; p.vy = 10; this.falls++; AU.scream(); this.sayK(p, 'slip', { force: true });
+        if (this.state === 'play' && this.m.careful) { this.radioK('careFail'); this.end(false, 'careful'); } };
+      if (this.state === 'crash') { fallOff(); return; }
+      if (Math.hypot(h.vx, h.vy) > 150 && Math.random() < dt * 0.9) { fallOff(); return; }
+      if (p.st === 'climb') {
+        p.cs -= sp;
+        if (p.cs <= 0.2) { p.st = 'cabin'; AU.grab(); this.sayK(p, 'board'); if (this.cabin.length >= this.ht.cap && !this.flags.cabFull) { this.flags.cabFull = 1; this.radio(pick(RADIO.cabinFull[lang()])); } }
+      } else {
+        p.cs += sp * 1.3;
+        if (p.cs >= r.base - 1.05) {
+          const z = this.zoneAt(r.x[r.base - 1], r.y[r.base - 1] + 2);
+          const j = this.cabin.indexOf(p); if (j >= 0) this.cabin.splice(j, 1);
+          if (z) { p.st = 'saved'; p.zone = z; p.y = z.y; p.zoneOff = clamp(p.x - z.x, 3, z.w - 3); p.x = z.x + p.zoneOff; p.timer = 0; this.onSaved(p); }
+          else { p.st = 'fall'; p.vx = 0; p.vy = 0; }
+        }
+      }
+      return;
     }
     else if (p.st === 'hang') {
       const k = p.k; p.x = r.x[k]; p.y = r.y[k];
@@ -743,6 +812,7 @@ class Game {
       p.hitCool = (p.hitCool || 0) - dt;
       if (r.hit[k] > 85 && p.hitCool <= 0) { // ضربة بالحايط (مرة وحدة كل 1.2 ثانية)
         p.hitCool = 1.2; p.grip -= p.kind === 'crate' ? 0.18 : 0.3 * Math.max(0.6, fragile); p.cool = 1.2; this.sayK(p, 'hit', { force: true }); AU.thud(); this.shake = Math.max(this.shake, 1);
+        if (r.hit[k] > 170 && p.kind !== 'crate' && Math.random() < 0.55) p.grip = 0; // ضربة قوية: ينفلت وياه اللي تحته
       }
       r.hit[k] = 0;
       // النار تحرگ اللي يعبر فوگها
@@ -819,8 +889,21 @@ class Game {
     const out = [];
     for (const pd of this.L.pads) out.push({ x: pd.x, y: pd.y, w: pd.w, pad: true });
     const wY = this.waterY();
-    if (wY !== null) for (const b of this.L.boats) { b.zone = b.zone || { boat: true }; Object.assign(b.zone, { x: b.x, y: wY - 3 + Math.sin(this.t * 1.6 + b.ph) * 1.2, w: b.w }); out.push(b.zone); }
+    if (wY !== null) for (const b of this.L.boats) { if (b.go) continue; b.zone = b.zone || { boat: true }; Object.assign(b.zone, { x: b.x, y: wY - 3 + Math.sin(this.t * 1.6 + b.ph) * 1.2, w: b.w }); out.push(b.zone); }
     return out;
+  }
+  updateBoats(dt) {
+    const wY = this.waterY(); if (wY === null) return;
+    for (const b of this.L.boats) {
+      if (b.x0 == null) { b.x0 = b.x; b.cap = b.kind === 'ship' ? 10 : b.kind === 'felucca' ? 5 : 6; b.dir = b.x < this.L.W / 2 ? -1 : 1; }
+      b.zone = b.zone || { boat: true }; Object.assign(b.zone, { x: b.x, y: wY - 3 + Math.sin(this.t * 1.6 + b.ph) * 1.2, w: b.w });
+      const on = this.people.filter(p => p.st === 'saved' && p.zone === b.zone);
+      b.load = on.length;
+      if (!b.go && b.load >= b.cap) { b.go = 1; b.v = 0; if (on[0]) this.say(on[0], lang() === 'ar' ? 'تكفّينا! يلا نطلع!' : 'We\'re full! Let\'s go!', { force: true }); }
+      if (b.go === 1) { b.v = Math.min(55, b.v + 25 * dt); b.x += b.dir * b.v * dt; if (b.x < -b.w - 60 || b.x > this.L.W + 60 || Math.abs(b.x - b.x0) > 700) { for (const p of on) p.st = 'gone'; b.go = 2; b.t = 5; } }
+      else if (b.go === 2) { b.t -= dt; if (b.t <= 0) { b.go = 3; } }
+      else if (b.go === 3) { const d = b.x0 - b.x; b.x += Math.sign(d) * Math.min(Math.abs(d), 60 * dt); if (Math.abs(d) < 0.5) { b.x = b.x0; b.go = 0; } }
+    }
   }
   zoneAt(x, y) { for (const z of this.zones()) if (x > z.x + 1 && x < z.x + z.w - 1 && y > z.y - 6 && y < z.y + 14) return z; return null; }
   onSaved(p, fell) {
@@ -860,7 +943,64 @@ class Game {
     this.crashLine = vc ? (lang() === 'ar' ? vc.ar : vc.en) : line('crash');
     if (vc) setTimeout(() => SND.play(vc.id), 900);
     this.say({ x: h.x, y: h.y - 10, id: 999 }, this.crashLine, { force: true, big: true, life: 4, pitch: 180 });
-    setTimeout(() => { if (G === this) this.end(false, 'crashed'); }, 2600);
+    this.ejectCabin(); this.scareBirds(h.x, 400);
+    this.groanT = [1.7, 3.1]; this.tapReady = false;
+    setTimeout(() => { if (G === this && this.state === 'crash') this.end(false, 'crashed'); }, 14000); // احتياط
+  }
+  /* ---------------- مشهد ما بعد التحطم ---------------- */
+  updateCrash(dt) {
+    const h = this.heli, L = this.L, wY = this.waterY();
+    if (!h.wrecked) {
+      const bot = h.y + 6;
+      let hit = null;
+      for (const s of L.solids) if (h.x > s.x && h.x < s.x + s.w && bot >= s.y && bot - h.vy * dt <= s.y + 3) { hit = s; break; }
+      if (hit || (wY !== null && bot > wY) || h.y > VH + 30) {
+        h.wrecked = { water: !hit && wY !== null && bot > wY, t: 0 };
+        if (hit) h.y = hit.y - 6; else if (wY !== null && h.y < VH + 30) { h.y = wY - 2; this.splash(h.x, wY, 18); AU.splash(); }
+        h.vx = h.vy = 0; h.rot = 0; h.tilt = (h.tilt > 0 ? 1 : -1) * 0.32;
+        this.shake = Math.max(this.shake, 4); AU.thud(); this.puff(h.x - 10, h.y + 5); this.puff(h.x + 10, h.y + 5);
+        for (let i = 0; i < 24; i++) this.parts.push({ x: h.x + (Math.random() - 0.5) * 20, y: h.y, vx: (Math.random() - 0.5) * 90, vy: -30 - Math.random() * 60, g: 260, life: 1.5, c: i % 3 ? '#ebe1c8' : '#555', s: i % 4 ? 1 : 2, solid: true });
+      }
+    } else {
+      h.wrecked.t += dt;
+      if (h.wrecked.water) h.y += dt * 2.5;
+      this.smokeT = (this.smokeT || 0) - dt;
+      if (this.smokeT <= 0 && h.y < VH + 10) { this.smokeT = 0.07; this.parts.push({ x: h.x + (Math.random() - 0.5) * 8, y: h.y - 2, vx: (Math.random() - 0.5) * 8, vy: -14 - Math.random() * 10, g: -4, life: 2.5 + Math.random(), c: Math.random() < 0.15 ? 'rgba(200,80,40,0.7)' : 'rgba(70,66,60,0.55)', s: 3 + (Math.random() * 3 | 0), smoke: true, wind: true }); }
+    }
+    // الناجين يتأوّهون
+    if (this.groanT.length && this.endT >= this.groanT[0]) {
+      this.groanT.shift();
+      const cand = this.people.filter(p => this.isHuman(p) && (p.st === 'daze' || p.st === 'wait' || p.st === 'swim' || p.st === 'fall') && Math.abs(p.x - h.x) < 160 && !p.groaned);
+      const p = cand.sort((a, b) => Math.abs(a.x - h.x) - Math.abs(b.x - h.x))[0];
+      if (p) { p.groaned = true; this.sayK(p, 'groan', { force: true }); }
+      else this.say({ x: h.x, y: h.y - 12, id: 998 }, line('groan'), { force: true, pitch: 160 });
+    }
+    if (!this.tapReady && this.endT > 3.4) this.tapReady = true;
+  }
+  continueCrash() { if (this.state === 'crash' && this.tapReady) { AU.click(); this.end(false, 'crashed'); return true; } return false; }
+  /* ---------------- الطيور ---------------- */
+  initBirds() {
+    const rng = mulberry(hashStr(this.m.id) + 31); this.birds = [];
+    for (const sp of this.L.spots) if (rng() < 0.45) { const n = 1 + (rng() * 3 | 0); for (let i = 0; i < n; i++) this.birds.push({ x: lerp(sp.x0, sp.x1, rng()), y: sp.y, st: 0, vx: 0, vy: 0, f: rng() * 9, face: rng() < 0.5 ? -1 : 1 }); }
+  }
+  scareBirds(x, r) { for (const b of this.birds) if (!b.st && Math.abs(b.x - x) < r) { b.st = 1; b.vx = (b.x < x ? -1 : 1) * (40 + Math.random() * 50); b.vy = -45 - Math.random() * 35; b.face = Math.sign(b.vx); } }
+  updateBirds(dt) {
+    const h = this.heli;
+    for (const b of this.birds) {
+      b.f += dt;
+      if (!b.st) { if (Math.abs(b.x - h.x) < 46 && Math.abs(b.y - h.y) < 70) { this.scareBirds(b.x, 30); } continue; }
+      b.x += b.vx * dt; b.y += b.vy * dt; b.vy += Math.sin(b.f * 9) * 40 * dt - 6 * dt;
+    }
+    this.birds = this.birds.filter(b => b.y > -20 && b.x > -40 && b.x < this.L.W + 40);
+  }
+  drawBirds(P) {
+    ctx.fillStyle = P.isDay ? '#2a2723' : '#d8cdb0';
+    for (const b of this.birds) {
+      const x = Math.round(b.x), y = Math.round(b.y);
+      if (!b.st) { ctx.fillRect(x, y - 2, 2, 1); ctx.fillRect(x + (b.face > 0 ? 2 : -1), y - 3, 1, 1); ctx.fillRect(x, y - 1, 1, 1); continue; }
+      const up = Math.floor(b.f * 12) % 2; ctx.fillRect(x, y, 1, 1);
+      if (up) { ctx.fillRect(x - 2, y - 1, 2, 1); ctx.fillRect(x + 1, y - 1, 2, 1); } else { ctx.fillRect(x - 2, y + 1, 2, 1); ctx.fillRect(x + 1, y + 1, 2, 1); }
+    }
   }
   end(win, why) {
     if (this.state === 'win' || this.state === 'fail') return;
@@ -887,24 +1027,25 @@ class Game {
     // الكاميرا
     const target = clamp(h.x - VW / 2 + h.vx * 0.5, 0, Math.max(0, L.W - VW));
     this.camX = lerp(this.camX, target, 0.08);
+    this.camY = lerp(this.camY || 0, clamp(h.y - 75, SKY_TOP - 20, 0), 0.06); const cy = Math.round(this.camY);
     const sx = this.shake ? (Math.random() - 0.5) * this.shake : 0, sy = this.shake ? (Math.random() - 0.5) * this.shake : 0;
     const cam = Math.round(this.camX + sx);
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false;
     // السماء
     const gr = ctx.createLinearGradient(0, 0, 0, CH); gr.addColorStop(0, P.sky); gr.addColorStop(1, P.sky2);
     ctx.fillStyle = gr; ctx.fillRect(0, 0, CW, CH);
-    ctx.setTransform(S, 0, 0, S, 0, Math.round(sy * S));
+    ctx.setTransform(S, 0, 0, S, 0, Math.round((sy - cy) * S));
     // النجوم
     if (P.star) {
       ctx.fillStyle = P.star;
-      for (const st of L.stars) { if ((st.b + this.t * 0.3) % 1 < 0.08) continue; const x = ((st.x * (VW + 200) - cam * 0.04) % (VW + 200) + VW + 200) % (VW + 200) - 100; ctx.globalAlpha = 0.4 + st.b * 0.6; ctx.fillRect(Math.round(x), Math.round(st.y * VH), 1, 1); }
+      for (const st of L.stars) { if ((st.b + this.t * 0.3) % 1 < 0.08) continue; const x = ((st.x * (VW + 200) - cam * 0.04) % (VW + 200) + VW + 200) % (VW + 200) - 100; ctx.globalAlpha = 0.4 + st.b * 0.6; ctx.fillRect(Math.round(x), Math.round(st.y * VH + cy * 0.92), 1, 1); }
       ctx.globalAlpha = 1;
     }
     // القمر/الشمس
-    this.drawMoon(Math.round(VW * 0.18 - cam * 0.02), 44, P);
+    this.drawMoon(Math.round(VW * 0.18 - cam * 0.02), Math.round(44 + cy * 0.9), P);
     // الطبقات
-    ctx.drawImage(L.layers.far, -Math.round(cam * 0.3), 0);
-    ctx.drawImage(L.layers.mid, -Math.round(cam * 0.6), 0);
+    ctx.drawImage(L.layers.far, -Math.round(cam * 0.3), Math.round(cy * 0.5));
+    ctx.drawImage(L.layers.mid, -Math.round(cam * 0.6), Math.round(cy * 0.25));
     if (this.m.weather === 'sand') { ctx.fillStyle = 'rgba(150,110,60,0.22)'; ctx.fillRect(0, 0, VW, VH); }
     ctx.drawImage(L.layers.fg, -cam, 0);
     ctx.save(); ctx.translate(-cam, 0);
@@ -913,15 +1054,16 @@ class Game {
     if (this.bolt) this.drawBolt(this.bolt);
     // المهابط
     for (const pd of L.pads) this.drawPad(pd, P);
+    this.drawBirds(P);
     this.drawFires(P);
     this.drawLaundry(P);
     // الإعصار
     for (const tw of L.tornados || []) this.drawTornado(tw, P);
     // الناس (غير المعلّقين)
-    for (const p of this.people) if (p.st !== 'hang' && p.st !== 'swim' && p.st !== 'carried') this.drawPerson(p, P);
+    for (const p of this.people) if (p.st !== 'hang' && p.st !== 'swim' && p.st !== 'carried' && p.st !== 'climb' && p.st !== 'climbDown') this.drawPerson(p, P);
     // الحبل
     this.drawRope(P);
-    for (const p of this.people) if (p.st === 'hang' || p.st === 'carried') this.drawPerson(p, P);
+    for (const p of this.people) if (p.st === 'hang' || p.st === 'carried' || p.st === 'climb' || p.st === 'climbDown') this.drawPerson(p, P);
     // الطيارة
     if (!(this.state === 'crash' && this.endT > 0.05)) this.drawHeli();
     else this.drawWreck();
@@ -942,8 +1084,10 @@ class Game {
     ctx.restore();
 
     // الطقس فوگ كلشي
+    ctx.setTransform(S, 0, 0, S, 0, 0);
     this.drawWeather(cam);
     if (this.flash > 0) { ctx.fillStyle = `rgba(240,235,220,${this.flash * 0.6})`; ctx.fillRect(0, 0, VW, VH); }
+    if (this.m.dark) this.drawDark(cam, cy, sy);
     // تظليل الحواف
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     const vg = ctx.createRadialGradient(CW / 2, CH / 2, CH * 0.35, CW / 2, CH / 2, CH * 0.95);
@@ -953,6 +1097,48 @@ class Game {
     this.drawIndicators(cam);
     // الفقاعات (نص واضح بدقة الشاشة)
     this.drawBubbles(cam);
+    // بعد التحطم: تعتيم + «اضغط للمتابعة»
+    if (this.state === 'crash' && this.endT > 2.6) {
+      const k = clamp((this.endT - 2.6) / 1.2, 0, 1);
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = `rgba(0,0,0,${0.5 * k})`; ctx.fillRect(0, 0, CW, CH);
+      if (this.tapReady) {
+        const ar = lang() === 'ar', txt = ar ? 'اضغط للمتابعة' : 'TAP TO CONTINUE', fs = Math.round(Math.min(CW, CH) * 0.045);
+        ctx.font = `bold ${fs}px ${ar ? 'Tahoma, Arial' : '"Courier New", monospace'}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const w = ctx.measureText(txt).width + fs * 1.6, hh = fs * 2, x = CW / 2 - w / 2, y = CH * 0.72;
+        const a = 0.65 + 0.35 * Math.sin(this.t * 4);
+        ctx.fillStyle = 'rgba(10,9,8,0.85)'; ctx.fillRect(x, y, w, hh); ctx.strokeStyle = `rgba(235,225,200,${a})`; ctx.lineWidth = Math.max(2, fs * 0.12); ctx.strokeRect(x, y, w, hh);
+        ctx.fillStyle = `rgba(235,225,200,${a})`; ctx.fillText(txt, CW / 2, y + hh / 2 + 1);
+      }
+    }
+  }
+  /* ---------- الظلام (قصة الرعب): بس ضوء الطيارة يكشف ---------- */
+  drawDark(cam, cy, sy) {
+    const d = this.darkCv || (this.darkCv = document.createElement('canvas'));
+    if (d.width !== CW || d.height !== CH) { d.width = CW; d.height = CH; }
+    const g = d.getContext('2d'), h = this.heli;
+    g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, CW, CH);
+    g.fillStyle = `rgba(2,3,5,${Math.max(0.15, 0.9 - this.flash * 0.85)})`; g.fillRect(0, 0, CW, CH);
+    g.globalCompositeOperation = 'destination-out';
+    const X = x => (x - cam) * S, Y = y => (y - cy + sy) * S;
+    const hole = (x, y, r, a) => { const cx = X(x), cyy = Y(y), R = r * S, gr = g.createRadialGradient(cx, cyy, 0, cx, cyy, R); gr.addColorStop(0, `rgba(0,0,0,${a})`); gr.addColorStop(0.55, `rgba(0,0,0,${a * 0.75})`); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.beginPath(); g.arc(cx, cyy, R, 0, 7); g.fill(); };
+    // الضوء يرمش أحياناً
+    this.flickT = (this.flickT || 0) - 1 / 60; if (this.flickT <= 0 && Math.random() < 0.004) this.flickT = 0.25 + Math.random() * 0.5;
+    const on = this.state === 'crash' ? 0.35 : (this.flickT > 0 ? (Math.random() < 0.5 ? 0.15 : 0.7) : 1);
+    hole(h.x, h.y, 38, on);
+    // كشّاف لتحت (يميل ويه الطيارة)
+    const ang = Math.PI / 2 + h.tilt * 0.9 + clamp(h.vx * 0.002, -0.3, 0.3), L = 190, half = 0.34, sx0 = X(h.x), sy0 = Y(h.y + 5);
+    const gr = g.createRadialGradient(sx0, sy0, 0, sx0, sy0, L * S); gr.addColorStop(0, `rgba(0,0,0,${0.95 * on})`); gr.addColorStop(0.7, `rgba(0,0,0,${0.55 * on})`); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.beginPath(); g.moveTo(sx0, sy0); g.lineTo(sx0 + Math.cos(ang - half) * L * S, sy0 + Math.sin(ang - half) * L * S); g.lineTo(sx0 + Math.cos(ang + half) * L * S, sy0 + Math.sin(ang + half) * L * S); g.closePath(); g.fill();
+    const E = this.chainEnd(); hole(E.x, E.y, 16, 0.6 * on);
+    for (const z of this.zones()) hole(z.x + z.w / 2, z.y - 6, 30, 0.85);
+    for (const f of this.L.fires || []) hole(f.x + f.w / 2, f.y - 12, 56, 1);
+    const blink = [];
+    for (const p of this.people) if ((p.st === 'wait' || p.st === 'swim') && Math.sin(this.t * 2.6 + p.id * 1.7) > 0.55) { hole(p.x, p.y - 8, 10, 0.55); blink.push(p); }
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(d, 0, 0);
+    // ضوا موبايل صغير بإيد اللي ينتظر
+    ctx.fillStyle = '#f2e8b0'; for (const p of blink) ctx.fillRect(Math.round(X(p.x + 2 * (p.face || 1))), Math.round(Y(p.y - 9)), Math.max(2, S), Math.max(2, S));
+    ctx.restore();
+    ctx.setTransform(S, 0, 0, S, 0, 0);
   }
   drawMoon(x, y, P) {
     const r = 17;
@@ -1008,6 +1194,9 @@ class Game {
       // ضوء أحمر يرمش
       if (Math.sin(this.t * 4 + b.ph) > 0.3) { ctx.fillStyle = Rr; ctx.fillRect(x + 8, y - 8, 1, 2); }
     }
+    // العدد: كم راكب من كم
+    if (b.cap) { ctx.fillStyle = b.load >= b.cap ? '#c8323c' : '#ebe1c8'; ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(`${b.load || 0}/${b.cap}`, x + w / 2, y + 7); }
+    if (b.go) return;
     // إطار الهدف
     const a = 0.45 + 0.45 * Math.sin(this.t * 4); ctx.globalAlpha = a; ctx.fillStyle = '#c8323c';
     const bx = x - 5, by = y - 22, bw = w + 10, bh = 28;
@@ -1017,6 +1206,14 @@ class Game {
   }
   drawRope(P) {
     const r = this.rope, end = r.base - 1; ctx.fillStyle = P.isDay ? '#2a2723' : '#e3d8bd';
+    if (this.ht.ladder) { // سلّم حبال: سكتين ودرجات
+      for (let i = 0; i < end; i++) {
+        const x0 = r.x[i], y0 = r.y[i], x1 = r.x[i + 1], y1 = r.y[i + 1], n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0)));
+        for (let k = 0; k < n; k++) { const X = Math.round(x0 + (x1 - x0) * k / n), Y = Math.round(y0 + (y1 - y0) * k / n); ctx.fillRect(X - 2, Y, 1, 1); ctx.fillRect(X + 2, Y, 1, 1); if (k % 3 === 0) ctx.fillRect(X - 2, Y, 5, 1); }
+      }
+      if (this.chain.length) { const x = r.x[end], y = r.y[end]; ctx.fillRect(Math.round(x), Math.round(y), 1, 2); }
+      return;
+    }
     for (let i = 0; i < end; i++) {
       const x0 = r.x[i], y0 = r.y[i], x1 = r.x[i + 1], y1 = r.y[i + 1]; const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0)));
       for (let k = 0; k < n; k++) ctx.fillRect(Math.round(x0 + (x1 - x0) * k / n), Math.round(y0 + (y1 - y0) * k / n), 1, 1);
@@ -1035,7 +1232,7 @@ class Game {
     }
   }
   drawPerson(p, P) {
-    if (p.st === 'broken' || p.st === 'cabin') return;
+    if (p.st === 'broken' || p.st === 'cabin' || p.st === 'gone') return;
     const k = p.kind;
     if (k === 'crate') return this.drawCrate(p, P);
     if (k === 'sheep') return this.drawSheep(p, P);
@@ -1105,6 +1302,10 @@ class Game {
       const near = Math.abs(this.heli.x - p.x) < 140 && this.state === 'play';
       if (near) { const jump = (Math.floor(p.f * 5) % 3 === 0) ? -1 : 0; px(POSE.head, x, y + jump); px(fr ? POSE.waveA : POSE.waveB, x, y + jump, p.face); }
       else { px(POSE.head, x, y); px(POSE.stand, x, y, p.face); if (p.wdir) { ctx.clearRect; } }
+    } else if (p.st === 'climb' || p.st === 'climbDown' || p.st === 'scale') {
+      const st = Math.floor(p.f * 5) % 2; px(POSE.hang, x, y);
+      ctx.fillRect(Math.round(x - 1), y + 9, 1, st ? 2 : 3); ctx.fillRect(Math.round(x + 1), y + 9, 1, st ? 3 : 2);
+      ctx.fillRect(Math.round(x + (st ? -2 : 2)), y + 1, 1, 1);
     } else if (p.st === 'hang') {
       px(POSE.hang, x, y);
       const sw = clamp(Math.round(-p.vx * 0.02), -2, 2), kick = Math.floor(p.f * (p.grip < 0.5 ? 14 : 4)) % 2;
@@ -1125,7 +1326,7 @@ class Game {
     }
   }
   drawHeli() {
-    const h = this.heli, ht = this.ht, spr = SPR[this.m.heli];
+    const h = this.heli, ht = this.ht, spr = SPR[this.heliKey] || SPR[this.m.heli];
     ctx.save(); ctx.translate(Math.round(h.x), Math.round(h.y)); ctx.rotate(h.tilt); ctx.scale(h.face, 1);
     ctx.drawImage(spr, -ht.cx, -ht.cy);
     // الدوّارات
@@ -1143,10 +1344,19 @@ class Game {
     if (flash && !this.flashOn && this.state === 'play') SND.play('camera', 1, 0.95 + Math.random() * 0.1); // صوت الكاميرا ويه الفلاش
     this.flashOn = flash;
     if (flash) { ctx.fillStyle = 'rgba(255,255,240,0.9)'; ctx.fillRect(8, 3, 4, 3); ctx.globalAlpha = 0.3; ctx.beginPath(); ctx.arc(10, 5, 10, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+    if (ht.door) { ctx.fillStyle = '#121110'; ctx.fillRect(ht.door[0] - 2, ht.door[1] - 2, 5, 8); }
     ctx.restore();
+    // عدّاد الركّاب جنب الباب
+    const nc = this.cabin.filter(q => q.st === 'cabin').length;
+    if (ht.ladder || nc) {
+      const a = this.anchor(), x = Math.round(a.x + 6 * h.face) - (h.face < 0 ? 12 : 0), y = Math.round(a.y - 14);
+      ctx.fillStyle = 'rgba(10,9,8,.75)'; ctx.fillRect(x - 1, y - 1, 13, 9);
+      ctx.fillStyle = '#ebe1c8'; ctx.font = 'bold 8px monospace'; ctx.textBaseline = 'top'; ctx.textAlign = 'left'; ctx.fillText(String(nc), x, y - 1);
+      ctx.fillRect(x + 8, y, 2, 2); ctx.fillRect(x + 7, y + 3, 4, 1); ctx.fillRect(x + 8, y + 3, 2, 4);
+    }
   }
   drawWreck() {
-    const h = this.heli, spr = SPR[this.m.heli], ht = this.ht;
+    const h = this.heli, spr = SPR[this.heliKey] || SPR[this.m.heli], ht = this.ht;
     ctx.save(); ctx.translate(Math.round(h.x), Math.round(h.y)); ctx.rotate(h.tilt); ctx.scale(h.face, 1); ctx.globalAlpha = 0.85;
     ctx.drawImage(spr, 0, 0, ht.w / 2, ht.h, -ht.cx - 4, -ht.cy, ht.w / 2, ht.h);
     ctx.drawImage(spr, ht.w / 2, 0, ht.w / 2, ht.h, 4, -ht.cy + 3, ht.w / 2, ht.h);
@@ -1246,8 +1456,8 @@ class Game {
       let left = Math.max(1, b.shown); const shownLines = lines.map(L => { const t = L.slice(0, Math.max(0, left)); left -= L.length + 1; return t; });
       const tw = Math.max(...lines.map(L => ctx.measureText(L).width));
       const padX = fs * 0.55, lh = fs * 1.3, bw = tw + padX * 2, bh = lines.length * lh + fs * 0.45;
-      let ex = (e.x - cam) * S, ey = (e.y - (e.st === 'hang' ? -2 : 16)) * S;
-      if (e.st === 'swim') ey = (e.y - 8) * S;
+      const cyb = this.camY || 0; let ex = (e.x - cam) * S, ey = (e.y - cyb - (e.st === 'hang' ? -2 : 16)) * S;
+      if (e.st === 'swim') ey = (e.y - cyb - 8) * S;
       let bx = ex - bw / 2 + (e.st === 'hang' ? bw / 2 + 10 * DPR : 0), by = ey - bh - 8 * DPR;
       if (b.big) { bx = CW / 2 - bw / 2; by = CH * 0.36; }
       const rightPad = isTouch() && !b.big ? 84 * DPR : 6 * DPR; // مكان أزرار الحبل بالموبايل
@@ -1361,6 +1571,7 @@ addEventListener('keydown', e => {
   AU.init();
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
   input.keys[e.code] = true; recomputeKeys();
+  if (G && G.tapReady && ['Space', 'Enter', 'NumpadEnter'].includes(e.code) && G.continueCrash()) return;
   if (G && (e.code === 'KeyP' || e.code === 'Escape')) togglePause();
   if (G && e.code === 'KeyR' && !e.repeat) restartMission();
   if (e.code === 'F11' && window.ibra && window.ibra.toggleFullscreen) { e.preventDefault(); window.ibra.toggleFullscreen(); }
@@ -1372,6 +1583,7 @@ const touch = { active: false, id: null, ox: 0, oy: 0 };
 const stick = $('#stick'), knob = $('#knob');
 cv.addEventListener('pointerdown', e => {
   AU.init();
+  if (G && G.continueCrash()) return;
   if (!G || e.pointerType === 'mouse') return;
   touch.active = true; touch.id = e.pointerId; touch.ox = e.clientX; touch.oy = e.clientY;
   stick.style.left = (e.clientX - 60) + 'px'; stick.style.top = (e.clientY - 60) + 'px'; stick.classList.add('show'); knob.style.transform = 'translate(0,0)';
